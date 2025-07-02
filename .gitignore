@@ -1,0 +1,8 @@
+# Ignorer les fichiers système MySQL
+database/mysql/mysql.sock
+*.sock
+# Ignorer les fichiers binlog MySQL et données lourdes
+database/mysql/binlog.*
+database/mysql/**/*.ibd
+*.pid
+
