@@ -1,0 +1,104 @@
+body,
+html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+#background-container {
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    height: 100vh;
+}
+
+
+.navbar {
+    height: 5vw;
+}
+
+#logoM {
+    position: relative;
+    height: 3vw;
+    left: -12vw;
+    top: 1vh;
+    width: 160px;
+}
+
+.card {
+    margin-top: 35%;
+    width: 120%;
+    margin-left: -7%;
+}
+
+.alert-box {
+    position: relative;
+    background-color: rgba(200, 200, 200, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    width: 200%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    left: -15vw;
+}
+
+.alert-box h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.alert-box p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+
+
+
+
+@media(max-width:767px) {
+    .navbar {
+        height: 20vw;
+    }
+
+    #logoM {
+
+        height: 9vw;
+
+        width: 9vw;
+        margin-left: 9vw;
+
+    }
+
+
+    .card {
+        margin-top: 55%;
+        width: auto;
+        margin-left: auto;
+    }
+
+    .alert-box {
+        width: 100%;
+        padding: 15px;
+        left: -1vw;
+    }
+
+}
+
+@media(min-width:2000px) {
+    .card {
+        height: 60%;
+    }
+
+    #logoM {
+        position: relative;
+        left: -25vw;
+
+    }
+}

@@ -1,0 +1,81 @@
+.container {
+    max-width: 700px;
+    margin-top: 50px;
+}
+
+.card {
+    /* border: none; */
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-style: normal;
+}
+
+.card-header {
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+    padding: 15px;
+    border-bottom: 2px solid #0056b3;
+    font-style: normal;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+.custom-file-input {
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+
+
+#sidebarTo {
+    display: none;
+}
+
+
+
+@media (min-width: 200px) and (max-width: 400px) {
+
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 40vw;
+        top: -2vw;
+    }
+
+    .card {
+        position: relative;
+        top: 15vw;
+    }
+
+}
+
+@media only screen and (min-width: 401px) and (max-width: 776px) {
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    .card {
+        position: relative;
+        top: -2vw;
+    }
+}

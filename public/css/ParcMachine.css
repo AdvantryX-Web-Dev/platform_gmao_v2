@@ -1,0 +1,68 @@
+#sidebarTo {
+    display: none;
+}
+
+th,
+td {
+    white-space: nowrap;
+}
+
+#alertsDropdown {
+    display: none;
+}
+
+.machineS {
+    width: 27vw;
+}
+
+
+
+@media (min-width: 200px) and (max-width: 400px) {
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 40vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        left: -70vw;
+        width: 50vw;
+        top: -20vw;
+
+    }
+
+    .machineS {
+        width: 70vw;
+    }
+
+    .btnMv {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 401px) and (max-width: 776px) {
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        margin-left: 50vw;
+        width: 50vw;
+        top: -15vw;
+
+    }
+
+    .machineS {
+        width: 77vw;
+    }
+
+
+
+}

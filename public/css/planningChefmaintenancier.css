@@ -1,0 +1,48 @@
+.fc-list-year-view {
+    background-color: white !important;
+    /* Force la couleur de fond à blanc */
+    color: black !important;
+    /* Force la couleur du texte à noir */
+}
+
+.custom-alert {
+    border-left: 4px solid;
+}
+
+.custom-alert.alert-success {
+    color: darkgreen;
+
+}
+
+.custom-alert.alert-danger {
+    color: darkred;
+
+}
+
+.custom-alert.alert-primary {
+    color: #004080;
+
+}
+
+#sidebarTo {
+    display: none;
+}
+
+@media (min-width: 200px) and (max-width: 400px) {
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 40vw;
+        top: -2vw;
+    }
+}
+
+@media only screen and (min-width: 401px) and (max-width: 776px) {
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+}

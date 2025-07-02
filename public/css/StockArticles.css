@@ -1,0 +1,175 @@
+.disabled {
+    opacity: 0.5;
+
+    pointer-events: none;
+
+}
+
+.button-container {
+    display: flex;
+    /* Utiliser la flexbox pour aligner les boutons horizontalement */
+    gap: 10px;
+    /* Espacement entre les boutons */
+}
+
+.article-container {
+    width: 450px;
+    margin-left: -35px;
+    border: 1px solid #d6d6d6;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+
+
+.quantity-input {
+    width: 70px;
+    margin-left: 100px;
+    margin-top: -40px;
+
+}
+
+.round-button {
+
+    border-radius: 50%;
+
+
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 20px;
+
+}
+
+th,
+td {
+    white-space: nowrap;
+}
+
+#sidebarTo {
+    display: none;
+}
+
+#articleRef {
+    width: 420px;
+}
+
+#AjoutCmd {
+    width: auto;
+}
+
+.quantite {
+    margin-left: 350px;
+    margin-top: -95px;
+}
+
+.ContenuQte {
+    width: 80px;
+    height: 35px;
+}
+
+#article {
+    width: 27vw;
+}
+
+.btn-text-short {
+    display: none;
+}
+
+.article {
+    width: 19vw;
+}
+
+@media (min-width: 100px) and (max-width: 400px) {
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 40vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        left: -70vw;
+        width: 50vw;
+        top: -20vw;
+
+    }
+
+    #articleRef {
+        width: 68vw;
+    }
+
+    #AjoutCmd {
+        position: relative;
+        width: auto;
+        left: -0.1vw;
+        top: 2vw;
+    }
+
+    #article {
+        width: 69vw
+    }
+
+    .quantite {
+        margin-left: 60vw;
+        margin-top: -22vw;
+    }
+
+    .btn-text {
+        display: none;
+    }
+
+    .btn-text-short {
+        display: block;
+    }
+
+    .article {
+        width: 50vw;
+    }
+}
+
+@media only screen and (min-width: 401px) and (max-width: 776px) {
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        margin-left: 50vw;
+        width: 50vw;
+        top: -15vw;
+
+    }
+
+    #articleRef {
+        width: 78vw;
+    }
+
+    #AjoutCmd {
+        width: 30vw;
+    }
+
+    #article {
+        width: 75vw
+    }
+
+    .quantite {
+        margin-left: 60vw;
+        margin-top: -22vw;
+    }
+
+    .article {
+        width: 50vw;
+    }
+}

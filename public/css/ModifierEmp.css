@@ -1,0 +1,114 @@
+.form-group {
+    width: 900px;
+    margin-left: 20px;
+}
+
+.password-container {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 80px;
+    top: 64%;
+    transform: translateY(-50%);
+
+    cursor: pointer;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+
+
+#sidebarTo {
+    display: none;
+}
+
+#alertsDropdown {
+    display: none;
+}
+
+.card {
+    width: 1000px;
+    margin-left: 120px;
+}
+
+.form-group {
+    width: 900px;
+    margin-left: 20px;
+}
+
+@media (min-width: 200px) and (max-width: 400px) {
+    div.dataTables_wrapper div.dataTables_filter {
+
+        margin-left: 50vw;
+        width: 50vw;
+
+    }
+
+    .card {
+        position: relative;
+        width: 70vw;
+        left: -42vw;
+    }
+
+
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    .input,
+    .border-select {
+        width: 50vw;
+    }
+
+    .toggle-password {
+        position: relative;
+        left: 40vw;
+        top: -6vw;
+    }
+}
+
+@media only screen and (min-width: 401px) and (max-width: 776px) {
+    div.dataTables_wrapper div.dataTables_filter {
+
+        margin-left: 50vw;
+        width: 50vw;
+
+    }
+
+    .card {
+        position: relative;
+        width: 80vw;
+        left: -30vw;
+    }
+
+
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    .input,
+    .border-select {
+        width: 60vw;
+    }
+}

@@ -1,0 +1,94 @@
+  .dataTables_length {
+            max-width: 150px;
+            /* Ajustez la valeur selon vos besoins */
+        }
+
+        .dataTables_length select {
+            width: auto;
+            /* Ajustez la largeur du sélecteur */
+        }
+
+        div.dataTables_wrapper div.dataTables_filter {
+            /* text-align: right; */
+            margin-left: 400px;
+        }
+
+        th {
+            white-space: nowrap;
+            color: dimgray;
+
+        }
+
+        .vert {
+            color: darkgreen;
+        }
+
+
+        .rouge {
+            color: darkred;
+        }
+
+
+        td {
+            white-space: nowrap;
+        }
+
+        #sidebarTo {
+            display: none;
+        }
+        .alertChaine {
+            position: relative;
+            left: 65vw;
+            top: -0.5vw;
+        }
+        @media (min-width: 200px) and (max-width: 400px) {
+
+
+            #sidebarTo {
+                position: relative;
+                display: block;
+                left: 40vw;
+                top: -2vw;
+            }
+
+            div.dataTables_wrapper div.dataTables_filter {
+                position: relative;
+                left: -70vw;
+                width: 50vw;
+                top: -23vw;
+
+            }
+            .alertChaine {
+                position: relative;
+                left: 33vw;
+                top: -0.9vw;
+            }
+
+            .machH_S {
+                display: none;
+            }
+
+        }
+
+        @media only screen and (min-width: 401px) and (max-width: 776px) {
+            #sidebarTo {
+                position: relative;
+                display: block;
+                left: 55vw;
+                top: -2vw;
+            }
+
+            div.dataTables_wrapper div.dataTables_filter {
+                position: relative;
+                margin-left: 50vw;
+                width: 50vw;
+                top: -15vw;
+
+            }
+            
+  .alertChaine {
+                position: relative;
+                left: 15vw;
+                top: -0.9vw;
+            }
+        }

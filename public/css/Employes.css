@@ -1,0 +1,51 @@
+#sidebarTo {
+    display: none;
+}
+
+#alertsDropdown {
+    display: none;
+}
+
+th,
+td {
+    white-space: nowrap;
+}
+
+@media (min-width: 200px) and (max-width: 400px) {
+
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 40vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        left: -70vw;
+        width: 50vw;
+        top: -23vw;
+
+    }
+}
+
+@media (min-width: 401px) and (max-width: 776px) {
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        margin-left: 50vw;
+        width: 50vw;
+        top: -15vw;
+
+    }
+
+
+
+}

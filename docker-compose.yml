@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  # PHP Service
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gmao_web
+    ports:
+      - "8082:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - gmao-network
+
+  # MySQL Service
+  mysql:
+    image: mysql:8.0
+    container_name: gmao_mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: db_isa
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: "%"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./database/mysql:/var/lib/mysql
+    networks:
+      - gmao-network
+
+  # phpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: gmao_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      UPLOAD_LIMIT: 500M
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - mysql
+    networks:
+      - gmao-network
+
+networks:
+  gmao-network:
+    driver: bridge 

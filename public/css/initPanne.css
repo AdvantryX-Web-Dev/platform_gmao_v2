@@ -1,0 +1,72 @@
+th,
+td {
+    white-space: nowrap;
+}
+
+#sidebarTo {
+    display: none;
+}
+
+@media (min-width: 200px) and (max-width: 400px) {
+    #import {
+        position: relative;
+        top: 50%;
+
+    }
+
+    #importFrm {
+        position: relative;
+        left: 35vw;
+    }
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 40vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        left: -70vw;
+        width: 50vw;
+        top: -23vw;
+
+    }
+
+    #type,
+    #codeP,
+    #nomP {
+        width: 70vw;
+    }
+}
+
+@media only screen and (min-width: 401px) and (max-width: 776px) {
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        margin-left: 50vw;
+        width: 50vw;
+        top: -15vw;
+
+    }
+
+    #importFrm {
+        position: relative;
+        left: 12vw;
+    }
+
+    #type,
+    #codeP,
+    #nomP {
+        width: 80vw;
+    }
+
+
+}

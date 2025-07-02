@@ -1,0 +1,26 @@
+.dataTables_length {
+    max-width: 150px;
+    /* Ajustez la valeur selon vos besoins */
+}
+
+.dataTables_length select {
+    width: auto;
+    /* Ajustez la largeur du sélecteur */
+}
+
+div.dataTables_wrapper div.dataTables_filter {
+    /* text-align: right; */
+    margin-left: 400px;
+}
+
+th {
+    color: dimgray;
+}
+
+td {
+
+    font-size: 17px;
+    color: dimgray;
+    font-style: normal;
+}
+

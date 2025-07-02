@@ -1,0 +1,214 @@
+th,
+td {
+    white-space: nowrap;
+    color: dimgray;
+
+}
+
+.disabled {
+    opacity: 0.5;
+
+    pointer-events: none;
+
+}
+
+.button-container {
+    display: flex;
+
+    gap: 10px;
+
+}
+
+.article-container {
+    width: 450px;
+    margin-left: -35px;
+    border: 1px solid #d6d6d6;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+
+
+.quantity-input {
+    width: 70px;
+    margin-left: 40px;
+    margin-top: -8px;
+
+}
+
+.round-button {
+
+    border-radius: 50%;
+
+
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 20px;
+
+}
+
+.quantite {
+    margin-left: 350px;
+    margin-top: -95px;
+}
+
+.ContenuQte {
+    width: 80px;
+}
+
+#sidebarTo {
+    display: none;
+}
+
+.form-select {
+    width: 420px;
+}
+
+@media (min-width: 200px) and (max-width: 400px) {
+
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 40vw;
+        top: -2vw;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+        position: relative;
+        left: -70vw;
+        width: 50vw;
+        top: -23vw;
+
+    }
+
+    .btnInterv {
+        display: none;
+    }
+
+    .PanneI,
+    .machine {
+        width: 70vw;
+    }
+
+    .articleList {
+        position: relative;
+        width: 70vw;
+        top: 20vw;
+    }
+
+    .article-container {
+        width: 78vw;
+
+    }
+
+    .quantity-input {
+        position: relative;
+        left: -0.5vw;
+    }
+
+}
+
+
+@media only screen and (min-width: 401px) and (max-width: 776px) {
+    .custom-btn {
+        width: auto;
+        margin-bottom: 10px;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+
+        margin-left: 50vw;
+        width: 50vw;
+
+    }
+
+    .PanneI,
+    .machine,
+    .articleList {
+        width: 5vw;
+    }
+
+    .fa-calendar-alt {
+        width: auto;
+    }
+
+    .notif {
+        font-size: medium;
+    }
+
+    #sidebarTo {
+        position: relative;
+        display: block;
+        left: 55vw;
+        top: -2vw;
+    }
+
+    .form-select {
+        width: 77vw;
+    }
+
+    .quantity-input {
+        margin-left: 25px;
+        margin-top: -8px;
+    }
+
+    #btnPreventive,
+    #btnCurative {
+        font-size: 85%;
+
+        padding: 0.30rem 0.6rem;
+
+    }
+
+    .article {
+        width: 50vw
+    }
+
+    .quantite {
+        margin-left: 60vw;
+        margin-top: -22vw;
+    }
+
+}
+
+@media (min-width: 768px ) {
+
+    #btnPreventive {
+        margin-left: -7vw;
+    }
+
+    #btnCurative {
+        margin-left: -16vw;
+
+    }
+
+    #DemAr {
+        margin-left: 27vw;
+    }
+
+    .article {
+        width: 21vw
+    }
+}
+
+@media (min-width: 2400px) {
+
+
+    #btnCurative {
+        margin-left: -10vw;
+
+    }
+.article {
+        width: 10vw
+    }
+
+
+}
