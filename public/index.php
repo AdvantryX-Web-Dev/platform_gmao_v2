@@ -9,10 +9,16 @@ require_once __DIR__ . '/../config/autoload.php';
 use App\Controllers\AuthController;
 use App\Controllers\MachineController;
 use App\Controllers\InterventionController;
+use App\Controllers\MaintainerController;
+use App\Controllers\Machine_boxController;
+use App\Controllers\Mouvement_machinesController;
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
 $interventionController = new InterventionController();
+$maintainerController = new MaintainerController();
+$machineBoxController = new Machine_boxController();
+$mouvement_machinesController = new Mouvement_machinesController();
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -31,7 +37,7 @@ switch ($route) {
             }
         }
         break;
-        
+
     case 'register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $authController->register();
@@ -39,11 +45,11 @@ switch ($route) {
             $authController->showRegisterForm();
         }
         break;
-        
+
     case 'logout':
         $authController->logout();
         break;
-        
+
     case 'dashboard':
         // Vérifier si l'utilisateur est connecté avant d'afficher le dashboard
         if (isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true) {
@@ -53,9 +59,9 @@ switch ($route) {
             exit;
         }
         break;
-        
+
     case 'machinesbox':
-        require_once __DIR__ . '/../src/views/ImplantationMachBox.php';
+        require_once __DIR__ . '/../src/views/Machine_box.php';
         break;
     case 'machine/mouvement':
         require_once __DIR__ . '/../src/views/MouvMachines.php';
@@ -72,9 +78,9 @@ switch ($route) {
     case 'machine/delete':
         $machineController->delete();
         break;
-        case 'intervention_preventive':
-            $interventionController->index();
-            break;
+    case 'intervention_preventive':
+        $interventionController->index();
+        break;
     case 'intervention_curative':
         $interventionController->indexCorrective();
         break;
@@ -84,6 +90,46 @@ switch ($route) {
     case 'historique_intervs_mach':
         $interventionController->historiqueIntervsMach();
         break;
+    case 'maintainers':
+        $maintainerController->list();
+        break;
+    case 'maintainer/create':
+        $maintainerController->create();
+        break;
+    case 'maintainer/edit':
+        $maintainerController->edit();
+        break;
+    case 'maintainer/delete':
+        $maintainerController->delete();
+        break;
+    case 'audit_trails_history':
+        $maintainerController->auditTrails_history();
+        break;
+    case 'mouvement_machines':
+        $mouvement_machinesController->mouvement_machines();
+        break;
+    case 'mouvement_machines/inter_chaine':
+        $mouvement_machinesController->inter_chaine();
+        break;
+    case 'mouvement_machines/parc_chaine':
+        $mouvement_machinesController->parc_chaine();
+        break;
+    case 'mouvement_machines/chaine_parc':
+        $mouvement_machinesController->chaine_parc();
+        break;
+    // case 'mouvement_machines/pending_reception':
+    //     $mouvement_machinesController->pending_reception();
+    //     break;
+    case 'mouvement_machines/accept':
+        $mouvement_machinesController->accept();
+        break;
+    case 'mouvement_machines/getMachinesByType':
+        $mouvement_machinesController->getMachinesByType();
+        break;
+    case 'mouvement_machines/saveMouvement':
+        $mouvement_machinesController->saveMouvement();
+        break;
+
     case 'compte/update_compte':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $authController->updateCompte();
@@ -114,14 +160,13 @@ switch ($route) {
             }
         }
         break;
-        
-  
-   
-    
-  
-        
-    
-        
+
+    // Routes pour les machines et leurs emplacements (box et lignes de production)
+
+
+    case 'machine/stats':
+        $machineController->getInterventionStats();
+        break;
     // Route par défaut
     default:
         header("Location: index.php?route=login");

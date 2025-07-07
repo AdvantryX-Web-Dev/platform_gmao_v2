@@ -40,21 +40,35 @@ class implantation_Prod_model
     {
         $this->$attr = $value;
     }
-    public static function findByChaine($nomCh)
+    public static function findAll()
     {
         $db = new Database();
         $conn = $db->getConnection();
 
-        $req = $conn->query("SELECT m.designation, pi.*
-        FROM prod__implantation pi
-         JOIN init__machine m on (pi.machine_id=m.machine_id)
-         where pi.prod_line ='$nomCh' and pi.machine_id NOT IN (select id_machine from `gmao__mouvement_machine`  WHERE (type_Mouv = 'entrée' AND statut = 1) OR (type_Mouv = 'sortie' AND id_Rais = 5))
-         ORDER BY pi.cur_date, pi.cur_time
-
-         ");
-        $machines = $req->fetchAll();
-        return $machines;
+        $req = $conn->query("SELECT p.*,isb.position,m.designation
+        FROM prod__implantation p Inner join init__smartbox isb on (p.smartbox=isb.smartbox)
+        inner join init__machine m on (p.machine_id=m.machine_id)
+        -- where YEAR(p.cur_date) = YEAR(CURDATE())
+       ");
+        $req->execute();
+        $resultats = $req->fetchAll();
+        return $resultats;
     }
+    // public static function findByChaine($nomCh)
+    // {
+    //     $db = new Database();
+    //     $conn = $db->getConnection();
+
+    //     $req = $conn->query("SELECT m.designation, pi.*
+    //     FROM prod__implantation pi
+    //      JOIN init__machine m on (pi.machine_id=m.machine_id)
+    //      where pi.prod_line ='$nomCh' and pi.machine_id NOT IN (select id_machine from `gmao__mouvement_machine`  WHERE (type_Mouv = 'entrée' AND statut = 1) OR (type_Mouv = 'sortie' AND id_Rais = 5))
+    //      ORDER BY pi.cur_date, pi.cur_time
+
+    //      ");
+    //     $machines = $req->fetchAll();
+    //     return $machines;
+    // }
     public static function findByMachineNonF()
     {
         $db = new Database();
@@ -87,43 +101,30 @@ class implantation_Prod_model
         $machines = $req->fetchAll();
         return $machines;
     }
-    public static function findAll()
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
 
-        $req = $conn->query("SELECT p.*,isb.position,m.designation
-        FROM prod__implantation p Inner join init__smartbox isb on (p.smartbox=isb.smartbox)
-        inner join init__machine m on (p.machine_id=m.machine_id)
-        -- where YEAR(p.cur_date) = YEAR(CURDATE())
-       ");
-        $req->execute();
-        $resultats = $req->fetchAll();
-        return $resultats;
-    }
-    public static function findChBymachine($machine_id)
-        {
-            $db = new Database();
-            $conn = $db->getConnection();
+    // public static function findChBymachine($machine_id)
+    //     {
+    //         $db = new Database();
+    //         $conn = $db->getConnection();
 
-        $req = $conn->query("SELECT prod_line
-        FROM prod__implantation  where machine_id='$machine_id'
-       ");
-        $req->execute();
-        $resultat = $req->fetchColumn();
-        return $resultat;
-    }
-    public static function findBoxAndOperBymachine($machine_id)
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
+    //     $req = $conn->query("SELECT prod_line
+    //     FROM prod__implantation  where machine_id='$machine_id'
+    //    ");
+    //     $req->execute();
+    //     $resultat = $req->fetchColumn();
+    //     return $resultat;
+    // }
+    // public static function findBoxAndOperBymachine($machine_id)
+    // {
+    //     $db = new Database();
+    //     $conn = $db->getConnection();
 
-        $req = $conn->query("SELECT operator ,smartbox
-        FROM prod__implantation  where machine_id='$machine_id'");
-        $req->execute();
-        $resultat = $req->fetch();
-        return $resultat;
-    }
+    //     $req = $conn->query("SELECT operator ,smartbox
+    //     FROM prod__implantation  where machine_id='$machine_id'");
+    //     $req->execute();
+    //     $resultat = $req->fetch();
+    //     return $resultat;
+    // }
     
     public static function findAllChaines()
     {

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use App\Models\Database;
 use PDOException;
 
@@ -58,10 +60,10 @@ class Machine_model
     }
 
     public static function findById($id_machine)
-        {
-            $db = new Database();
-            $conn = $db->getConnection();
-            $machine = null;
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        $machine = null;
         try {
             $req = $conn->query("SELECT * FROM init__machine m LEFT JOIN `gmao__numTete` gn on gn.id_machine=m.machine_id WHERE machine_id='$id_machine'");
             $machine = $req->fetch();
@@ -151,7 +153,8 @@ class Machine_model
         }
         return $type;
     }
-    public static function deleteById($id) {
+    public static function deleteById($id)
+    {
         $db = new Database();
         $conn = $db->getConnection();
         try {
@@ -162,6 +165,19 @@ class Machine_model
         } catch (PDOException $e) {
             // Gérer les erreurs de requête SQL
             // error_log('Erreur: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public static function findAllTypes()
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            $req = $conn->query("SELECT DISTINCT type FROM init__machine ORDER BY type");
+            return $req->fetchAll();
+        } catch (PDOException $e) {
+            // Gérer les erreurs de requête SQL
             return false;
         }
     }

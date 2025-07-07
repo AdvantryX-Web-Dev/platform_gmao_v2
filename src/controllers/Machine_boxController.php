@@ -1,21 +1,12 @@
 <?php
 namespace App\Controllers;
-
-use App\Models\Machine_model;
-
-
-function afficherMachines()
-{
-    $machines = Machine_model::findAll();
-    return $machines;
-}
-
-function afficherDetailsMachine($id_machine)
-{
-    $machine = Machine_model::findById($id_machine);
-    return $machine;
-}
-function typeMBymachine($machine_id)
-{
-    return Machine_model::findBytype($machine_id);
+use App\Models\Machines_box_model;
+class Machine_boxController {
+    public function __construct() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+    }
+    public static function affectationBoxsMachines()
+    {
+        return Machines_box_model::findAll();
+    }
 }

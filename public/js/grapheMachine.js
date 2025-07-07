@@ -23,6 +23,7 @@ function afficherGraphique(machineId) {
 
     // Récupérez les données spécifiques de la machine
     const machineData = allMachinesData[machineId];
+    console.log(allMachinesData);
     var ctx = document.getElementById('myChart').getContext('2d');
     myChart = new Chart(ctx, {
         type: 'bar',

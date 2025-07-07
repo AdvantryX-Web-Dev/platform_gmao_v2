@@ -44,7 +44,14 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
                                 <div class="form-group">
                                     <label>Nouveau mot de passe</label>
-                                    <input type="password" name="motDePasse" class="form-control" placeholder="Laisser vide pour ne pas changer">
+                                    <div class="input-group">
+                                        <input type="password" name="motDePasse" id="motDePasse" class="form-control" placeholder="Nouveau mot de passe" required>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+                                                <i class="fas fa-eye"></i>
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="d-flex">
                                     <button type="submit" class="btn btn-primary mr-2">Enregistrer</button>
@@ -63,6 +70,26 @@ if (session_status() === PHP_SESSION_NONE) {
         <script src="/public/js/jquery-3.6.4.min.js"></script>
         <script src="/public/js/bootstrap.bundle.min.js"></script>
         <script src="/public/js/sb-admin-2.min.js"></script>
+        <script>
+            // Masquer les alertes après 3 secondes
+            $(document).ready(function() {
+                setTimeout(function() {
+                    $(".alert").fadeOut("slow");
+                }, 3000);
+                // Afficher/masquer le mot de passe
+                $('#togglePassword').on('click', function() {
+                    const input = $('#motDePasse');
+                    const icon = $(this).find('i');
+                    if (input.attr('type') === 'password') {
+                        input.attr('type', 'text');
+                        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                    } else {
+                        input.attr('type', 'password');
+                        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                    }
+                });
+            });
+        </script>
     </div>
 </body>
 </html> 
