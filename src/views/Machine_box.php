@@ -64,7 +64,7 @@ use App\Controllers\Machine_boxController;
                                     <thead>
                                         <tr>
                                             <th>Chaine de production <i class="fas fa-sort"></i></th>
-                                            <th>Machine_id <i class="fas fa-sort"></i></th>
+                                            <th>Machine <i class="fas fa-sort"></i></th>
                                             <th>Désignation machine <i class="fas fa-sort"></i></th>
                                             <th>DigiTex<i class="fas fa-sort"></i></th>
                                             <th>Poste <i class="fas fa-sort"></i></th>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Database;
+use PDOException;
 
 class Intervention_model
 {
@@ -40,7 +41,12 @@ class Intervention_model
         $req = $conn->query("SELECT m.designation, pi.*
         FROM prod__implantation pi
          JOIN init__machine m on (pi.machine_id=m.machine_id)
-         where pi.prod_line ='$nomCh' and pi.machine_id NOT IN (select id_machine from `gmao__mouvement_machine`  WHERE (type_Mouv = 'entrée' AND statut = 1) OR (type_Mouv = 'sortie' AND id_Rais = 5))
+         where pi.prod_line ='$nomCh'
+          and pi.machine_id NOT IN (
+          select id_machine from `gmao__mouvement_machine`
+            WHERE (type_Mouv = 'chaine_parc' ) 
+            OR (type_Mouv = 'parc_chaine')
+            )
          ORDER BY pi.cur_date, pi.cur_time
 
          ");
@@ -82,4 +88,73 @@ class Intervention_model
         $maintDispos = $req->fetchAll();
         return $maintDispos;
     }
+    public static function planningSave(){
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Check if the request is POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = "Méthode non autorisée";
+            header('Location: ../../public/index.php?route=intervention_preventive');
+            return;
+        }
+        
+        // Validate required fields
+        $requiredFields = ['machine_id', 'intervention_type_id', 'planned_date'];
+        foreach ($requiredFields as $field) {
+            if (empty($_POST[$field])) {
+                $_SESSION['error'] = "Le champ '$field' est requis";
+                header('Location: ../../public/index.php?route=intervention_preventive');
+                return;
+            }
+        }
+        
+        // Get form data
+        $machine_id = $_POST['machine_id'];
+        $intervention_type_id = $_POST['intervention_type_id'];
+        $planned_date = $_POST['planned_date'];
+        $comments = $_POST['comments'] ?? '';
+        
+        // Create database connection
+        $db = new Database();
+        $conn = $db->getConnection();
+        
+        try {
+            // Begin transaction
+            $conn->beginTransaction();
+            
+            // Insert into planning table
+            $stmt = $conn->prepare("
+                INSERT INTO gmao_planning 
+                (machine_id, intervention_type_id, planned_date, comments, created_at,updated_at) 
+                VALUES (?, ?, ?, ?, NOW(),NOW())
+            ");
+           
+            $stmt->bindParam(1, $machine_id);
+            $stmt->bindParam(2, $intervention_type_id);
+            $stmt->bindParam(3, $planned_date);
+            $stmt->bindParam(4, $comments);
+            
+            $result = $stmt->execute();
+            
+            if ($result) {
+                // Commit the transaction
+                $conn->commit();
+                $_SESSION['success'] = "Intervention planifiée ajoutée avec succès";
+            } else {
+                // Rollback the transaction
+                $conn->rollBack();
+                $_SESSION['error'] = "Erreur lors de l'ajout de l'intervention planifiée";
+            }
+            
+        } catch (PDOException $e) {
+            // Rollback the transaction
+            $conn->rollBack();
+            $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
+        }
+        
+        header('Location: ../../public/index.php?route=intervention_preventive');
+    }
+   
 }

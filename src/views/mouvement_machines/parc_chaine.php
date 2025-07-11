@@ -19,7 +19,7 @@ if (!isset($mouvements)) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Mouvement Parc - Chaine</title>
+    <title>Mouvement sortie de Parc</title>
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" href="/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -47,7 +47,7 @@ if (!isset($mouvements)) {
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Mouvement des machines parc - chaine :</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Mouvement des machines sortie de Parc :</h6>
                             <div class="d-flex">
                                 <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#mouvementModal">
                                     <i class="fas fa-plus"></i> mouvement
@@ -77,7 +77,6 @@ if (!isset($mouvements)) {
                                             <th>Désignation</th>
                                             <th>Raisons</th>
                                             <th>Date mouvement</th>
-                                            <th>Statut</th>
                                             <th>Initiateur</th>
                                             <th>Réceptionneur</th>
                                             <th>Action</th>
@@ -91,8 +90,7 @@ if (!isset($mouvements)) {
                                                     <td><?= htmlspecialchars($mouvement['reference']) ?></td>
                                                     <td><?= htmlspecialchars($mouvement['designation']) ?></td>
                                                     <td><?= htmlspecialchars($mouvement['raison_mouv']) ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['date_Mouv_Mach']) ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['statut']) ?></td>
+                                                    <td><?= htmlspecialchars($mouvement['date_mouvement']) ?></td>
                                                     <td>
                                                         <?php
                                                         if (!empty($mouvement['idEmp_moved'])) {
@@ -113,7 +111,9 @@ if (!isset($mouvements)) {
                                                     </td>
                                                     <td>
                                                         <?php if (empty($mouvement['idEmp_accepted'])): ?>
-                                                            <button class="btn btn-success btn-sm reception-btn" data-toggle="modal" data-target="#receptionModal" data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach']) ?>">
+                                                            <button class="btn btn-success btn-sm reception-btn" data-toggle="modal" data-target="#receptionModal"
+                                                                data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach']) ?>"
+                                                                data-machine-id="<?= htmlspecialchars($mouvement['id_machine']) ?>">
                                                                 <i class="fas fa-check"></i> Réceptionner
                                                             </button>
                                                         <?php endif; ?>
@@ -227,21 +227,10 @@ if (!isset($mouvements)) {
                     <form id="receptionForm" action="../../public/index.php?route=mouvement_machines/accept" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="mouvement_id" id="mouvement_id" value="">
+                            <input type="hidden" name="machine_id" id="machine_id" value="">
                             <input type="hidden" name="type_mouvement" value="parc_chaine">
 
-                            <!-- <div class="row mb-3">
-                                <div class="col-12 mb-2">
-                                    <h6 class="font-weight-bold">Choisir le récepteur :</h6>
-                                </div>
-                           
-                                <div class="col-12">
-                                    <button type="submit" name="useConnectedUser" value="<?= $_SESSION['user']['matricule'] ?? ''; ?>" class="btn btn-primary btn-block">
-                                        <i class="fas fa-user"></i> Utiliser mon compte (<?= $_SESSION['user']['matricule'] ?? ''; ?>)
-                                    </button>
-                                </div>
-                            </div> -->
 
-                            <!-- <hr class="my-4"> -->
 
                             <div class="form-group">
                                 <label for="recepteur"> sélectionner un maintenancier :</label>
@@ -261,6 +250,22 @@ if (!isset($mouvements)) {
                                     }
                                     ?>
                                 </select>
+                                <div class="form-group">
+                                    <label for="etat_machine">Etat de la Machine :</label>
+                                    <select class="form-control" id="etat_machine" name="etat_machine" required>
+                                        <option value="">--Etat de la Machine--</option>
+                                        <?php
+                                        // Charger les raisons de mouvement ici
+                                        $etat_machine = []; // Remplacer par les données réelles
+                                        if (isset($controller)) {
+                                            $etat_machine = $controller->getMachineStatus();
+                                        }
+                                        foreach ($etat_machine as $etat) {
+                                            echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
                                 <div class="text-right mt-2">
                                     <button type="submit" class="btn btn-success">
                                         <i class="fas fa-check"></i> Confirmer avec ce maintenancier
@@ -346,7 +351,9 @@ if (!isset($mouvements)) {
                 // Mettre à jour l'ID du mouvement dans le modal de réception
                 $('.reception-btn').click(function() {
                     var mouvementId = $(this).data('id');
+                    var machineId = $(this).data('machine-id');
                     $('#mouvement_id').val(mouvementId);
+                    $('#machine_id').val(machineId);
                 });
             });
         </script>

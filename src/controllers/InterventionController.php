@@ -66,4 +66,10 @@ class InterventionController
     {
         include(__DIR__ . '/../views/HistoriqueIntervsMach.php');
     }
+
+    public function planningSave()
+    {
+       return Intervention_model::planningSave();
+    }
+ 
 }

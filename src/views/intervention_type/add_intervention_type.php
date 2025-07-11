@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Ajouter une machine</title>
+    <title>Ajouter un type de intervention</title>
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" href="/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -24,46 +24,47 @@ if (session_status() === PHP_SESSION_NONE) {
                 <div class="container-fluid">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Ajouter une machine</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Ajouter un type de intervention</h6>
                         </div>
                         <div class="card-body">
+                            <?php if (!empty($_SESSION['maintainer_success'])): ?>
+                                <div class="alert alert-success"><?= $_SESSION['maintainer_success']; unset($_SESSION['maintainer_success']); ?></div>
+                            <?php endif; ?>
+                            <?php if (!empty($_SESSION['maintainer_error'])): ?>
+                                <div class="alert alert-danger"><?= $_SESSION['maintainer_error']; unset($_SESSION['maintainer_error']); ?></div>
+                            <?php endif; ?>
                             <form method="post" action="">
                                 <div class="form-group">
-                                    <label>Machine ID</label>
-                                    <input type="text" name="machine_id" class="form-control" required maxlength="16">
-                                </div>
-                                <div class="form-group">
-                                    <label>Référence</label>
-                                    <input type="text" name="reference" class="form-control">
-                                </div>
-                                <div class="form-group">
-                                    <label>Marque</label>
-                                    <input type="text" name="brand" class="form-control" required>
+                                    <label>Designation</label>
+                                    <input type="text" name="designation" class="form-control" required >
                                 </div>
                                 <div class="form-group">
                                     <label>Type</label>
-                                    <input type="text" name="type" class="form-control" required>
+                                    <select name="type" class="form-control" required>
+                                        <option value="preventive">Preventive</option>
+                                        <option value="curative">Curative</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Désignation</label>
-                                    <input type="text" name="designation" class="form-control" required>
+                                    <label>Code</label>
+                                    <input type="text" name="code" class="form-control" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Numéro Facture</label>
-                                    <input type="text" name="billing_num" class="form-control" required>
+                                   
                                 </div>
-                                <div class="form-group">
-                                    <label>Date Facture</label>
-                                    <input type="date" name="bill_date" class="form-control">
-                                </div>
+                               
+                            
+                             
+                               
                                 <button type="submit" class="btn btn-success">Ajouter</button>
-                                <a href="../../public/index.php?route=machines" class="btn btn-secondary ml-2">Annuler</a>
+                                    <a href="/public/index.php?route=intervention_type/list" class="btn btn-secondary ml-2">Annuler</a>    
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
             <?php include(__DIR__ . "/../layout/footer.php"); ?>
+
         </div>
         <a class="scroll-to-top rounded" href="#page-top">
             <i class="fas fa-angle-up"></i>
@@ -74,6 +75,13 @@ if (session_status() === PHP_SESSION_NONE) {
         <script src="/public/js/bootstrap.bundle.min.js"></script>
         <script src="/public/js/sb-admin-2.min.js"></script>
         <script src="/public/js/dataTables.bootstrap4.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                setTimeout(function() {
+                    $(".alert").fadeOut("slow");
+                }, 3000);
+            });
+        </script>
     </div>
 </body>
 </html> 

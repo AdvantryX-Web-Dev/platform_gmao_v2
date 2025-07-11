@@ -92,6 +92,16 @@ $nomCh = $selectedChaine;
                         </div>
                         <?php unset($_SESSION['error']); ?>
                     <?php endif; ?>
+
+                    <?php if (!empty($_SESSION['success'])): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <?= htmlspecialchars($_SESSION['success']) ?>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fermer">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <?php unset($_SESSION['success']); ?>
+                    <?php endif; ?>
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
@@ -99,19 +109,34 @@ $nomCh = $selectedChaine;
                                 <h6 class="m-0 font-weight-bold text-primary">Historique des Interventions sur les Machines de chaine
                                     <?php echo htmlspecialchars($nomCh); ?> :
                                 </h6>
-                                <form method="get" class="form-inline mb-0" style="display:inline-block;">
-                                    <input type="hidden" name="route" value="intervention_preventive">
-                                    <select name="chaine" id="chaine" class="form-control mr-2" onchange="this.form.submit()">
-                                        <option value="">-- Toutes les chaînes --</option>
-                                        <?php
-                                        foreach ($chaines as $ch) {
-                                            $selected = ($selectedChaine == $ch['prod_line']) ? 'selected' : '';
-                                            echo '<option value="' . htmlspecialchars($ch['prod_line']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
-                                        }
-                                        ?>
-                                    </select>
-                                </form>
-
+                                <div class="d-flex align-items-center">
+                                    <form method="get" class="form-inline mb-0 mr-2" style="display:inline-block;">
+                                        <input type="hidden" name="route" value="intervention_preventive">
+                                        <select name="chaine" id="chaine" class="form-control mr-2" onchange="this.form.submit()">
+                                            <option value="">-- Toutes les chaînes --</option>
+                                            <?php
+                                            foreach ($chaines as $ch) {
+                                                $selected = ($selectedChaine == $ch['prod_line']) ? 'selected' : '';
+                                                echo '<option value="' . htmlspecialchars($ch['prod_line']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </form>
+                                    <button class="btn btn-success mr-2" data-toggle="modal" data-target="#planningModal">
+                                        <i class="fas fa-calendar-plus"></i> Ajouter au planning
+                                    </button>
+                                    <?php 
+                                    // Get count of future interventions
+                                    $planningController = new \App\Controllers\InterventionPlanningController();
+                                    $futureCount = $planningController->getFutureInterventionsCount();
+                                    ?>
+                                    <a href="../../public/index.php?route=intervention_planning/list" class="btn btn-info">
+                                        <i class="fas fa-calendar-alt"></i> Liste des planifications
+                                        <?php if ($futureCount > 0): ?>
+                                        <span class="badge badge-light ml-1"><?= $futureCount ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="card-body">
@@ -227,6 +252,73 @@ $nomCh = $selectedChaine;
         </script>
         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+
+    <!-- Planning Modal -->
+    <div class="modal fade" id="planningModal" tabindex="-1" role="dialog" aria-labelledby="planningModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="planningModalLabel">
+                        <i class="fas fa-calendar-plus"></i> Ajouter une intervention planifiée
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="planningForm" action="../../public/index.php?route=intervention_planning/save" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="machine_id"> Machine :</label>
+                            <select class="form-control" id="machine_id" name="machine_id" required>
+                                <option value="">-- Sélectionner une machine --</option>
+                                <?php
+                                if (isset($machines) && is_array($machines)) {
+                                    foreach ($machines as $machine) {
+                                        echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
+                                            htmlspecialchars($machine['machine_id']) .  '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="intervention_type_id"> Type d'intervention :</label>
+                            <select class="form-control" id="intervention_type_id" name="intervention_type_id" required>
+                                <option value="">-- Sélectionner un type --</option>
+                                <?php
+                                // Load intervention types (only preventive)
+                                $interventionTypes = \App\Models\Intervention_type_model::findByType('preventive');
+                                if (isset($interventionTypes) && is_array($interventionTypes)) {
+                                    foreach ($interventionTypes as $type) {
+                                        echo '<option value="' . htmlspecialchars($type['id']) . '">' .
+                                            htmlspecialchars($type['designation']) . '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="planned_date"> Date planifiée :</label>
+                            <input type="date" class="form-control" id="planned_date" name="planned_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comments"><i class="fas fa-comment"></i> Commentaires :</label>
+                            <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">
+                            Valider
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                             Annuler
+                        </button>
+
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </body>
 

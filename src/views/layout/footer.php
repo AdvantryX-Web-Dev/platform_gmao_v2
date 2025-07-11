@@ -2,7 +2,7 @@
 <footer class="sticky-footer bg-white mt-auto">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-            <span>&copy; <?php echo date('Y'); ?> GMAO System. Tous droits réservés.</span>
+            <span>&copy; <?php echo date('Y'); ?>  GMAO System ADVANTRYX – Tous droits réservés.</span>
         </div>
     </div>
 </footer>

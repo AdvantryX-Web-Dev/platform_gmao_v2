@@ -31,7 +31,9 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item" href="../../public/index.php?route=machines">Liste des machines</a>
                 <a class="collapse-item" href="../../public/index.php?route=maintainers">Liste des maintenanciers</a>
-                <a class="collapse-item" href="../../public/index.php?route=typeMachine/list">Catégories</a>
+                <a class="collapse-item" href="../../public/index.php?route=intervention_type/list">Liste des interventions</a>
+                <a class="collapse-item" href="../../public/index.php?route=machines_status/list">Liste des états de machine</a>
+                <a class="collapse-item" href="../../public/index.php?route=categories">Liste des motifs de mvt</a>
                 <a class="collapse-item" href="../../public/index.php?route=equipement/list">Liste des équipements</a>
             </div>
         </div>
@@ -45,12 +47,12 @@
         </a>
         <div id="collapseGestionMachine" class="collapse" aria-labelledby="headingGestionMachine" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <a class="collapse-item" href="#">État machine</a>
-                <a class="collapse-item" href="../../public/index.php?route=machinesbox">Machine-Box</a>
+            <a class="collapse-item" href="../../public/index.php?route=Gestion_machines/status">Etat des machines</a>
+            <a class="collapse-item" href="../../public/index.php?route=machinesbox">Machine-Box</a>
                 <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvMachine" aria-expanded="false" aria-controls="collapseMouvMachine">Mouvement machine </a>
                 <div id="collapseMouvMachine" class="collapse ml-3" aria-labelledby="headingMouvMachine" data-parent="#collapseGestionMachine">
-                    <a class="collapse-item" href="../../public/index.php?route=mouvement_machines/chaine_parc">Chaine - Parc</a>
-                    <a class="collapse-item" href="../../public/index.php?route=mouvement_machines/parc_chaine">Parc - Chaine</a>
+                    <a class="collapse-item" href="../../public/index.php?route=mouvement_machines/chaine_parc">Entrer en Parc</a>
+                    <a class="collapse-item" href="../../public/index.php?route=mouvement_machines/parc_chaine">Sortie de Parc</a>
                     <a class="collapse-item" href="../../public/index.php?route=mouvement_machines/inter_chaine">Inter Chaine</a>
 
 

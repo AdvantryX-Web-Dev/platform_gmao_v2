@@ -12,6 +12,10 @@ use App\Controllers\InterventionController;
 use App\Controllers\MaintainerController;
 use App\Controllers\Machine_boxController;
 use App\Controllers\Mouvement_machinesController;
+use App\Controllers\CategoriesController;
+use App\Controllers\Intervention_typeController;
+use App\Controllers\Machines_statusController;
+use App\Controllers\InterventionPlanningController;
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -19,6 +23,10 @@ $interventionController = new InterventionController();
 $maintainerController = new MaintainerController();
 $machineBoxController = new Machine_boxController();
 $mouvement_machinesController = new Mouvement_machinesController();
+$categoriesController = new CategoriesController();
+$intervention_typeController = new Intervention_typeController();
+$machines_statusController = new Machines_statusController();
+$intervention_planningController = new InterventionPlanningController();
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -60,14 +68,14 @@ switch ($route) {
         }
         break;
 
-    case 'machinesbox':
-        require_once __DIR__ . '/../src/views/Machine_box.php';
-        break;
-    case 'machine/mouvement':
-        require_once __DIR__ . '/../src/views/MouvMachines.php';
-        break;
+    /** Gestion initiale des machines */
     case 'machines':
         $machineController->list();
+        break;
+
+    case 'machines/state':
+        $controller = new MachineController();
+        $controller->machines_state();
         break;
     case 'machine/create':
         $machineController->create();
@@ -78,18 +86,7 @@ switch ($route) {
     case 'machine/delete':
         $machineController->delete();
         break;
-    case 'intervention_preventive':
-        $interventionController->index();
-        break;
-    case 'intervention_curative':
-        $interventionController->indexCorrective();
-        break;
-    case 'intervention_curative/ajouterDemande':
-        $interventionController->ajouterDemande();
-        break;
-    case 'historique_intervs_mach':
-        $interventionController->historiqueIntervsMach();
-        break;
+    /** Gestion des mainteneurs */
     case 'maintainers':
         $maintainerController->list();
         break;
@@ -104,6 +101,61 @@ switch ($route) {
         break;
     case 'audit_trails_history':
         $maintainerController->auditTrails_history();
+        break;
+    /** Gestion des categories */
+    case 'categories':
+
+        $categoriesController->list();
+        break;
+    case 'category/create':
+        $categoriesController->create();
+        break;
+    case 'category/edit':
+        $categoriesController->edit();
+        break;
+    case 'category/delete':
+        $categoriesController->delete();
+        break;
+    case 'category/audit_trails':
+        $categoriesController->auditTrails();
+        break;
+    /** Gestion initiale des interventions */
+    case 'intervention_type/list':
+        $intervention_typeController->list();
+        break;
+    case 'intervention_type/create':
+        $intervention_typeController->create();
+        break;
+    case 'intervention_type/edit':
+        $intervention_typeController->edit();
+        break;
+    case 'intervention_type/delete':
+        $intervention_typeController->delete();
+        break;
+    /** Gestion des états des machines */
+    case 'machines_status/list':
+        $machines_statusController->list();
+        break;
+    case 'machines_status/create':
+        $machines_statusController->create();
+        break;
+    case 'machines_status/edit':
+        $machines_statusController->edit();
+        break;
+    case 'machines_status/delete':
+        $machines_statusController->delete();
+        break;
+
+
+    /** Gestion des machines */
+    case 'Gestion_machines/status':
+        $machineController->machines_state();
+        break;
+    case 'machinesbox':
+        require_once __DIR__ . '/../src/views/Machine_box.php';
+        break;
+    case 'machine/mouvement':
+        require_once __DIR__ . '/../src/views/MouvMachines.php';
         break;
     case 'mouvement_machines':
         $mouvement_machinesController->mouvement_machines();
@@ -129,7 +181,25 @@ switch ($route) {
     case 'mouvement_machines/saveMouvement':
         $mouvement_machinesController->saveMouvement();
         break;
-
+    /** Gestion des interventions */
+    case 'intervention_preventive':
+        $interventionController->index();
+        break;
+    case 'intervention_planning/save':
+        $interventionController->planningSave();
+        break;
+    case 'intervention_planning/list':
+        $intervention_planningController->list();
+        break;
+    case 'intervention_curative':
+        $interventionController->indexCorrective();
+        break;
+    case 'intervention_curative/ajouterDemande':
+        $interventionController->ajouterDemande();
+        break;
+    case 'historique_intervs_mach':
+        $interventionController->historiqueIntervsMach();
+        break;
     case 'compte/update_compte':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $authController->updateCompte();
@@ -164,9 +234,7 @@ switch ($route) {
     // Routes pour les machines et leurs emplacements (box et lignes de production)
 
 
-    case 'machine/stats':
-        $machineController->getInterventionStats();
-        break;
+
     // Route par défaut
     default:
         header("Location: index.php?route=login");

@@ -61,7 +61,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     <thead>
                                         <tr>
                                             <?php if ($isAdmin): ?>
-                                                <th>Actions</th>
+                                                <th  style="width: 5%;">Actions</th>
                                             <?php endif; ?>
                                             <th>Matricule</th>
                                             <th>Nom</th>
@@ -74,9 +74,9 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             <?php foreach ($maintainers as $maintainer): ?>
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
-                                                        <td>
-                                                            <a href="../../public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
-                                                            <a href="../../public/index.php?route=maintainer/delete&id=<?= urlencode($maintainer['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce mainteneur ?');"><i class="fas fa-trash"></i></a>
+                                                        <td >
+                                                            <a href="../../public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>"><i class="fas fa-edit m-2"></i></a>
+                                                            <a href="../../public/index.php?route=maintainer/delete&id=<?= urlencode($maintainer['id']) ?>"  onclick="return confirm('Supprimer ce mainteneur ?');"><i class="fas fa-trash text-danger"></i></a>
                                                         </td>
                                                     <?php endif; ?>
                                                     <td><?= htmlspecialchars($maintainer['matricule'] ?? '') ?></td>

@@ -59,15 +59,15 @@ SELECT
         NULL AS nbOperationsAujourdhui,
         NULL AS tempsFonctionnement,
         NULL AS tempsDispo,
-        DATE(mo.date_Mouv_Mach) AS date,
-        TIME(mo.date_Mouv_Mach) AS time
+        DATE(mo.date_mouvement) AS date,
+        TIME(mo.date_mouvement) AS time
     FROM 
         init__machine m
     INNER JOIN 
         `gmao__mouvement_machine`  mo ON m.machine_id = mo.id_machine
     WHERE 
        
-         YEAR(DATE(mo.date_Mouv_Mach)) = YEAR(CURDATE()) AND mo.id_machine='$machine_id'
+         YEAR(DATE(mo.date_mouvement)) = YEAR(CURDATE()) AND mo.id_machine='$machine_id'
          UNION ALL
 SELECT 
         m.machine_id, 

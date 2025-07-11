@@ -59,7 +59,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     <thead>
                                         <tr>
                                             <?php if ($isAdmin): ?>
-                                                <th>Actions</th>
+                                                <th style="width: 5%;">Actions</th>
                                             <?php endif; ?>
                                             <th>Machine ID</th>
                                             <th>Référence</th>
@@ -76,8 +76,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
                                                         <td>
-                                                            <a href="../../public/index.php?route=machine/edit&id=<?= urlencode($machine['machine_id'] ?? '') ?>" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
-                                                            <a href="../../public/index.php?route=machine/delete&id=<?= urlencode($machine['machine_id'] ?? '') ?>" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer cette machine ?');"><i class="fas fa-trash"></i></a>
+                                                            <a href="../../public/index.php?route=machine/edit&id=<?= urlencode($machine['machine_id'] ?? '') ?>"><i class="fas fa-edit m-2"></i></a>
+                                                            <a href="../../public/index.php?route=machine/delete&id=<?= urlencode($machine['machine_id'] ?? '') ?>"  onclick="return confirm('Supprimer cette machine ?');"><i class="fas fa-trash text-danger"></i></a>
                                                         </td>
                                                     <?php endif; ?>
                                                     <td><?= htmlspecialchars($machine['machine_id'] ?? '') ?></td>

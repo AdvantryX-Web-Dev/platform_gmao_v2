@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Database;
 use PDOException;
+use PDO;
 
 class Machine_model
 {
@@ -178,6 +179,83 @@ class Machine_model
             return $req->fetchAll();
         } catch (PDOException $e) {
             // Gérer les erreurs de requête SQL
+            return false;
+        }
+    }
+
+    public static function MachinesStateTable()
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            $query = "
+                SELECT 
+                    m.*,
+                     ms.status_name as etat_machine,
+                     ml.location_name as location
+                FROM 
+                    init__machine m
+                     LEFT JOIN gmao_machines_status ms ON ms.id = m.machines_status_id 
+                     LEFT JOIN gmao_machine_location ml ON ml.id = m.machines_location_id 
+                
+                ORDER BY 
+                    m.id
+            ";
+
+            $stmt = $conn->query($query);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Return empty array instead of false if no results
+            return $result ?: [];
+        } catch (PDOException $e) {
+            // Log error for debugging
+            error_log('Error in getMachinesStateTable: ' . $e->getMessage());
+            // Return empty array instead of false
+            return [];
+        }
+    }
+
+    /**
+     * Get all machine statuses from gmao_machines_status table
+     * 
+     * @return array Array of machine statuses
+     */
+    public static function getMachineStatus()
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            $query = "SELECT * FROM gmao_machines_status ORDER BY id ASC";
+            $stmt = $conn->query($query);
+            $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            return $result ?: [];
+        } catch (PDOException $e) {
+            // Handle SQL query errors
+            error_log('Error in getMachineStatus: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Update machine status
+     * 
+     * @param string $machineId Machine ID
+     * @param int $statusId Status ID from gmao_machines_status table
+     * @return bool True if update was successful, false otherwise
+     */
+    public static function updateMachineStatus($machineId, $statusId)
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            $query = "UPDATE init__machine SET machines_status_id = :status_id, updated_at = NOW() 
+                      WHERE machine_id = :machine_id";
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':status_id', $statusId, PDO::PARAM_INT);
+            $stmt->bindParam(':machine_id', $machineId, PDO::PARAM_STR);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Handle SQL query errors
             return false;
         }
     }

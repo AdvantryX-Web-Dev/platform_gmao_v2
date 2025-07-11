@@ -3,9 +3,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-use App\Models\Maintainer_model;
+use App\Models\Machines_status_model;
 
-$maintainers = Maintainer_model::findAll();
+$machines_status = Machines_status_model::findAll();
 
 // Vérifie si l'utilisateur est un administrateur
 $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
@@ -15,7 +15,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
 <head>
     <meta charset="UTF-8">
-    <title>Liste des catégories</title>
+    <title>Liste des statuts de machine </title>
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" href="/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -43,12 +43,12 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                     
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Liste des catégories :</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Liste des statuts de machine :</h6>
                             <?php if ($isAdmin): ?>
                                 <div>
-                                    
-                                    <a href="../../public/index.php?route=category/create" class="btn btn-success">
-                                        <i class="fas fa-plus"></i> Ajouter une catégorie
+                                 
+                                    <a href="/public/index.php?route=machines_status/create" class="btn btn-success">
+                                        <i class="fas fa-plus"></i> Ajouter un statut de machine
                                     </a>
                                 </div>
                             <?php endif; ?>
@@ -61,28 +61,30 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             <?php if ($isAdmin): ?>
                                                 <th style="width: 5%;">Actions</th>
                                             <?php endif; ?>
-                                            <th>Raison du mouvement</th>
-                                            <th>Type de raison</th>
+                                            <th>Statut de machine</th>
+                                           
                                            
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (is_array($categories) && count($categories) > 0): ?>
-                                            <?php foreach ($categories as $category): ?>
+                                        <?php if (is_array($machines_status) && count($machines_status) > 0): ?>
+                                            <?php foreach ($machines_status as $machines_status): ?>
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
-                                                        <td>
-                                                            <a href="../../public/index.php?route=category/edit&id=<?= urlencode($category['id_Raison']) ?>" ><i class="fas fa-edit m-2"></i></a>
-                                                            <a href="../../public/index.php?route=category/delete&id=<?= urlencode($category['id_Raison']) ?>" onclick="return confirm('Supprimer cette catégorie ?');"><i class="fas fa-trash text-danger"></i></a>
+                                                        <td >
+                                                            <a href="/public/index.php?route=machines_status/edit&id=<?= urlencode($machines_status['id']) ?>" ><i class="fas fa-edit m-2"></i></a>
+                                                            <a href="/public/index.php?route=machines_status/delete&id=<?= urlencode($machines_status['id']) ?>" onclick="return confirm('Supprimer ce statut de machine ?');">
+                                                                <i class="fas fa-trash text-danger"></i>
                                                         </td>
                                                     <?php endif; ?>
-                                                        <td><?= htmlspecialchars($category['raison_mouv_mach'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($category['typeR'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($machines_status['status_name'] ?? '') ?></td>
+                                                    
+                                                   
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="<?= $isAdmin ? 5 : 4 ?>">Aucune catégorie trouvée.</td>
+                                                            <td colspan="4">Aucun statut de machine trouvé.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -93,6 +95,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 </div>
             </div>
             <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
+
         </div>
         <a class="scroll-to-top rounded" href="#page-top">
             <i class="fas fa-angle-up"></i>

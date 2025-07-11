@@ -3,17 +3,17 @@ namespace App\Models;
 use App\Models\Database;
 use PDOException;
 
-class Categories_model
+class Machines_status_model
 {
-    private $id_Raison;
-    private $raison_mouv_mach;
-    private $typeR;
+    private $id;
+    private $status_name;
+   
  
-    public function __construct($id_Raison, $raison_mouv_mach, $typeR)
+    public function __construct($id, $status_name)
     {
-        $this->id_Raison = $id_Raison;
-        $this->raison_mouv_mach = $raison_mouv_mach;
-        $this->typeR = $typeR;
+        $this->id = $id;
+        $this->status_name = $status_name;
+       
 
     }
 
@@ -35,40 +35,40 @@ class Categories_model
     {
         $db = new Database();
         $conn = $db->getConnection();
-        $categories = array();
+        $machines_status = array();
         try {
-            $req = $conn->query("SELECT * FROM gmao__raison_mouv_mach ");
-            $categories = $req->fetchAll();
+            $req = $conn->query("SELECT * FROM gmao_machines_status");
+            $machines_status = $req->fetchAll();
         } catch (PDOException $e) {
             
             return false;
         }
-        return $categories;
+        return $machines_status;
     }
 
     public static function findById($id)
         {
             $db = new Database();
             $conn = $db->getConnection();
-            $category = null;
+            $machines_status = null;
             try {
-                $req = $conn->query("SELECT * FROM gmao__raison_mouv_mach WHERE id_Raison='$id'");
-            $category = $req->fetch();
+                $req = $conn->query("SELECT * FROM gmao_machines_status WHERE id='$id'");
+            $machines_status = $req->fetch();
         } catch (PDOException $e) {
           
             return false;
         }
-        return $category;
+        return $machines_status;
     }
-    public static function StoreCategory($category)
+    public static function StoreMachinesStatus($machines_status)
     {
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("INSERT INTO gmao__raison_mouv_mach (`id_Raison`, `raison_mouv_mach`, `typeR`) VALUES (?, ?, ?)");
-            $stmt->bindParam(1, $category->id_Raison);
-            $stmt->bindParam(2, $category->raison_mouv_mach);
-            $stmt->bindParam(3, $category->typeR);
+            $stmt = $conn->prepare("INSERT INTO gmao_machines_status (`id`, `status_name`) VALUES (?, ?)");
+            $stmt->bindParam(1, $machines_status->id);
+            $stmt->bindParam(2, $machines_status->status_name);
+           
             
 
             $stmt->execute();
@@ -77,14 +77,13 @@ class Categories_model
             return false;
         }
     }
-    public static function UpdateCategory($category)
+    public static function UpdateMachinesStatus($machines_status)
     {
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("UPDATE gmao__raison_mouv_mach SET raison_mouv_mach = ?, typeR = ? WHERE id_Raison = '$category->id_Raison'");
-            $stmt->bindParam(1, $category->raison_mouv_mach);
-            $stmt->bindParam(2, $category->typeR);
+                    $stmt = $conn->prepare("UPDATE gmao_machines_status SET status_name = ? WHERE id = '$machines_status->id'");
+            $stmt->bindParam(1, $machines_status->status_name);
            
             $stmt->execute();
             return true;
@@ -100,7 +99,7 @@ class Categories_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("DELETE FROM gmao__raison_mouv_mach WHERE id_Raison = ?");
+            $stmt = $conn->prepare("DELETE FROM gmao_machines_status WHERE id = ?");
             $stmt->bindParam(1, $id);
             $stmt->execute();
             return true;

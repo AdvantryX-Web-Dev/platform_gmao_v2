@@ -24,8 +24,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <div class="container-fluid">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Éditer un mainteneur</h6>
-                            <a href="../../public/index.php?route=maintainers" class="btn btn-secondary">Retour à la liste</a>
+                            <h6 class="m-0 font-weight-bold text-primary">Editer un mainteneur</h6>
                         </div>
                         <div class="card-body">
                             <form method="post" action="../../public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>">
@@ -54,14 +53,15 @@ if (session_status() === PHP_SESSION_NONE) {
                                         
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                <button type="submit" class="btn btn-success">Enregistrer</button>
                                 <a href="../../public/index.php?route=maintainers" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>
                 </div>
-                <?php include(__DIR__ . "/../layout/footer.php"); ?>
             </div>
+            <?php include(__DIR__ . "/../layout/footer.php"); ?>
+
         </div>
         <a class="scroll-to-top rounded" href="#page-top">
             <i class="fas fa-angle-up"></i>
