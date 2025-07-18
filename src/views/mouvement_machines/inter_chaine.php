@@ -131,8 +131,8 @@ if (!isset($mouvements)) {
                         </div>
                     </div>
                 </div>
-                <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
             </div>
+            <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
         </div>
 
         <!-- Modal pour ajouter un nouveau mouvement -->
@@ -204,8 +204,8 @@ if (!isset($mouvements)) {
                             </div>
                         </div>
                         <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Enregistrer</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn btn-primary">Valider</button>
                         </div>
                     </form>
                 </div>

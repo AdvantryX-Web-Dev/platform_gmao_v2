@@ -131,8 +131,9 @@ if (!isset($mouvements)) {
                         </div>
                     </div>
                 </div>
-                <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
             </div>
+            <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
+
         </div>
 
         <!-- Modal pour ajouter un nouveau mouvement -->
@@ -205,8 +206,9 @@ if (!isset($mouvements)) {
                             </div>
                         </div>
                         <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Enregistrer</button>
+
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn btn-primary">Valider</button>
                         </div>
                     </form>
                 </div>
@@ -292,9 +294,6 @@ if (!isset($mouvements)) {
             </div>
         </div>
 
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
 
         <!-- Scripts JavaScript -->
         <script src="/public/js/jquery-3.6.4.min.js"></script>
