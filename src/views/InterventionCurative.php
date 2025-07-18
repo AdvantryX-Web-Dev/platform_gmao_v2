@@ -1,16 +1,22 @@
 <?php
 
-use App\Controllers\InterventionController;
 use App\Models\implantation_Prod_model;
 
 
 // Initialisation du filtre chaîne AVANT tout HTML
 $chaines = implantation_Prod_model::findAllChaines();
+
+$selectedprodline_id = isset($_GET['id']) ? $_GET['id'] : '';
 $selectedChaine = isset($_GET['chaine']) ? $_GET['chaine'] : '';
-if ($selectedChaine === '' && count($chaines) > 0) {
-    $selectedChaine = $chaines[0]['prod_line'];
+
+if ($selectedChaine === '') {
+    $selectedChaine = $chaines[0]['id'];
 }
-$nomCh = $selectedChaine;
+
+$prodline_id = $selectedChaine;
+$findChaineById = implantation_Prod_model::findChaineById($prodline_id);
+$nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -83,7 +89,7 @@ $nomCh = $selectedChaine;
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 font-weight-bold text-primary">Historique des Interventions sur les Machines de chaine
+                                <h6 class="m-0 font-weight-bold text-primary">Liste des interventions curatives sur les Machines de chaine
                                     <?php echo htmlspecialchars($nomCh); ?> :
                                 </h6>
                                 <form method="get" class="form-inline mb-0" style="display:inline-block;">
@@ -92,8 +98,8 @@ $nomCh = $selectedChaine;
                                         <option value="">-- Toutes les chaînes --</option>
                                         <?php
                                         foreach ($chaines as $ch) {
-                                            $selected = ($selectedChaine == $ch['prod_line']) ? 'selected' : '';
-                                            echo '<option value="' . htmlspecialchars($ch['prod_line']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
+                                            $selected = ($selectedChaine == $ch['id']) ? 'selected' : '';
+                                            echo '<option value="' . htmlspecialchars($ch['id']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
                                         }
                                         ?>
                                     </select>
@@ -123,36 +129,25 @@ $nomCh = $selectedChaine;
                                         <?php
 
                                         $interventionController = new \App\Controllers\InterventionController();
-                                        $machines = $interventionController->getByChaine($nomCh);
+
+                                        // Récupérer les interventions curatives avec prodline_id et nomCh
+
+                                        $machines = $interventionController->curativeByChaine($prodline_id, $nomCh);
 
                                         foreach ($machines as $machine) {
-                                            $nbInterC = 0;
-                                            $id_machine = $machine['machine_id'];
-                                            $interves = $interventionController->getInterventionByMachine($id_machine);
-                                            // Filtrer les interventions préventives
-                                            $preventives = array_filter($interves, function ($interv) {
-                                                return strtolower($interv['intervention_type']) === 'curative';
-                                            });
-                                            if (empty($preventives)) {
-                                                continue; // Sauter les machines sans intervention préventive
-                                            }
-                                            $lastDate = '';
-                                            foreach ($interves as $interv) {
-                                                if (strtolower($interv['intervention_type']) == 'curative') {
-                                                    $lastDate = $interves[0]['intervention_date'];
-                                                    $nbInterC++;
-                                                }
-                                            }
+                                            // Les données sont déjà agrégées par machine par la méthode curativeByChaine
+                                            $nbInterC = $machine['nb_interventions'];
+                                            $lastDate = $machine['last_date'];
 
                                             echo
                                             '<tr class="machine-row" >
                                                 <td  machine-id="' . $machine['machine_id'] . '" style="color: #0056b3; cursor: pointer;"> ' . $machine['machine_id'] . '</td>
                                                 <td>' . $machine['designation'] . '</td>
                                                 <td>' . $machine['smartbox'] . '</td>
-                                                <td><a href="?route=historique_intervs_mach&type=c&id_machine=' . $machine['machine_id'] . '">' . $nbInterC . '</td>
-                                                <td>' . htmlspecialchars($lastDate) .'</td>
+                                                <td><a href="?route=historique_intervs_mach&type=c&id_machine=' . $machine['machine_id'] . '">' . $nbInterC . '</a></td>
+                                                <td>' . date('d/m/Y', strtotime($lastDate)) . '</td>
                                             </tr>';
-                                            $nbInterAndpannes = $interventionController->getNbInterPannMach($id_machine);
+                                            $nbInterAndpannes = $interventionController->getNbInterPannMach($machine['machine_id']);
 
                                             $machineData = array();
                                             foreach ($nbInterAndpannes as $resultat) {
@@ -162,7 +157,7 @@ $nomCh = $selectedChaine;
                                                     'nbInter' => $resultat['nbInter'],
                                                 );
                                             }
-                                            $machinesData[$id_machine] = $machineData;
+                                            $machinesData[$machine['machine_id']] = $machineData;
                                         }
                                         ?>
                                     </tbody>
@@ -197,10 +192,6 @@ $nomCh = $selectedChaine;
         </div>
         <!-- End of Page Wrapper -->
 
-        <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
 
         <script>
             var allMachinesData = <?php echo json_encode($machinesData); ?>;

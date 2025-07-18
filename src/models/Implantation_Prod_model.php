@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Database;
@@ -24,10 +25,9 @@ class implantation_Prod_model
         $this->cur_date = $cur_date;
         $this->cur_time = $cur_time;
         $this->db = new Database();
-
     }
 
-   
+
 
     public function __get($attr)
     {
@@ -125,13 +125,26 @@ class implantation_Prod_model
     //     $resultat = $req->fetch();
     //     return $resultat;
     // }
-    
+
     public static function findAllChaines()
     {
         $db = new Database();
         $conn = $db->getConnection();
-        
-        $req = $conn->query("SELECT DISTINCT prod_line FROM prod__implantation ORDER BY prod_line");
+
+        // $req = $conn->query("SELECT DISTINCT prod_line FROM prod__implantation ORDER BY prod_line");
+        $req = $conn->query("SELECT * FROM 	init__prod_line ORDER BY prod_line");
+        $req->execute();
+        $resultats = $req->fetchAll();
+        return $resultats;
+    }
+
+    public static function findChaineById($id)
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+
+        // $req = $conn->query("SELECT DISTINCT prod_line FROM prod__implantation ORDER BY prod_line");
+        $req = $conn->query("SELECT prod_line FROM 	init__prod_line WHERE id = $id");
         $req->execute();
         $resultats = $req->fetchAll();
         return $resultats;

@@ -41,50 +41,54 @@
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <?php if (isset($_GET['id_machine']) && isset($_GET['type'])) {
-                                $machine_id = $_GET['id_machine']; ?>
+                                $id_machine = $_GET['id_machine']; ?>
+                                <?php $machine = $_GET['machine']; ?>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h6 class="m-0 font-weight-bold text-primary">Historique des Interventions
                                         <?php echo ($_GET['type'] == "c") ? "curatives" : "préventives"; ?> sur la Machine
-                                        <?php echo $machine_id; ?> :
+                                        <?php echo $machine; ?> :
                                     </h6>
-                                    <div class="col-md-3 " style="margin-right: -20px;">
-
+                                    <div class="col-md-3  text-right" >
+                                    <a href="javascript:history.back()" class="btn btn-primary">
+                                        <i class="fas fa-arrow-left"></i> Retour
+                                    </a>
                                     </div>
                                 </div>
+                                
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th> Période D'intervention <i class="fas fa-sort"></i></th>
-                                            <th> Date Début <i class="fas fa-sort"></i></th>
-                                            <th>Date Fin <i class="fas fa-sort"></i></th>
-                                            <th>Maintenancier <i class="fas fa-sort"></i></th>
-                                            <th>Etat Machine <i class="fas fa-sort"></i></th>
+                                            <th> Date d'intervention <i class="fas fa-sort"></i></th>
+                                            <th> Machine <i class="fas fa-sort"></i></th>
+                                            <th> Chaîne de production <i class="fas fa-sort"></i></th>
+                                            <th> Type d'intervention <i class="fas fa-sort"></i></th>
+                                            <th> Maintenancier <i class="fas fa-sort"></i></th>
+                                            <th> Planifié <i class="fas fa-sort"></i></th>
+                                            <th> Date de création <i class="fas fa-sort"></i></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     <?php
-                                    $interventionController = new \App\Controllers\InterventionController();
-                                    $type = $_GET['type'];
-                                    $interves = $interventionController->getInterventionByMachine($machine_id);
-                                  
-                                    foreach ($interves as $interv) {
-                                        $dateDebut = new DateTime($interv['intervention_date'] . ' ' . $interv['intervention_time']);
-                                        $dateFin = new DateTime($interv['endDate']);
-                                        $periodeIn = $dateDebut->diff($dateFin)->format('%a jours, %h heures, %i minutes');
-                                        $heureMinuteSeconde = substr($interv['intervention_time'], 0, 8);
-                                        if (strtolower($type) === 'c' && strtolower($interv['intervention_type']) === 'curative') {
-                                            echo '<tr><td>' . $periodeIn . '</td><td>' . $interv['intervention_date'] . '  ' . $heureMinuteSeconde . '</td><td>' . $interv['endDate'] . '</td><td>' . $interv['maintainer_matricule'] . '</td><td>' . ($interv['etatMachine'] === 'reparee' ? '<span class="text-success"><i class="fas fa-check"></i> Réparée</span>' : '<span class="text-danger"><i class="fas fa-times"></i> Non réparée</span>') . '</td></tr>';
-                                        } elseif (strtolower($type) === 'p' && strtolower($interv['intervention_type']) === 'preventive') {
-                                            echo '<tr><td>' . $periodeIn . '</td><td>' . $interv['intervention_date'] . '  ' . $heureMinuteSeconde . '</td><td>' . $interv['endDate'] . '</td><td>' . $interv['maintainer_matricule'] . '</td><td>' . ($interv['etatMachine'] === 'reparee' ? '<span class="text-success"><i class="fas fa-check"></i> Réparée</span>' : '<span class="text-danger"><i class="fas fa-times"></i> Non réparée</span>') . '</td></tr>';
-                                        }
+                                    $intervesByMachine = \App\Models\Intervention_model::findByMachine($id_machine);
+                                    foreach ($intervesByMachine as $interve) {
+                                    
+                                        echo '<tr>
+                                            <td>' . $interve['intervention_date'] . '</td>
+                                            <td>' . $interve['machine'] . '</td>
+                                            <td>' . $interve['prodline'] . '</td>
+                                            <td>' . $interve['intervention_type_designation'] . '</td>
+                                            <td>' . $interve['maintainer_last_name'] . ' ' . $interve['maintainer_first_name'] . '</td>
+                                            <td>' . $interve['planning_date'] . '</td>
+                                            <td>' . $interve['created_at'] . '</td>
+                                        </tr>';
                                     }
                                 } ?>
 
@@ -131,8 +135,7 @@
 
                 },
                 "order": [
-                    [2, 'desc']
-
+                    [6, 'desc'] // Tri par date de création (colonne 7) en ordre décroissant
                 ]
             });
         });

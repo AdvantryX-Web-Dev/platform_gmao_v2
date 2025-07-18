@@ -3,14 +3,22 @@
 use App\Controllers\InterventionController;
 use App\Models\implantation_Prod_model;
 
+use App\Models\Database;
 
 // Initialisation du filtre chaîne AVANT tout HTML
 $chaines = implantation_Prod_model::findAllChaines();
+
+$selectedprodline_id = isset($_GET['id']) ? $_GET['id'] : '';
 $selectedChaine = isset($_GET['chaine']) ? $_GET['chaine'] : '';
-if ($selectedChaine === '' && count($chaines) > 0) {
-    $selectedChaine = $chaines[0]['prod_line'];
+
+if ($selectedChaine === '') {
+    $selectedChaine = $chaines[0]['id'];
 }
-$nomCh = $selectedChaine;
+
+$prodline_id = $selectedChaine;
+$findChaineById = implantation_Prod_model::findChaineById($prodline_id);
+$nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -106,7 +114,7 @@ $nomCh = $selectedChaine;
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 font-weight-bold text-primary">Historique des Interventions sur les Machines de chaine
+                                <h6 class="m-0 font-weight-bold text-primary"> Liste des interventions préventives sur les Machines de chaine
                                     <?php echo htmlspecialchars($nomCh); ?> :
                                 </h6>
                                 <div class="d-flex align-items-center">
@@ -116,16 +124,19 @@ $nomCh = $selectedChaine;
                                             <option value="">-- Toutes les chaînes --</option>
                                             <?php
                                             foreach ($chaines as $ch) {
-                                                $selected = ($selectedChaine == $ch['prod_line']) ? 'selected' : '';
-                                                echo '<option value="' . htmlspecialchars($ch['prod_line']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
+                                                $selected = ($selectedChaine == $ch['id']) ? 'selected' : '';
+                                                echo '<option value="' . htmlspecialchars($ch['id']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
                                             }
                                             ?>
                                         </select>
                                     </form>
+                                    <button class="btn btn-primary mr-2" data-toggle="modal" data-target="#ajoutInterventionPreventiveModal">
+                                        <i class="fas fa-tools"></i> Ajouter intervention préventive
+                                    </button>
                                     <button class="btn btn-success mr-2" data-toggle="modal" data-target="#planningModal">
                                         <i class="fas fa-calendar-plus"></i> Ajouter au planning
                                     </button>
-                                    <?php 
+                                    <?php
                                     // Get count of future interventions
                                     $planningController = new \App\Controllers\InterventionPlanningController();
                                     $futureCount = $planningController->getFutureInterventionsCount();
@@ -133,7 +144,7 @@ $nomCh = $selectedChaine;
                                     <a href="../../public/index.php?route=intervention_planning/list" class="btn btn-info">
                                         <i class="fas fa-calendar-alt"></i> Liste des planifications
                                         <?php if ($futureCount > 0): ?>
-                                        <span class="badge badge-light ml-1"><?= $futureCount ?></span>
+                                            <span class="badge badge-danger ml-1"><?= $futureCount ?></span>
                                         <?php endif; ?>
                                     </a>
                                 </div>
@@ -156,35 +167,20 @@ $nomCh = $selectedChaine;
                                         <?php
 
                                         $interventionController = new \App\Controllers\InterventionController();
-                                        $machines = $interventionController->getByChaine($nomCh);
+                                        $machines = $interventionController->preventiveByChaine($prodline_id, $nomCh);
 
                                         foreach ($machines as $machine) {
-                                            $nbInterP = 0;
-                                            $id_machine = $machine['machine_id'];
-                                            $interves = $interventionController->getInterventionByMachine($id_machine);
-                                            // Filtrer les interventions préventives
-                                            $preventives = array_filter($interves, function ($interv) {
-                                                return strtolower($interv['intervention_type']) !== 'curative';
-                                            });
-                                            if (empty($preventives)) {
-                                                continue; // Sauter les machines sans intervention préventive
-                                            }
-                                            $lastDate = '';
-                                            foreach ($interves as $interv) {
-                                                if (strtolower($interv['intervention_type']) !== 'curative') {
-                                                    $lastDate = $interves[0]['intervention_date'];
-                                                    $nbInterP++;
-                                                }
-                                            }
+
+                                            $id_machine = $machine['id'];
+
 
                                             echo '<tr class="machine-row" >
                                             <td  machine-id="' . $machine['machine_id'] . '" style="color: #0056b3; cursor: pointer;"> ' . $machine['machine_id'] . '</td>
                                             <td>' . $machine['designation'] . '</td>
-                                                <td>' . $machine['smartbox'] . '</td>
-                                                <td><a href="?route=historique_intervs_mach&type=p&id_machine=' . $machine['machine_id'] . '">' . $nbInterP . '</td>
-                                                <td>' . htmlspecialchars($lastDate) .
-                                                '</td>
-                                                </tr>';
+                                            <td>' . $machine['smartbox'] . '</td>
+                                            <td><a href="?route=historique_intervs_mach&type=p&machine=' . $machine['machine_id'] . '&id_machine=' . $id_machine . '">' . $machine['nb_interventions'] . '</a></td>
+                                            <td>' . date('d/m/Y', strtotime($machine['last_date'])) . '</td>
+                                            </tr>';
                                             $nbInterAndpannes = $interventionController->getNbInterPannMach($id_machine);
 
                                             $machineData = array();
@@ -229,10 +225,8 @@ $nomCh = $selectedChaine;
         </div>
         <!-- End of Page Wrapper -->
 
-        <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
+
+
         <script>
             var allMachinesData = <?php echo json_encode($machinesData); ?>;
         </script>
@@ -250,76 +244,13 @@ $nomCh = $selectedChaine;
                 });
             });
         </script>
-        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     </div>
 
-    <!-- Planning Modal -->
-    <div class="modal fade" id="planningModal" tabindex="-1" role="dialog" aria-labelledby="planningModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="planningModalLabel">
-                        <i class="fas fa-calendar-plus"></i> Ajouter une intervention planifiée
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="planningForm" action="../../public/index.php?route=intervention_planning/save" method="POST">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="machine_id"> Machine :</label>
-                            <select class="form-control" id="machine_id" name="machine_id" required>
-                                <option value="">-- Sélectionner une machine --</option>
-                                <?php
-                                if (isset($machines) && is_array($machines)) {
-                                    foreach ($machines as $machine) {
-                                        echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
-                                            htmlspecialchars($machine['machine_id']) .  '</option>';
-                                    }
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="intervention_type_id"> Type d'intervention :</label>
-                            <select class="form-control" id="intervention_type_id" name="intervention_type_id" required>
-                                <option value="">-- Sélectionner un type --</option>
-                                <?php
-                                // Load intervention types (only preventive)
-                                $interventionTypes = \App\Models\Intervention_type_model::findByType('preventive');
-                                if (isset($interventionTypes) && is_array($interventionTypes)) {
-                                    foreach ($interventionTypes as $type) {
-                                        echo '<option value="' . htmlspecialchars($type['id']) . '">' .
-                                            htmlspecialchars($type['designation']) . '</option>';
-                                    }
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="planned_date"> Date planifiée :</label>
-                            <input type="date" class="form-control" id="planned_date" name="planned_date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="comments"><i class="fas fa-comment"></i> Commentaires :</label>
-                            <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">
-                            Valider
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                             Annuler
-                        </button>
-
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Include modals -->
+    <?php include(__DIR__ . "/../views/modals/PlanningModal.php") ?>
+    <?php include(__DIR__ . "/../views/modals/AjoutInterventionPreventive.php") ?>
 </body>
+
+</html>
 
 </html>

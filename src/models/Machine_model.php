@@ -43,6 +43,27 @@ class Machine_model
     {
         $this->$attr = $value;
     }
+    public static function findAllMachine()
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        $machines = array();
+
+        try {
+            $req = $conn->query("
+                SELECT DISTINCT m.machine_id ,m.id
+                FROM prod__implantation 
+                LEFT JOIN init__machine m ON m.machine_id = prod__implantation.machine_id
+            ");
+            $machines = $req->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Gérer les erreurs de requête SQL
+            // error_log('Erreur: ' . $e->getMessage());
+            return false;
+        }
+
+        return $machines;
+    }
 
     public static function findAll()
     {

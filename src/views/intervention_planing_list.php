@@ -17,25 +17,33 @@ if (session_status() === PHP_SESSION_NONE) {
     <link rel="stylesheet" href="/public/css/datatables.min.css">
     <style>
         .today-row {
-            background-color: #fff7e0 !important; /* Light yellow background */
+            background-color: #fff7e0 !important;
+            /* Light yellow background */
             font-weight: bold;
-            border-left: 4px solid #ffc107; /* Warning color border */
+            border-left: 4px solid #ffc107;
+            /* Warning color border */
         }
+
         .today-row td {
             position: relative;
         }
+
         .today-row:hover {
-            background-color: #fff0c5 !important; /* Slightly darker yellow on hover */
+            background-color: #fff0c5 !important;
+            /* Slightly darker yellow on hover */
         }
+
         /* Additional styles for today's intervention cells */
         .today-row td:first-child::before {
             content: "⚠️ ";
             font-size: 14px;
         }
+
         .today-row td:nth-child(3) {
             color: #ff6b01;
             font-weight: bold;
         }
+
         /* Make the date column more prominent */
         table.dataTable tbody tr td:nth-child(3) {
             font-weight: 500;
@@ -86,7 +94,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <h6 class="m-0 font-weight-bold text-primary">Interventions planifiées
                                 </h6>
                                 <div class="d-flex align-items-center">
-
+                                    <button class="btn btn-success mr-2" data-toggle="modal" data-target="#planningModal">
+                                        <i class="fas fa-calendar-plus"></i> Ajouter au planning
+                                    </button>
                                     <a href="../../public/index.php?route=intervention_preventive" class="btn btn-primary">
                                         <i class="fas fa-arrow-left"></i> Retour
                                     </a>
@@ -109,7 +119,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                          
+
                                             <?php if (is_array($plannings) && count($plannings) > 0): ?>
                                                 <?php foreach ($plannings as $planning): ?>
                                                     <?php
@@ -118,7 +128,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     $today->setTime(0, 0, 0);
 
                                                     // Determine status and status class
-                                                    if  ($planned_date < $today) {
+                                                    if ($planned_date < $today) {
                                                         $status = 'En retard';
                                                         $statusClass = 'danger';
                                                     } elseif ($planned_date->format('Y-m-d') === $today->format('Y-m-d')) {
@@ -137,10 +147,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         <td>
                                                             <span class="badge badge-<?= $statusClass ?>"><?= $status ?></span>
                                                         </td>
-                                                       
+
                                                         <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($planning['created_at']))) ?></td>
                                                         <td><?= htmlspecialchars($planning['comments'] ?? '-') ?></td>
-                                                        
+
                                                     </tr>
                                                 <?php endforeach; ?>
                                             <?php else: ?>
@@ -159,12 +169,7 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
             <?php include(__DIR__ . "/../views/layout/footer.php"); ?>
 
-
-           
-            <a class="scroll-to-top rounded" href="#page-top">
-                <i class="fas fa-angle-up"></i>
-            </a>
-
+            <?php include(__DIR__ . "/../views/modals/PlanningModal.php") ?>
             <!-- Scripts JavaScript -->
             <script src="/public/js/jquery-3.6.4.min.js"></script>
             <script src="/public/js/bootstrap.bundle.min.js"></script>

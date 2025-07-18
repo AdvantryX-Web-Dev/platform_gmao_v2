@@ -185,6 +185,9 @@ switch ($route) {
     case 'intervention_preventive':
         $interventionController->index();
         break;
+    case 'intervention/savePreventive':
+        $interventionController->savePreventive();
+        break;
     case 'intervention_planning/save':
         $interventionController->planningSave();
         break;
