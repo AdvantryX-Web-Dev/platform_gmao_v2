@@ -11,31 +11,28 @@ use PDOException;
 
 class Mouvement_machinesController
 {
-    public function mouvement_machines()
-    {
-        include(__DIR__ . '/../views/mouvement_machines/inter_machine.php');
-    }
+    // public function mouvement_machines()
+    // {
+    //     include(__DIR__ . '/../views/G_machines/mouvement_machines/inter_machine.php');
+    // }
     public function chaine_parc()
     {
         $mouvements = MouvementMachine_model::findChaineParc();
-        include(__DIR__ . '/../views/mouvement_machines/chaine_parc.php');
+        include(__DIR__ . '/../views/G_machines/mouvement_machines/chaine_parc.php');
     }
     public function inter_chaine()
     {
         $mouvements = MouvementMachine_model::findInterChaine();
-        include(__DIR__ . '/../views/mouvement_machines/inter_chaine.php');
+        include(__DIR__ . '/../views/G_machines/mouvement_machines/inter_chaine.php');
     }
 
     public function parc_chaine()
     {
         $mouvements = MouvementMachine_model::findParcChaine();
-        include(__DIR__ . '/../views/mouvement_machines/parc_chaine.php');
+        include(__DIR__ . '/../views/G_machines/mouvement_machines/parc_chaine.php');
     }
 
-    // public function pending_reception() {
-    //     $mouvements = MouvementMachine_model::findPendingReception();
-    //     include(__DIR__ . '/../views/mouvement_machines/pending_reception.php');
-    // }
+
 
     public function accept()
     {
@@ -94,12 +91,12 @@ class Mouvement_machinesController
                     $locationId = null;
                     if ($type_mouvement === 'chaine_parc') {
                         // Trouver l'ID pour "parc"
-                        $stmt = $conn->prepare("SELECT id FROM gmao_machine_location WHERE location_name = 'parc' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'parc' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     } else { //  inter_chaine ou parc_chaine
                         // Trouver l'ID pour "chaine"
-                        $stmt = $conn->prepare("SELECT id FROM gmao_machine_location WHERE location_name = 'prodline' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'prodline' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     }
@@ -276,9 +273,10 @@ class Mouvement_machinesController
         header('Location: ../../public/index.php?route=mouvement_machines/parc_chaine');
         exit;
     }
-    public function getTypes()
+    public function getTypes($location)
     {
-        return Machine_model::findAllTypes();
+
+        return Machine_model::findAllTypes($location);
     }
     public function getMachinesByType()
     {
@@ -286,13 +284,16 @@ class Mouvement_machinesController
 
         if (isset($_GET['type'])) {
             $type = $_GET['type'];
+            $location = $_GET['location'];
             $db = new \App\Models\Database();
             $conn = $db->getConnection();
 
-            $query = "SELECT machine_id, reference, designation 
-                      FROM init__machine 
+            $query = "SELECT m.id as id, m.machine_id as machine_id, m.reference as reference, m.designation as designation 
+                      FROM init__machine m
+                      left join gmao__machine_location ml on ml.id=m.machines_location_id
                       WHERE type = :type 
-                      ORDER BY reference";
+                      and ml.location_name='$location'
+                      ORDER BY machine_id";
 
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':type', $type);
@@ -307,7 +308,7 @@ class Mouvement_machinesController
 
             $query = "SELECT machine_id, reference, designation, type 
                       FROM init__machine 
-                      ORDER BY type, reference";
+                      ORDER BY machine_id, ";
 
             $stmt = $conn->query($query);
             $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -324,5 +325,11 @@ class Mouvement_machinesController
 
         $stmt = $conn->query("SELECT COUNT(*) FROM gmao__mouvement_machine WHERE type_Mouv = 'parc_chaine' AND idEmp_accepted IS NULL");
         return $stmt->fetchColumn();
+    }
+
+    public function showHistoryMachineStatus()
+    {
+        // Inclure la vue d'historique des mouvements d'une machine
+        include(__DIR__ . '/../views/G_machines/G_machines_status/history_machineStatus.php');
     }
 }

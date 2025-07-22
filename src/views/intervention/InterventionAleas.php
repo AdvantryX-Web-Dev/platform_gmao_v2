@@ -1,0 +1,185 @@
+<?php
+
+use App\Models\implantation_Prod_model;
+
+
+// Initialisation du filtre chaîne AVANT tout HTML
+$chaines = implantation_Prod_model::findAllChaines();
+
+$selectedprodline_id = isset($_GET['id']) ? $_GET['id'] : '';
+$selectedChaine = isset($_GET['chaine']) ? $_GET['chaine'] : '';
+
+if ($selectedChaine === '') {
+    $selectedChaine = $chaines[0]['id'];
+}
+
+$prodline_id = $selectedChaine;
+$findChaineById = implantation_Prod_model::findChaineById($prodline_id);
+$nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
+
+
+
+$interventionController = new \App\Controllers\InterventionController();
+$aleas = $interventionController->getAleasProduction($nomCh);
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>GMAO Digitex | by AdvantryX</title>
+    <!-- Favicon-- logo dans l'ongle-->
+    <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
+    <!-- les icones-->
+    <link href="/public/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+    <!-- Custom styles for this template-->
+    <link href="/public/css/sb-admin-2.min.css" rel="stylesheet">
+    <script src="/public/js/jquery-3.6.4.min.js"></script>
+    <script src="/public/js/jquery.dataTables.min.js"></script>
+    <script src="/public/js/chart.js"></script>
+    <link rel="stylesheet" href="/public/css/table.css">
+    <link rel="stylesheet" href="/public/css/InterventionChefMain.css">
+</head>
+
+<body id="page-top">
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <?php include(__DIR__ . "/../../views/layout/sidebar.php") ?>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <?php include(__DIR__ . "/../../views/layout/navbar.php") ?>
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">Liste des aléas en production
+                                    <?php if (!empty($nomCh)): ?>
+                                        pour la chaîne <?php echo htmlspecialchars($nomCh); ?>
+                                    <?php endif; ?>
+                                </h6>
+                                <div class="d-flex">
+                                    <form method="get" class="form-inline mb-0 mr-2">
+                                        <input type="hidden" name="route" value="intervention_aleas">
+                                        <select name="chaine" id="chaine" class="form-control" onchange="this.form.submit()">
+                                            <option value="">-- Toutes les chaînes --</option>
+                                            <?php
+                                            foreach ($chaines as $ch) {
+                                                $selected = ($selectedChaine == $ch['id']) ? 'selected' : '';
+                                                echo '<option value="' . htmlspecialchars($ch['id']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </form>
+                                    <a href="?route=intervention_curative" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Retour
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Machine</th>
+                                            <th>SmartBox</th>
+                                            <th>Type d'aléa</th>
+                                            <th>Nombre d'aléas</th>
+                                            <th>Opérateur</th>
+                                            <th>Dernière demande</th>
+                                            <th>Maintenancier</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($aleas)): ?>
+                                            <?php foreach ($aleas as $alea): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($alea['machine_id'] ?? ''); ?></td>
+                                                    <td><?php echo htmlspecialchars($alea['smartbox'] ?? ''); ?></td>
+                                                    <td><?php echo htmlspecialchars($alea['aleas_type_name'] ?? ''); ?></td>
+                                                    <td>
+                                                        <a href="?route=intervention_aleas_machine&machine_id=<?php echo urlencode($alea['machine_id']); ?>" class="badge badge-info">
+                                                            <?php echo htmlspecialchars($alea['nb_aleas'] ?? '0'); ?>
+                                                        </a>
+                                                    </td>
+                                                    <td><?php echo htmlspecialchars($alea['operator_name'] ?? ''); ?></td>
+                                                    <td><?php echo !empty($alea['created_at']) ? date('d/m/Y H:i', strtotime($alea['created_at'])) : ''; ?></td>
+                                                    <td><?php echo htmlspecialchars($alea['monitor_name'] ?? ''); ?></td>
+                                                    <td>
+                                                        <?php if ($alea['status'] === 'Terminé'): ?>
+                                                            <span class="badge badge-success">Terminé</span>
+                                                        <?php elseif ($alea['status'] === 'En cours'): ?>
+                                                            <span class="badge badge-warning">En cours</span>
+                                                        <?php else: ?>
+                                                            <span class="badge badge-danger">En attente</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End of Main Content -->
+
+                <!-- Footer -->
+                <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
+                <!-- End of Footer -->
+            </div>
+            <!-- End of Content Wrapper -->
+        </div>
+        <!-- End of Page Wrapper -->
+
+        <script src="/public/js/sideBare.js"></script>
+        <script src="/public/js/bootstrap.bundle.min.js"></script>
+        <script src="/public/js/sb-admin-2.min.js"></script>
+        <script src="/public/js/dataTables.bootstrap4.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                // Configuration DataTables avec gestion des tables vides
+                $('#dataTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.11.6/i18n/fr_fr.json',
+                        emptyTable: "Aucune donnée disponible"
+                    },
+                    pageLength: 10,
+                    order: [
+                        [4, 'desc']
+                    ], // Tri par date de demande décroissant
+                    // Résoudre le problème des DataTables avec tables vides
+                    initComplete: function(settings, json) {
+                        if ($('#dataTable tbody tr').length === 0) {
+                            $('#dataTable tbody').append('<tr><td colspan="9" class="text-center">Aucune donnée disponible</td></tr>');
+                        }
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+
+</html>

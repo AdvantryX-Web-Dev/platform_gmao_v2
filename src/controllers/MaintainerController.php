@@ -1,16 +1,21 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\Maintainer_model;
 use App\Models\AuditTrail_model;
 
-class MaintainerController {
-    public function list() {
+class MaintainerController
+{
+    public function list()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $maintainers = Maintainer_model::findAll();
-        include(__DIR__ . '/../views/maintainers/list__maintainer.php');
+        include(__DIR__ . '/../views/init_data/maintainers/list__maintainer.php');
     }
 
-    public function create() {
+    public function create()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $maintainer = new Maintainer_model(
@@ -23,7 +28,7 @@ class MaintainerController {
             );
             if (Maintainer_model::StoreMaintainer($maintainer)) {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Mainteneur ajouté avec succès !'];
-                
+
                 // Audit trail
                 if (isset($_SESSION['user']['matricule'])) {
                     $newValues = [
@@ -42,10 +47,11 @@ class MaintainerController {
             exit;
         }
 
-        include(__DIR__ . '/../views/maintainers/add_maintainer.php');
+        include(__DIR__ . '/../views/init_data/maintainers/add_maintainer.php');
     }
 
-    public function edit() {
+    public function edit()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $id = $_GET['id'] ?? null;
         if (!$id) {
@@ -53,10 +59,10 @@ class MaintainerController {
             header('Location: ../../public/index.php?route=maintainers');
             exit;
         }
-        
+
         // Récupérer les anciennes valeurs pour l'audit
         $oldMaintainer = Maintainer_model::findById($id);
-        
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $maintainer = new Maintainer_model(
                 $id,
@@ -68,7 +74,7 @@ class MaintainerController {
             );
             if (Maintainer_model::UpdateMaintainer($maintainer)) {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Mainteneur modifié avec succès !'];
-                
+
                 // Audit trail
                 if (isset($_SESSION['user']['matricule']) && $oldMaintainer) {
                     $newValues = [
@@ -88,20 +94,21 @@ class MaintainerController {
             exit;
         }
         $maintainer = Maintainer_model::findById($id);
-       
-        include(__DIR__ . '/../views/maintainers/edit_maintainer.php');
+
+        include(__DIR__ . '/../views/init_data/maintainers/edit_maintainer.php');
     }
 
-    public function delete() {
+    public function delete()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $id = $_GET['id'] ?? null;
         if ($id) {
             // Récupérer les anciennes valeurs pour l'audit
             $oldMaintainer = Maintainer_model::findById($id);
-            
+
             if (Maintainer_model::deleteById($id)) {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Mainteneur supprimé avec succès !'];
-                
+
                 // Audit trail
                 if (isset($_SESSION['user']['matricule']) && $oldMaintainer) {
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'init__employee', $oldMaintainer, null);
@@ -115,13 +122,14 @@ class MaintainerController {
         header('Location: ../../public/index.php?route=maintainers');
         exit;
     }
-    
+
     /**
      * Affiche l'historique des audits pour les mainteneurs
      */
-    public function auditTrails() {
+    public function auditTrails()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        
+
         // Vérifier les permissions (seuls les administrateurs peuvent voir)
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
@@ -129,19 +137,20 @@ class MaintainerController {
             header('Location: ../../public/index.php?route=maintainers');
             exit;
         }
-        
+
         // Récupérer les filtres
         $action = $_GET['action'] ?? null;
         $table = 'init__employee'; // On filtre spécifiquement pour la table des employés/mainteneurs
-        
+
         // Récupérer l'historique des audits
         $auditTrails = AuditTrail_model::getFilteredAuditTrails($action, $table, 100);
-        
-        include(__DIR__ . '/../views/maintainers/audit_trails.php');
+
+        include(__DIR__ . '/../views/init_data/maintainers/audit_trails.php');
     }
-    public function auditTrails_history() {
+    public function auditTrails_history()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        
+
         // Vérifier les permissions (seuls les administrateurs peuvent voir)
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
@@ -149,14 +158,14 @@ class MaintainerController {
             header('Location: ../../public/index.php?route=maintainers');
             exit;
         }
-        
+
         // Récupérer les filtres
         $action = $_GET['action'] ?? null;
         $table = 'init__employee'; // On filtre spécifiquement pour la table des employés/mainteneurs
-        
+
         // Récupérer l'historique des audits
         $auditTrails = AuditTrail_model::getFilteredAuditTrails($action, $table, 100);
-        
-        include(__DIR__ . '/../views/maintainers/audit_trails.php');
+
+        include(__DIR__ . '/../views/init_data/maintainers/audit_trails.php');
     }
-} 
+}

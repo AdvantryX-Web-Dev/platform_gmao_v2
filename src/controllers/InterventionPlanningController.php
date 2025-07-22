@@ -50,7 +50,7 @@ class InterventionPlanningController
 
             // Insert into planning table
             $stmt = $conn->prepare("
-                INSERT INTO gmao_planning 
+                INSERT INTO gmao__planning 
                 (machine_id, intervention_type_id, planned_date, comments, created_by, created_at) 
                 VALUES (?, ?, ?, ?, ?, NOW())
             ");
@@ -96,7 +96,7 @@ class InterventionPlanningController
     public function list()
     {
         $plannings = $this->getPlannedInterventions();
-        include(__DIR__ . '/../views/intervention_planing_list.php');
+        include(__DIR__ . '/../views/intervention/intervention_planing_list.php');
     }
 
     /**
@@ -118,13 +118,16 @@ class InterventionPlanningController
                     ti.designation as intervention_type,
                     p.comments, 
                     p.created_at,
-                    p.updated_at
+                    p.updated_at,
+                    ia.created_at as intervention_date
                 FROM 
-                    gmao_planning p
+                    gmao__planning p
                 LEFT JOIN 
                     init__machine m ON p.machine_id = m.id
                 LEFT JOIN 
-                    gmao_type_intervention ti ON p.intervention_type_id = ti.id
+                    gmao__type_intervention ti ON p.intervention_type_id = ti.id
+                      LEFT JOIN
+                    gmao__intervention_action ia ON p.id = ia.planning_id
                
                 ORDER BY 
                     p.planned_date DESC, p.created_at DESC
@@ -151,14 +154,15 @@ class InterventionPlanningController
 
         try {
             $query = "
-                SELECT 
-                    COUNT(*) as count
-                FROM 
-                    gmao_planning 
-                WHERE 
-                   planned_date = CURDATE() 
-                OR planned_date = CURDATE() + INTERVAL 1 DAY      
-                ";
+                SELECT COUNT(*) AS count
+                FROM gmao__planning p
+                LEFT JOIN gmao__intervention_action ia ON p.id = ia.planning_id
+                WHERE ia.planning_id IS NULL
+                AND (
+                    p.planned_date = CURDATE()
+                    OR p.planned_date = CURDATE() + INTERVAL 1 DAY
+                );
+            ";
 
             $stmt = $conn->query($query);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -195,7 +199,7 @@ class InterventionPlanningController
 
             // Update planning record
             $stmt = $conn->prepare("
-                UPDATE gmao_planning 
+                UPDATE gmao__planning 
                 SET completed_date = NOW() 
                 WHERE id = ? AND completed_date IS NULL
             ");
@@ -246,11 +250,11 @@ class InterventionPlanningController
         $currentDate = date('Y-m-d');
 
         try {
-            $stmt = $conn->prepare("SELECT p.*, m.machine_id FROM gmao_planning p 
+            $stmt = $conn->prepare("SELECT p.*, m.machine_id FROM gmao__planning p 
                     JOIN init__machine m ON p.machine_id = m.id 
                     WHERE p.planned_date >= ? 
                     AND p.id NOT IN (
-                        SELECT planning_id FROM gmao_intervention_action 
+                        SELECT planning_id FROM gmao__intervention_action 
                         WHERE planning_id =p.id
                     )
                     ORDER BY p.planned_date ASC");

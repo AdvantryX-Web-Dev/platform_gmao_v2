@@ -15,8 +15,7 @@ class Machine_model
     private $brand;
     private $billing_num;
     private $bill_date;
-    private $price;
-    private $dateImportation;
+
 
     public function __construct($machine_id, $designation, $reference, $type, $brand, $billing_num, $bill_date)
     {
@@ -27,8 +26,6 @@ class Machine_model
         $this->brand = $brand;
         $this->billing_num = $billing_num;
         $this->bill_date = $bill_date;
-        // $this->price = $price;
-
     }
 
     public function __get($attr)
@@ -54,11 +51,11 @@ class Machine_model
                 SELECT DISTINCT m.machine_id ,m.id
                 FROM prod__implantation 
                 LEFT JOIN init__machine m ON m.machine_id = prod__implantation.machine_id
+                order by m.machine_id desc
             ");
             $machines = $req->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
+
             return false;
         }
 
@@ -71,11 +68,11 @@ class Machine_model
         $conn = $db->getConnection();
         $machines = array();
         try {
-            $req = $conn->query("SELECT * FROM init__machine m  LEFT JOIN `gmao__numTete` gn on gn.id_machine=m.machine_id");
+            $req = $conn->query("SELECT * FROM init__machine m  LEFT JOIN `gmao__numTete` gn on gn.id_machine=m.machine_id
+            order by m.created_at desc");
             $machines = $req->fetchAll();
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
+
             return false;
         }
         return $machines;
@@ -90,8 +87,7 @@ class Machine_model
             $req = $conn->query("SELECT * FROM init__machine m LEFT JOIN `gmao__numTete` gn on gn.id_machine=m.machine_id WHERE machine_id='$id_machine'");
             $machine = $req->fetch();
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
+
             return false;
         }
         return $machine;
@@ -102,7 +98,6 @@ class Machine_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            // $prix_formate = number_format($machine->price, 3, ',', '.');
             $stmt = $conn->prepare("UPDATE init__machine SET reference = ?, designation = ?, brand = ?, type = ?, billing_num = ?, bill_date = ?, cur_date=NOW() WHERE machine_id = ?");
             $stmt->bindParam(1, $machine->reference);
             $stmt->bindParam(2, $machine->designation);
@@ -110,13 +105,11 @@ class Machine_model
             $stmt->bindParam(4, $machine->type);
             $stmt->bindParam(5, $machine->billing_num);
             $stmt->bindParam(6, $machine->bill_date);
-            // $stmt->bindParam(7, $prix_formate);
             $stmt->bindParam(7, $machine->machine_id);
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -126,7 +119,6 @@ class Machine_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            // $prix_formate = number_format($machine->price, 3, ',', '.');
             $stmt = $conn->prepare("INSERT INTO init__machine (`machine_id`, `reference`, `brand`, `type`, `designation`, `billing_num`, `bill_date`, `cur_date`) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
             $stmt->bindParam(1, $machine->machine_id);
             $stmt->bindParam(2, $machine->reference);
@@ -135,13 +127,11 @@ class Machine_model
             $stmt->bindParam(5, $machine->designation);
             $stmt->bindParam(6, $machine->billing_num);
             $stmt->bindParam(7, $machine->bill_date);
-            // $stmt->bindParam(8, $prix_formate);
 
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -154,27 +144,25 @@ class Machine_model
             $req = $conn->query("SELECT * FROM init__machine where designation='$type'");
             $machines = $req->fetchAll();
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
+
             return false;
         }
         return $machines;
     }
-    public static function findTypeByMachine($id_machine)
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
-        $machines = array();
-        try {
-            $req = $conn->query("SELECT type FROM init__machine  where machine_id='$id_machine'");
-            $type = $req->fetchColumn();
-        } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
-            return false;
-        }
-        return $type;
-    }
+    // public static function findTypeByMachine($id_machine)
+    // {
+    //     $db = new Database();
+    //     $conn = $db->getConnection();
+    //     $machines = array();
+    //     try {
+    //         $req = $conn->query("SELECT type FROM init__machine  where machine_id='$id_machine'");
+    //         $type = $req->fetchColumn();
+    //     } catch (PDOException $e) {
+
+    //         return false;
+    //     }
+    //     return $type;
+    // }
     public static function deleteById($id)
     {
         $db = new Database();
@@ -185,21 +173,22 @@ class Machine_model
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
-            // error_log('Erreur: ' . $e->getMessage());
+
             return false;
         }
     }
 
-    public static function findAllTypes()
+    public static function findAllTypes($location   )
     {
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $req = $conn->query("SELECT DISTINCT type FROM init__machine ORDER BY type");
+            $req = $conn->query("SELECT DISTINCT type FROM init__machine 
+            left join gmao__machine_location ml on ml.id=init__machine.machines_location_id
+             where ml.location_name='$location'
+            ORDER BY type");
             return $req->fetchAll();
         } catch (PDOException $e) {
-            // Gérer les erreurs de requête SQL
             return false;
         }
     }
@@ -209,35 +198,102 @@ class Machine_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
+            // Obtenir la date d'aujourd'hui
+            $today = date('Y-m-d');
+            
+            // Requête principale pour obtenir les machines et leurs informations
+            // avec jointure sur la table de présence pour aujourd'hui
             $query = "
                 SELECT 
                     m.*,
-                     ms.status_name as etat_machine,
-                     ml.location_name as location
+                    ms.status_name as etat_machine,
+                    ms.id as status_id,
+                    ml.location_name as location,
+                    pp.p_state
                 FROM 
                     init__machine m
-                     LEFT JOIN gmao_machines_status ms ON ms.id = m.machines_status_id 
-                     LEFT JOIN gmao_machine_location ml ON ml.id = m.machines_location_id 
-                
+                    LEFT JOIN gmao__machines_status ms ON ms.id = m.machines_status_id 
+                    LEFT JOIN gmao__machine_location ml ON ml.id = m.machines_location_id 
+                    LEFT JOIN prod__presence pp ON pp.machine_id = m.machine_id AND pp.cur_date = :today
                 ORDER BY 
-                    m.id
+                    m.updated_at DESC
             ";
 
-            $stmt = $conn->query($query);
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':today', $today);
+            $stmt->execute();
+            $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Récupérer les IDs des statuts
+            $stmt = $conn->query("
+                SELECT id, status_name 
+                FROM gmao__machines_status
+            ");
+            $statusMap = [];
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $statusMap[$row['status_name']] = $row['id'];
+            }
+            
+            // Parcourir les machines et ajuster leur état selon l'emplacement et l'activité
+            foreach ($machines as &$machine) {
+                $machineId = $machine['machine_id'];
+                $location = $machine['location'];
+                $currentStatus = $machine['etat_machine'];
+                $newStatusId = null;
+                
+                // Déterminer le nouvel état selon l'emplacement
+                if ($location == 'prodline') {
+                    // Si la machine est en production
+                    if ($machine['p_state'] == 1) {
+                        // Machine active aujourd'hui (présente dans prod__presence avec p_state = 1)
+                        $machine['etat_machine'] = 'active';
+                        $newStatusId = $statusMap['active'];
+                    }
+                    elseif ($currentStatus == 'en panne') {
+                        // Si déjà marquée en panne, garder cet état
+                        $machine['etat_machine'] = 'en panne';
+                        $newStatusId = $statusMap['en panne'];
+                    } else {
+                        // Machine en production mais pas active aujourd'hui
+                        $machine['etat_machine'] = 'inactive';
+                        $newStatusId = $statusMap['inactive'];
+                    }
+                } 
+                // Pour les machines dans le parc
+                elseif ($location == 'parc') {
+                    if (in_array($currentStatus, ['en panne', 'ferraille', 'réparé'])) {
+                        // Conserver l'état actuel s'il est approprié pour le parc
+                        $newStatusId = $machine['status_id'];
+                    } else {
+                        // Sinon, mettre par défaut à "réparé"
+                        $machine['etat_machine'] = 'réparé';
+                        $newStatusId = $statusMap['réparé'];
+                    }
+                }
+                
+                // Mettre à jour l'état dans la base de données si nécessaire
+                if ($newStatusId && $newStatusId != $machine['machines_status_id']) {
+                    $updateStmt = $conn->prepare("
+                        UPDATE init__machine 
+                        SET machines_status_id = :status_id, updated_at = NOW() 
+                        WHERE machine_id = :machine_id
+                    ");
+                    $updateStmt->bindParam(':status_id', $newStatusId, \PDO::PARAM_INT);
+                    $updateStmt->bindParam(':machine_id', $machineId, \PDO::PARAM_STR);
+                    $updateStmt->execute();
+                }
+            }
 
-            // Return empty array instead of false if no results
-            return $result ?: [];
+            return $machines;
         } catch (PDOException $e) {
-            // Log error for debugging
-            error_log('Error in getMachinesStateTable: ' . $e->getMessage());
+            error_log('Error in MachinesStateTable: ' . $e->getMessage());
             // Return empty array instead of false
             return [];
         }
     }
 
     /**
-     * Get all machine statuses from gmao_machines_status table
+     * Get all machine statuses from gmao__machines_status table
      * 
      * @return array Array of machine statuses
      */
@@ -246,7 +302,7 @@ class Machine_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $query = "SELECT * FROM gmao_machines_status ORDER BY id ASC";
+            $query = "SELECT * FROM gmao__machines_status ORDER BY id ASC";
             $stmt = $conn->query($query);
             $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             return $result ?: [];
@@ -261,7 +317,7 @@ class Machine_model
      * Update machine status
      * 
      * @param string $machineId Machine ID
-     * @param int $statusId Status ID from gmao_machines_status table
+     * @param int $statusId Status ID from gmao__machines_status table
      * @return bool True if update was successful, false otherwise
      */
     public static function updateMachineStatus($machineId, $statusId)
@@ -276,7 +332,6 @@ class Machine_model
             $stmt->bindParam(':machine_id', $machineId, PDO::PARAM_STR);
             return $stmt->execute();
         } catch (PDOException $e) {
-            // Handle SQL query errors
             return false;
         }
     }

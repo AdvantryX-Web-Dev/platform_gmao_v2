@@ -164,4 +164,49 @@ class MouvementMachine_model
         $resultats = $req->fetchAll();
         return $resultats;
     }
+
+    public static function historiqueMachine($machine_id)
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+
+        $req = $conn->prepare("
+            SELECT 
+                mm.*,
+                m.reference, 
+                m.designation, 
+                rm.raison_mouv_mach as raison_mouv,
+                ms.status_name,
+                ml.location_name,
+                e1.first_name as initiator_first_name, 
+                e1.last_name as initiator_last_name,
+                e2.first_name as acceptor_first_name, 
+                e2.last_name as acceptor_last_name,
+                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
+                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
+            FROM 
+                gmao__mouvement_machine mm 
+            INNER JOIN 
+                init__machine m ON mm.id_machine = m.machine_id
+            INNER JOIN 
+                gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+            LEFT JOIN 
+                init__employee e1 ON mm.idEmp_moved = e1.id
+            LEFT JOIN 
+                init__employee e2 ON mm.idEmp_accepted = e2.id
+            LEFT JOIN 
+                gmao__machines_status ms ON m.machines_status_id = ms.id
+            LEFT JOIN 
+                	gmao__machine_location ml ON mm.machines_location_id = ml.id
+            WHERE 
+                mm.id_machine = :machine_id
+            ORDER BY 
+                mm.date_mouvement DESC, mm.created_at DESC
+        ");
+        $req->bindParam(':machine_id', $machine_id, PDO::PARAM_STR);
+        $req->execute();
+        $resultats = $req->fetchAll();
+
+        return $resultats;
+    }
 }

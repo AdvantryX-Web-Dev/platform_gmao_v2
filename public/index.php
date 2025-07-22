@@ -12,7 +12,7 @@ use App\Controllers\InterventionController;
 use App\Controllers\MaintainerController;
 use App\Controllers\Machine_boxController;
 use App\Controllers\Mouvement_machinesController;
-use App\Controllers\CategoriesController;
+use App\Controllers\Motif_mvtController;
 use App\Controllers\Intervention_typeController;
 use App\Controllers\Machines_statusController;
 use App\Controllers\InterventionPlanningController;
@@ -23,7 +23,7 @@ $interventionController = new InterventionController();
 $maintainerController = new MaintainerController();
 $machineBoxController = new Machine_boxController();
 $mouvement_machinesController = new Mouvement_machinesController();
-$categoriesController = new CategoriesController();
+$Motif_mvtController = new Motif_mvtController();
 $intervention_typeController = new Intervention_typeController();
 $machines_statusController = new Machines_statusController();
 $intervention_planningController = new InterventionPlanningController();
@@ -105,19 +105,19 @@ switch ($route) {
     /** Gestion des categories */
     case 'categories':
 
-        $categoriesController->list();
+        $Motif_mvtController->list();
         break;
     case 'category/create':
-        $categoriesController->create();
+        $Motif_mvtController->create();
         break;
     case 'category/edit':
-        $categoriesController->edit();
+        $Motif_mvtController->edit();
         break;
     case 'category/delete':
-        $categoriesController->delete();
+        $Motif_mvtController->delete();
         break;
     case 'category/audit_trails':
-        $categoriesController->auditTrails();
+        $Motif_mvtController->auditTrails();
         break;
     /** Gestion initiale des interventions */
     case 'intervention_type/list':
@@ -152,14 +152,12 @@ switch ($route) {
         $machineController->machines_state();
         break;
     case 'machinesbox':
-        require_once __DIR__ . '/../src/views/Machine_box.php';
+        require_once __DIR__ . '/../src/views/G_machines/Machine_box.php';
         break;
     case 'machine/mouvement':
-        require_once __DIR__ . '/../src/views/MouvMachines.php';
+        require_once __DIR__ . '/../src/views/G_machines/MouvMachines.php';
         break;
-    case 'mouvement_machines':
-        $mouvement_machinesController->mouvement_machines();
-        break;
+    
     case 'mouvement_machines/inter_chaine':
         $mouvement_machinesController->inter_chaine();
         break;
@@ -200,8 +198,17 @@ switch ($route) {
     case 'intervention_curative/ajouterDemande':
         $interventionController->ajouterDemande();
         break;
+    case 'intervention_aleas':
+        $interventionController->showAleasProduction();
+        break;
+    case 'intervention_aleas_machine':
+        $interventionController->showAleasByMachine();
+        break;
     case 'historique_intervs_mach':
         $interventionController->historiqueIntervsMach();
+        break;
+    case 'mouvement_machines/history':
+        $mouvement_machinesController->showHistoryMachineStatus();
         break;
     case 'compte/update_compte':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -75,9 +75,9 @@ class Intervention_model
                     LIMIT 1
                 ) as smartbox
             FROM 
-                gmao_intervention_action a
+                gmao__intervention_action a
             LEFT JOIN 
-                gmao_type_intervention t ON a.intervention_type_id = t.id
+                gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
                 init__machine m ON a.machine_id = m.id
             WHERE 
@@ -121,7 +121,7 @@ class Intervention_model
 
     }
 
-    public static function curativeByChaine($prodline_id, $nomCh)
+    public static function curativeByChaine()
     {
 
         $db = new Database();
@@ -139,18 +139,16 @@ class Intervention_model
                 (
                     SELECT smartbox 
                     FROM prod__implantation imp 
-                    WHERE imp.prod_line = '" . $nomCh . "' 
                     LIMIT 1
                 ) as smartbox
             FROM 
-                gmao_intervention_action a
+                gmao__intervention_action a
             LEFT JOIN 
-                gmao_type_intervention t ON a.intervention_type_id = t.id
+                gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
                 init__machine m ON a.machine_id = m.id
             WHERE 
-                a.production_line_id = '" . $prodline_id . "' 
-                AND t.type = 'curative'
+                 t.type = 'curative'
                
             ORDER BY 
                 a.created_at DESC
@@ -190,14 +188,14 @@ class Intervention_model
         $db = new Database();
         $conn = $db->getConnection();
         $year = date('Y');
-        $req = $conn->query("SELECT p.codePanne, COUNT(*) as nbInter FROM `gmao__interventions` i JOIN `gmao__interv_panne` p ON(i.id= p.numInter )  WHERE machine_id = '" . $machine_id . "' AND YEAR(intervention_date) = '$year' GROUP BY codePanne");
+        $req = $conn->query("SELECT p.codePanne, COUNT(*) as nbInter FROM `gmao__intervention_action` i JOIN `gmao__interv_panne` p ON(i.id= p.numInter )  WHERE machine_id = '" . $machine_id . "' AND YEAR(intervention_date) = '$year' GROUP BY codePanne");
         $resultats = $req->fetchAll();
 
         return $resultats;
     }
 
-
-    public static function findByMachine($id_machine)
+    //historique des interventions par machine
+    public static function findByMachine($id_machine, $type)
     {
 
         $db = new Database();
@@ -210,14 +208,14 @@ class Intervention_model
                             e.first_name as maintainer_first_name,
                             pl.planned_date as planning_date
 
-                            FROM `gmao_intervention_action` a
-                            LEFT JOIN `gmao_type_intervention` t ON a.intervention_type_id = t.id
+                            FROM `gmao__intervention_action` a
+                            LEFT JOIN `gmao__type_intervention` t ON a.intervention_type_id = t.id
                             LEFT JOIN `init__machine` m ON a.machine_id = m.id
                             LEFT JOIN `init__prod_line` p ON a.production_line_id = p.id
                             LEFT JOIN `init__employee` e ON a.maintenance_by = e.id
 
-                            LEFT JOIN `gmao_planning` pl ON a.planning_id = pl.id
-                            WHERE a.machine_id = '" . $id_machine . "' 
+                            LEFT JOIN `gmao__planning` pl ON a.planning_id = pl.id
+                            WHERE a.machine_id = '" . $id_machine . "' and t.type = '" . $type . "'
                             ORDER BY a.created_at DESC");
         $inters = $req->fetchAll();
         return $inters;
@@ -276,7 +274,7 @@ class Intervention_model
 
             // Insert into planning table
             $stmt = $conn->prepare("
-                INSERT INTO gmao_planning 
+                INSERT INTO gmao__planning 
                 (machine_id, intervention_type_id, planned_date, comments, created_at,updated_at) 
                 VALUES (?, ?, ?, ?, NOW(),NOW())
             ");
@@ -353,7 +351,7 @@ class Intervention_model
             $conn->beginTransaction();
 
             // Insert into intervention_action table
-            $sql = "INSERT INTO gmao_intervention_action 
+            $sql = "INSERT INTO gmao__intervention_action 
                 (machine_id, production_line_id, planning_id, intervention_date, 
                 maintenance_by, intervention_type_id, created_at, updated_at) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";

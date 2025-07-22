@@ -43,7 +43,7 @@ class Maintainer_model
         $conn = $db->getConnection();
         $maintainers = array();
         try {
-            $req = $conn->query("SELECT * FROM init__employee WHERE qualification = 'MAINTAINER'");
+            $req = $conn->query("SELECT * FROM init__employee WHERE qualification = 'MAINTAINER'  order by matricule desc");
             $maintainers = $req->fetchAll();
         } catch (PDOException $e) {
             

@@ -15,7 +15,7 @@ class MachineController
         // Récupérer les statistiques d'intervention pour chaque machine
         $machine_stats = $this->getMachineInterventionStats();
 
-        include(__DIR__ . '/../views/machines/init__machine.php');
+        include(__DIR__ . '/../views/init_data/machines/init__machine.php');
     }
 
     public function create()
@@ -63,7 +63,7 @@ class MachineController
             header('Location: /public/index.php?route=machines');
             exit;
         }
-        include(__DIR__ . '/../views/machines/add_machine.php');
+        include(__DIR__ . '/../views/init_data/machines/add_machine.php');
     }
 
     public function edit()
@@ -121,7 +121,7 @@ class MachineController
             exit;
         }
         $machine = Machine_model::findById($id);
-        include(__DIR__ . '/../views/machines/edit_machine.php');
+        include(__DIR__ . '/../views/init_data/machines/edit_machine.php');
     }
 
     public function delete()
@@ -161,10 +161,15 @@ class MachineController
     public function machines_state()
     {
         $machines = Machine_model::MachinesStateTable();
-
-        include(__DIR__ . '/../views/G_machines_status/machineStatus.php');
+        
+        include(__DIR__ . '/../views/G_machines/G_machines_status/machineStatus.php');
     }
+    public function history_machines_stateBYmachineID()
+    {
+        $machines = Machine_model::MachinesStateTable();
 
+        include(__DIR__ . '/../views/G_machines/G_machines_status/history_machineStatus.php');
+    }
     /**
      * Récupère les statistiques d'interventions pour toutes les machines
      * @return array Tableau associatif des statistiques par machine

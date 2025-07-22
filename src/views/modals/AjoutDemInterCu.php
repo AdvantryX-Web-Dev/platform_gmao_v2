@@ -1,5 +1,6 @@
  <?php
     $all_machines = \App\Models\Machine_model::findAllMachine();
+    $machineStatuses = \App\Models\Machine_model::getMachineStatus();
     ?>
  <!--Modal Ajouter Demande d'intervention curative -->
  <div class="modal fade" id="ajouterDemandeInterventionModal" tabindex="-1" role="dialog" aria-labelledby="ajouterDemandeInterventionModalLabel" aria-hidden="true">
@@ -7,24 +8,15 @@
          <div class="modal-content">
              <div class="modal-header bg-primary text-white">
                  <h5 class="modal-title" id="ajouterDemandeInterventionModalLabel">
-                     <i class="fas fa-wrench"></i> Ajouter une demande d'intervention curative
+                     <i class="fas fa-wrench"></i> Ajouter une intervention curative
                  </h5>
                  <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                      <span aria-hidden="true">&times;</span>
                  </button>
              </div>
-             <?php
-                echo "<pre>";
-                print_r($prodline_id);
-                echo "</pre>";
-                ?>
+
              <form id="ajouterInterventionForm" action="?route=intervention_curative/ajouterDemande" method="post">
                  <div class="modal-body">
-                     <div class="form-group">
-                         <label for="chaine"><i class="fas fa-industry"></i> Chaîne :</label>
-                         <input type="text" id="chaine" class="form-control" name="chaine" value="<?php echo htmlspecialchars($selectedChaine); ?>" readonly disabled>
-                         <input type="hidden" id="production_line_id" name="production_line_id" value="<?php echo htmlspecialchars($prodline_id); ?>">
-                     </div>
 
                      <div class="form-group">
                          <label for="machine"> Machine :</label>
@@ -72,6 +64,23 @@
                                 ?>
                          </select>
                      </div>
+
+                     <div class="form-group">
+                         <label for="intervention_date">Date d'intervention :</label>
+                         <input type="date" class="form-control" id="intervention_date" name="intervention_date" required>
+                     </div>
+
+                     <div class="form-group">
+                         <label for="machine_status">Statut de la machine après l'intervention :</label>
+                         <select class="form-control" id="machine_status" name="machine_status" required>
+                             <option value="">-- Sélectionner un statut --</option>
+                             <?php foreach ($machineStatuses as $status): ?>
+                                 <option value="<?php echo htmlspecialchars($status['id']); ?>"><?php echo htmlspecialchars($status['status_name']); ?></option>
+                             <?php endforeach; ?>
+                         </select>
+                     </div>
+
+
                  </div>
                  <div class="modal-footer">
                      <button type="submit" name="Ajouter" class="btn btn-success">

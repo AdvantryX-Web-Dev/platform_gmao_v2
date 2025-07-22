@@ -84,9 +84,9 @@ class Demande_maintenancier
                 }
             }
 
-            // 2. Insertion dans gmao_intervention_action
+            // 2. Insertion dans gmao__intervention_action
             $stmt2 = $conn->prepare("
-                INSERT INTO `gmao_intervention_action` 
+                INSERT INTO `gmao__intervention_action` 
                 (machine_id, production_line_id, planning_id, intervention_date, maintenance_by, intervention_type_id, created_at, updated_at) 
                 VALUES (:machine_id, :production_line_id, NULL, CURDATE(), :maintenance_by, :intervention_type_id, NOW(), NOW())
             ");
