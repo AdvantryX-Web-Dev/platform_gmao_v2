@@ -183,13 +183,6 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
             updateVisibility();
         });
 
-        // Pour faciliter le test
-        $('<button type="button" class="btn btn-info mt-2" id="testVisibility">Test Visibilité</button>')
-            .insertAfter('#intervention_type_id')
-            .on('click', function(e) {
-                e.preventDefault();
-                console.log('Test manuel - Valeurs actuelles: Type=' + currentTypeValue + ', Planning=' + currentPlanningValue);
-                updateVisibility();
-            });
+    
     });
 </script>
