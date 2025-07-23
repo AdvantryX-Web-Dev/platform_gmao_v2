@@ -40,6 +40,7 @@ class Machine_model
     {
         $this->$attr = $value;
     }
+    //all machine de init__machine
     public static function findAllMachine()
     {
         $db = new Database();
@@ -49,8 +50,7 @@ class Machine_model
         try {
             $req = $conn->query("
                 SELECT DISTINCT m.machine_id ,m.id
-                FROM prod__implantation 
-                LEFT JOIN init__machine m ON m.machine_id = prod__implantation.machine_id
+                FROM init__machine m
                 order by m.machine_id desc
             ");
             $machines = $req->fetchAll(PDO::FETCH_ASSOC);
@@ -261,13 +261,13 @@ class Machine_model
                 } 
                 // Pour les machines dans le parc
                 elseif ($location == 'parc') {
-                    if (in_array($currentStatus, ['en panne', 'ferraille', 'réparé'])) {
+                    if (in_array($currentStatus, ['en panne', 'ferraille', 'fonctionnelle'])) {
                         // Conserver l'état actuel s'il est approprié pour le parc
                         $newStatusId = $machine['status_id'];
                     } else {
-                        // Sinon, mettre par défaut à "réparé"
-                        $machine['etat_machine'] = 'réparé';
-                        $newStatusId = $statusMap['réparé'];
+                        // Sinon, mettre par défaut à "fonctionnelle"
+                        $machine['etat_machine'] = 'fonctionnelle';
+                        $newStatusId = $statusMap['fonctionnelle'];
                     }
                 }
                 

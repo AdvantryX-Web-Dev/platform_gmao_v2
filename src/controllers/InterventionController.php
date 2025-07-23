@@ -15,9 +15,9 @@ class InterventionController
     {
         include(__DIR__ . '/../views/intervention/InterventionPreventive.php');
     }
-    public function preventiveByChaine($prodline_id, $nomCh)
+    public function preventiveByChaine()
     {
-        $machines = Intervention_model::preventiveByChaine($prodline_id, $nomCh);
+        $machines = Intervention_model::preventiveByChaine();
 
         return $machines;
     }

@@ -53,7 +53,7 @@ class Intervention_model
     //     $machines = $req->fetchAll();
     //     return $machines;
     // }
-    public static function preventiveByChaine($prodline_id, $nomCh)
+    public static function preventiveByChaine()
     {
 
         $db = new Database();
@@ -71,7 +71,6 @@ class Intervention_model
                 (
                     SELECT smartbox 
                     FROM prod__implantation imp 
-                    WHERE imp.prod_line = '" . $nomCh . "' 
                     LIMIT 1
                 ) as smartbox
             FROM 
@@ -81,11 +80,10 @@ class Intervention_model
             LEFT JOIN 
                 init__machine m ON a.machine_id = m.id
             WHERE 
-                a.production_line_id = '" . $prodline_id . "' 
-                AND (
+                
                     a.planning_id IS NOT NULL 
                     OR (a.planning_id IS NULL AND t.type = 'preventive')
-                )
+                
             ORDER BY 
                 a.created_at DESC
         ");
@@ -305,6 +303,8 @@ class Intervention_model
     }
     public static function savePreventive()
     {
+
+
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -316,32 +316,45 @@ class Intervention_model
             return;
         }
 
-        // Validate required fields
-        $requiredFields = ['machine_id', 'production_line_id', 'intervention_date', 'maintenance_by'];
-        foreach ($requiredFields as $field) {
-            if (empty($_POST[$field])) {
-                $_SESSION['error'] = "Le champ '$field' est requis";
-                header('Location: ../../public/index.php?route=intervention_preventive');
-                return;
-            }
-        }
+        // // Validate required fields
+        // $requiredFields = ['machine_id', 'production_line_id', 'intervention_date', 'maintenance_by'];
+        // foreach ($requiredFields as $field) {
+        //     if (empty($_POST[$field])) {
+        //         $_SESSION['error'] = "Le champ '$field' est requis";
+        //         header('Location: ../../public/index.php?route=intervention_preventive');
+        //         return;
+        //     }
+        // }
 
-        // Validation spécifique: soit planning_id soit intervention_type_id doit être fourni
+
         if (empty($_POST['planning_id']) && empty($_POST['intervention_type_id'])) {
-            $_SESSION['error'] = "Vous devez sélectionner soit un planning, soit un type d'intervention";
+            $_SESSION['error'] = "Vous ne pouvez pas sélectionner un planning et un type d'intervention en même temps";
             header('Location: ../../public/index.php?route=intervention_preventive');
             return;
         }
 
         // Get form data
-        $machine_id = $_POST['machine_id'];
-        $production_line_id = $_POST['production_line_id'];
         $planning_id = !empty($_POST['planning_id']) ? $_POST['planning_id'] : null;
         $intervention_date = $_POST['intervention_date'];
         $maintenance_by = $_POST['maintenance_by'];
-        $intervention_type_id =  !empty($_POST['intervention_type_id']) ? $_POST['intervention_type_id'] : null;
         $created_at = date('Y-m-d H:i:s');
         $updated_at = date('Y-m-d H:i:s');
+
+        if (isset($_POST['planning_id']) && !empty($_POST['planning_id'])) {
+
+            $db = new Database();
+            $conn = $db->getConnection();
+            $req = $conn->query("SELECT * FROM gmao__planning WHERE id = '" . $_POST['planning_id'] . "'");
+            $planning = $req->fetch();
+            $machine_id = $planning['machine_id'];
+            $intervention_type_id = $planning['intervention_type_id'];
+            $production_line_id = $planning['production_line_id'] ?? null;
+        } else {
+            $machine_id = $_POST['machine_id'];
+            $production_line_id = $_POST['production_line_id'];
+            $intervention_type_id =  !empty($_POST['intervention_type_id']) ? $_POST['intervention_type_id'] : null;
+        }
+
         // Create database connection
         $db = new Database();
         $conn = $db->getConnection();

@@ -8,16 +8,6 @@ use App\Models\Database;
 // Initialisation du filtre chaîne AVANT tout HTML
 $chaines = implantation_Prod_model::findAllChaines();
 
-$selectedprodline_id = isset($_GET['id']) ? $_GET['id'] : '';
-$selectedChaine = isset($_GET['chaine']) ? $_GET['chaine'] : '';
-
-if ($selectedChaine === '') {
-    $selectedChaine = $chaines[0]['id'];
-}
-
-$prodline_id = $selectedChaine;
-$findChaineById = implantation_Prod_model::findChaineById($prodline_id);
-$nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
 
 ?>
 <!DOCTYPE html>
@@ -115,21 +105,10 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                         <div class="card-header py-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="m-0 font-weight-bold text-primary"> Liste des interventions préventives sur les Machines de chaine
-                                    <?php echo htmlspecialchars($nomCh); ?> :
+                                     :
                                 </h6>
                                 <div class="d-flex align-items-center">
-                                    <form method="get" class="form-inline mb-0 mr-2" style="display:inline-block;">
-                                        <input type="hidden" name="route" value="intervention_preventive">
-                                        <select name="chaine" id="chaine" class="form-control mr-2" onchange="this.form.submit()">
-                                            <option value="">-- Toutes les chaînes --</option>
-                                            <?php
-                                            foreach ($chaines as $ch) {
-                                                $selected = ($selectedChaine == $ch['id']) ? 'selected' : '';
-                                                echo '<option value="' . htmlspecialchars($ch['id']) . '" ' . $selected . '>' . htmlspecialchars($ch['prod_line']) . '</option>';
-                                            }
-                                            ?>
-                                        </select>
-                                    </form>
+                                    
                                     <button class="btn btn-primary mr-2" data-toggle="modal" data-target="#ajoutInterventionPreventiveModal">
                                         <i class="fas fa-tools"></i> Ajouter intervention préventive
                                     </button>
@@ -167,7 +146,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                                         <?php
 
                                         $interventionController = new \App\Controllers\InterventionController();
-                                        $machines = $interventionController->preventiveByChaine($prodline_id, $nomCh);
+                                        $machines = $interventionController->preventiveByChaine();
 
                                         foreach ($machines as $machine) {
 

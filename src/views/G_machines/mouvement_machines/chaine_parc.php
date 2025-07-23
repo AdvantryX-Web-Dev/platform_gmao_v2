@@ -19,7 +19,7 @@ if (!isset($mouvements)) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Mouvement entre en Parc</title>
+    <title>Mouvement Entrée au parc</title>
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" href="/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -47,7 +47,7 @@ if (!isset($mouvements)) {
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Mouvement des machines entre en Parc :</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Mouvement des machines Entrée au parc :</h6>
                             <div class="d-flex">
                                 <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#mouvementModal">
                                     <i class="fas fa-plus"></i> mouvement
