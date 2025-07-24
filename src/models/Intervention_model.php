@@ -221,8 +221,8 @@ class Intervention_model
     public static function findByMachine($id_machine, $type)
     {
 
-        // Connexion à db_GMAO pour les tables gmao_*
-        $dbGmao = Database::getInstance('db_GMAO');
+        // Connexion à MAHDCO_MAINT pour les tables gmao_*
+        $dbGmao = Database::getInstance('MAHDCO_MAINT');
         $connGmao = $dbGmao->getConnection();
 
         // Préparation de la requête avec la syntaxe correcte pour les références cross-database

@@ -1,7 +1,7 @@
 <?php
 // Database configuration
 return [
-    'default' => 'db_GMAO', // Base de données par défaut
+    'default' => 'MAHDCO_MAINT', // Base de données par défaut
     'connections' => [
         'db_digitex' => [
             'host' => 'mysql',
@@ -15,9 +15,9 @@ return [
                 PDO::ATTR_EMULATE_PREPARES => false,
             ]
         ],
-        'db_GMAO' => [
+        'MAHDCO_MAINT' => [
             'host' => 'mysql',
-            'dbname' => 'db_GMAO',
+            'dbname' => 'MAHDCO_MAINT',
             'username' => 'root',
             'password' => 'root',
             'charset' => 'utf8mb4',

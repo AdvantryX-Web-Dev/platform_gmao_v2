@@ -68,7 +68,7 @@ class InterventionController
                 $intervention_date_sql = date('Y-m-d', strtotime($intervention_date));
 
                 // Connexion aux deux bases de données
-                $dbGMAO = \App\Models\Database::getInstance('db_GMAO');
+                $dbGMAO = \App\Models\Database::getInstance('MAHDCO_MAINT');
                 $connGMAO = $dbGMAO->getConnection();
 
                 $dbDigitex = \App\Models\Database::getInstance('db_digitex');

@@ -62,8 +62,8 @@ class Machines_box_model
 
     public static function findAllv2()
     {
-        // Connexion à la base de données db_GMAO
-        $dbGmao = Database::getInstance('db_GMAO');
+        // Connexion à la base de données MAHDCO_MAINT
+        $dbGmao = Database::getInstance('MAHDCO_MAINT');
         $connGmao = $dbGmao->getConnection();
 
         // Connexion à la base de données db_digitex (qui pointe vers db_digitex)
@@ -73,7 +73,7 @@ class Machines_box_model
         // Au lieu d'utiliser des qualificateurs de base de données, nous allons effectuer des requêtes séparées
         // puis les combiner dans le PHP
 
-        // 1. Récupérer les données de prod__implantation depuis db_GMAO
+        // 1. Récupérer les données de prod__implantation depuis MAHDCO_MAINT
         $implantQuery = "SELECT * FROM prod__implantation";
         $implantStmt = $connGmao->query($implantQuery);
         $implantations = $implantStmt->fetchAll();

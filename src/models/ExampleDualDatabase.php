@@ -27,18 +27,18 @@ class ExampleDualDatabase
     }
 
     /**
-     * Récupère des données depuis la base de données db_GMAO
+     * Récupère des données depuis la base de données MAHDCO_MAINT
      * 
      * @return array Les données récupérées
      */
     public static function getDataFromDbGMAO()
     {
-        // Obtenir l'instance de la base de données db_GMAO
-        $db = Database::getInstance('db_GMAO');
+        // Obtenir l'instance de la base de données MAHDCO_MAINT
+        $db = Database::getInstance('MAHDCO_MAINT');
         $conn = $db->getConnection();
 
         // Exemple de requête
-        $stmt = $conn->prepare("SELECT * FROM your_table_in_db_GMAO LIMIT 10");
+        $stmt = $conn->prepare("SELECT * FROM your_table_in_MAHDCO_MAINT LIMIT 10");
         $stmt->execute();
 
         return $stmt->fetchAll();
@@ -59,18 +59,18 @@ class ExampleDualDatabase
         $stmtIsa->execute();
         $dataFromIsa = $stmtIsa->fetchAll();
 
-        // Récupérer des données de db_GMAO
-        $dbGMAO = Database::getInstance('db_GMAO');
+        // Récupérer des données de MAHDCO_MAINT
+        $dbGMAO = Database::getInstance('MAHDCO_MAINT');
         $connGMAO = $dbGMAO->getConnection();
 
-        $stmtGMAO = $connGMAO->prepare("SELECT * FROM your_table_in_db_GMAO LIMIT 5");
+        $stmtGMAO = $connGMAO->prepare("SELECT * FROM your_table_in_MAHDCO_MAINT LIMIT 5");
         $stmtGMAO->execute();
         $dataFromGMAO = $stmtGMAO->fetchAll();
 
         // Combiner les données
         return [
             'db_digitex_data' => $dataFromIsa,
-            'db_GMAO_data' => $dataFromGMAO
+            'MAHDCO_MAINT_data' => $dataFromGMAO
         ];
     }
 }

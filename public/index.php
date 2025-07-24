@@ -167,9 +167,7 @@ switch ($route) {
     case 'mouvement_machines/chaine_parc':
         $mouvement_machinesController->chaine_parc();
         break;
-    // case 'mouvement_machines/pending_reception':
-    //     $mouvement_machinesController->pending_reception();
-    //     break;
+   
     case 'mouvement_machines/accept':
         $mouvement_machinesController->accept();
         break;

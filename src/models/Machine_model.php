@@ -203,23 +203,23 @@ class Machine_model
         $dbDigitex = Database::getInstance('db_digitex');
         $connDigitex = $dbDigitex->getConnection();
 
-        // Connexion à la base de données db_GMAO pour les tables gmao__*
-        $dbGmao = Database::getInstance('db_GMAO');
+        // Connexion à la base de données MAHDCO_MAINT pour les tables gmao__*
+        $dbGmao = Database::getInstance('MAHDCO_MAINT');
         $connGmao = $dbGmao->getConnection();
 
         try {
             // Obtenir la date d'aujourd'hui
             $today = date('Y-m-d');
 
-            // D'abord, récupérer les données de gmao__machines_status et gmao__machine_location depuis db_GMAO
-            $statusQuery = "SELECT id, status_name FROM db_GMAO.gmao__machines_status";
+            // D'abord, récupérer les données de gmao__machines_status et gmao__machine_location depuis MAHDCO_MAINT
+            $statusQuery = "SELECT id, status_name FROM MAHDCO_MAINT.gmao__machines_status";
             $stmtStatus = $connGmao->query($statusQuery);
             $statusMap = [];
             while ($row = $stmtStatus->fetch(\PDO::FETCH_ASSOC)) {
                 $statusMap[$row['status_name']] = $row['id'];
             }
 
-            $locationQuery = "SELECT id, location_name FROM db_GMAO.gmao__machine_location";
+            $locationQuery = "SELECT id, location_name FROM MAHDCO_MAINT.gmao__machine_location";
             $stmtLocation = $connGmao->query($locationQuery);
             $locationMap = [];
             while ($row = $stmtLocation->fetch(\PDO::FETCH_ASSOC)) {
@@ -236,8 +236,8 @@ class Machine_model
                     pp.p_state
                 FROM 
                     db_digitex.init__machine m
-                    LEFT JOIN db_GMAO.gmao__machines_status ms ON ms.id = m.machines_status_id 
-                    LEFT JOIN db_GMAO.gmao__machine_location ml ON ml.id = m.machines_location_id 
+                    LEFT JOIN MAHDCO_MAINT.gmao__machines_status ms ON ms.id = m.machines_status_id 
+                    LEFT JOIN MAHDCO_MAINT.gmao__machine_location ml ON ml.id = m.machines_location_id 
                     LEFT JOIN db_digitex.prod__presence pp ON pp.machine_id = m.machine_id AND pp.cur_date = :today
                 ORDER BY 
                     m.updated_at DESC

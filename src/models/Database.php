@@ -11,7 +11,7 @@ class Database
     /**
      * Constructeur qui établit la connexion à la base de données spécifiée
      * 
-     * @param string $dbKey Clé de la base de données à utiliser (db_digitex, db_GMAO)
+     * @param string $dbKey Clé de la base de données à utiliser (db_digitex, MAHDCO_MAINT)
      */
     public function __construct($dbKey = null)
     {

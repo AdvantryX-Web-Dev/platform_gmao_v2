@@ -62,7 +62,7 @@ class Mouvement_machinesController
             }
 
             // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
-            $db = Database::getInstance('db_GMAO');
+            $db = Database::getInstance('MAHDCO_MAINT');
             $conn = $db->getConnection();
             $dbdigitex = Database::getInstance('db_digitex');
             $connDigitex = $dbdigitex->getConnection();
