@@ -154,17 +154,17 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                                                 <td>' . date('d/m/Y', strtotime($lastDate)) . '</td>
                                                
                                             </tr>';
-                                            $nbInterAndpannes = $interventionController->getNbInterPannMach($machine['machine_id']);
+                                            // $nbInterAndpannes = $interventionController->getNbInterPannMach($machine['machine_id']);
 
-                                            $machineData = array();
-                                            foreach ($nbInterAndpannes as $resultat) {
+                                            // $machineData = array();
+                                            // foreach ($nbInterAndpannes as $resultat) {
 
-                                                $machineData[] = array(
-                                                    'codePanne' => $resultat['codePanne'],
-                                                    'nbInter' => $resultat['nbInter'],
-                                                );
-                                            }
-                                            $machinesData[$machine['machine_id']] = $machineData;
+                                            //     $machineData[] = array(
+                                            //         'codePanne' => $resultat['codePanne'],
+                                            //         'nbInter' => $resultat['nbInter'],
+                                            //     );
+                                            // }
+                                            // $machinesData[$machine['machine_id']] = $machineData;
                                         }
                                         ?>
                                     </tbody>
@@ -174,7 +174,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                     </div>
 
                 </div>
-                <div class="container-fluid " id="statsCard"
+                <!-- <div class="container-fluid " id="statsCard"
                     style="display: none; margin: 20px auto;">
                     <div class="card-header bg-primary text-white">
                         <h5 class="m-0">
@@ -186,7 +186,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                             <canvas id="myChart" width="800" height="400"></canvas>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <?php include(__DIR__ . "/../../views/modals/AjoutDemInterCu.php") ?>
 

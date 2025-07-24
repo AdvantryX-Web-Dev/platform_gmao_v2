@@ -146,10 +146,11 @@ $aleas = $interventionController->getAleasProduction($nomCh);
                 </div>
                 <!-- End of Main Content -->
 
-                <!-- Footer -->
-                <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
-                <!-- End of Footer -->
+
             </div>
+            <!-- Footer -->
+            <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
+            <!-- End of Footer -->
             <!-- End of Content Wrapper -->
         </div>
         <!-- End of Page Wrapper -->

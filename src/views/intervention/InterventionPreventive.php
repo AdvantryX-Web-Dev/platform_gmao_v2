@@ -160,17 +160,17 @@ $chaines = implantation_Prod_model::findAllChaines();
                                             <td><a href="?route=historique_intervs_mach&type=preventive&machine=' . $machine['machine_id'] . '&id_machine=' . $id_machine . '">' . $machine['nb_interventions'] . '</a></td>
                                             <td>' . date('d/m/Y', strtotime($machine['last_date'])) . '</td>
                                             </tr>';
-                                            $nbInterAndpannes = $interventionController->getNbInterPannMach($id_machine);
+                                           // $nbInterAndpannes = $interventionController->getNbInterPannMach($id_machine);
 
-                                            $machineData = array();
-                                            foreach ($nbInterAndpannes as $resultat) {
+                                            // $machineData = array();
+                                            // foreach ($nbInterAndpannes as $resultat) {
 
-                                                $machineData[] = array(
-                                                    'codePanne' => $resultat['codePanne'],
-                                                    'nbInter' => $resultat['nbInter'],
-                                                );
-                                            }
-                                            $machinesData[$id_machine] = $machineData;
+                                            //     $machineData[] = array(
+                                            //         'codePanne' => $resultat['codePanne'],
+                                            //         'nbInter' => $resultat['nbInter'],
+                                            //     );
+                                            // }
+                                            // $machinesData[$id_machine] = $machineData;
                                         }
                                         ?>
                                     </tbody>
@@ -180,7 +180,7 @@ $chaines = implantation_Prod_model::findAllChaines();
                     </div>
 
                 </div>
-                <div class="container-fluid" id="statsCard"
+                <!-- <div class="container-fluid" id="statsCard"
                     style="display: none; margin: 20px auto;">
                     <div class="card-header bg-primary text-white">
                         <h5 class="m-0">
@@ -192,7 +192,7 @@ $chaines = implantation_Prod_model::findAllChaines();
                             <canvas id="myChart" width="800" height="400"></canvas>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
 
 

@@ -43,8 +43,6 @@ if (!empty($machine_id)) {
 
 
     <style>
-      
-
         /* Badge styles */
         .badge-parc-chaine {
             background-color: #28a745;
@@ -142,7 +140,7 @@ if (!empty($machine_id)) {
                                 </div>
                             <?php else: ?>
                                 <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                         <thead>
                                             <tr>
                                                 <th>Date</th>
@@ -170,7 +168,7 @@ if (!empty($machine_id)) {
                                                                 break;
                                                             case 'chaine_parc':
                                                                 $typeClass = 'badge-chaine-parc';
-                                                                $typeText = 'Entrée dans parc';
+                                                                $typeText = 'Entrée au parc';
                                                                 break;
                                                             case 'inter_chaine':
                                                                 $typeClass = 'badge-inter-chaine';
@@ -222,25 +220,25 @@ if (!empty($machine_id)) {
     <script>
         $(document).ready(function() {
             var table = $('#dataTable').DataTable({
-                    language: {
-                        search: "Rechercher:",
-                        lengthMenu: "Afficher _MENU_ éléments par page",
-                        info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-                        infoEmpty: "Aucun élément à afficher",
-                        infoFiltered: "(filtré de _MAX_ éléments au total)",
-                        zeroRecords: "Aucun enregistrement correspondant trouvé",
-                        paginate: {
-                            first: "Premier",
-                            previous: "Précédent",
-                            next: "Suivant",
-                            last: "Dernier"
-                        }
-                    },
-                    pageLength: 10,
-                    order: [
-                        [0, 'asc']
-                    ]
-                });
+                language: {
+                    search: "Rechercher:",
+                    lengthMenu: "Afficher _MENU_ éléments par page",
+                    info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+                    infoEmpty: "Aucun élément à afficher",
+                    infoFiltered: "(filtré de _MAX_ éléments au total)",
+                    zeroRecords: "Aucun enregistrement correspondant trouvé",
+                    paginate: {
+                        first: "Premier",
+                        previous: "Précédent",
+                        next: "Suivant",
+                        last: "Dernier"
+                    }
+                },
+                pageLength: 10,
+                order: [
+                    [0, 'asc']
+                ]
+            });
         });
     </script>
 </body>

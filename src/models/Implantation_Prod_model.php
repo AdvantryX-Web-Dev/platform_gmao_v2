@@ -128,7 +128,7 @@ class implantation_Prod_model
 
     public static function findAllChaines()
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
 
         // $req = $conn->query("SELECT DISTINCT prod_line FROM prod__implantation ORDER BY prod_line");
@@ -140,7 +140,7 @@ class implantation_Prod_model
 
     public static function findChaineById($id)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
 
         // $req = $conn->query("SELECT DISTINCT prod_line FROM prod__implantation ORDER BY prod_line");

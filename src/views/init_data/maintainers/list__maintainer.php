@@ -46,9 +46,9 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <h6 class="m-0 font-weight-bold text-primary">Liste des mainteneurs :</h6>
                             <?php if ($isAdmin): ?>
                                 <div>
-                                    <a href="../../public/index.php?route=audit_trails_history" class="btn btn-info mr-2">
+                                    <!-- <a href="../../public/index.php?route=audit_trails_history" class="btn btn-info mr-2">
                                         <i class="fas fa-history"></i> Historique des modifications
-                                    </a>
+                                    </a> -->
                                     <a href="../../public/index.php?route=maintainer/create" class="btn btn-success">
                                         <i class="fas fa-plus"></i> Ajouter un mainteneur
                                     </a>

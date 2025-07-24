@@ -69,6 +69,41 @@ class MouvementMachine_model
 
     public static function findInterChaine()
     {
+        $dbGmao = Database::getInstance('db_GMAO');
+        $conn = $dbGmao->getConnection();
+
+        // Utiliser une requête qui spécifie explicitement les bases de données
+        $query = "
+        SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
+                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
+                e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
+                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
+                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
+        FROM db_GMAO.gmao__mouvement_machine mm 
+        INNER JOIN db_GMAO.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
+        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
+        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
+        WHERE mm.type_Mouv = 'inter_chaine'
+        ORDER BY mm.date_mouvement DESC";
+
+        try {
+            $req = $conn->query($query);
+            $resultats = $req->fetchAll();
+            return $resultats;
+        } catch (\PDOException $e) {
+            // En cas d'erreur (par exemple si les qualificateurs de bases ne fonctionnent pas)
+            // Logger l'erreur et utiliser la méthode alternative
+            error_log("Erreur dans findChaineParc: " . $e->getMessage());
+            return self::findInterChainev0();
+        }
+        $req->execute();
+        $resultats = $req->fetchAll();
+
+        return $resultats;
+    }
+    public static function findInterChainev0()
+    {
         $db = new Database();
         $conn = $db->getConnection();
 
@@ -91,6 +126,37 @@ class MouvementMachine_model
     }
     public static function findParcChaine()
     {
+        $dbGmao = Database::getInstance('db_GMAO');
+        $conn = $dbGmao->getConnection();
+
+        // Utiliser une requête qui spécifie explicitement les bases de données
+        $query = "
+        SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
+                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
+                e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
+                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
+                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
+        FROM db_GMAO.gmao__mouvement_machine mm 
+        INNER JOIN db_GMAO.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
+        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
+        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
+        WHERE mm.type_Mouv = 'parc_chaine'
+        ORDER BY mm.date_mouvement DESC";
+
+        try {
+            $req = $conn->query($query);
+            $resultats = $req->fetchAll();
+            return $resultats;
+        } catch (\PDOException $e) {
+            // En cas d'erreur (par exemple si les qualificateurs de bases ne fonctionnent pas)
+            // Logger l'erreur et utiliser la méthode alternative
+            error_log("Erreur dans findChaineParc: " . $e->getMessage());
+            return self::findParcChainev0();
+        }
+    }
+    public static function findParcChainev0()
+    {
         $db = new Database();
         $conn = $db->getConnection();
 
@@ -110,60 +176,99 @@ class MouvementMachine_model
         $resultats = $req->fetchAll();
         return $resultats;
     }
-    public static function findChaineParc()
+    public static function findChaineParcv2()
     {
         $db = new Database();
         $conn = $db->getConnection();
 
-        $req = $conn->query("SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
+        $req = $conn->query("
+    SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
+            e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
+            e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
+            CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
+            CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
+        FROM gmao__mouvement_machine mm 
+        INNER JOIN init__machine m ON mm.id_machine = m.machine_id
+        INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
+        LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
+        WHERE mm.type_Mouv = 'chaine_parc'
+        ORDER BY mm.date_mouvement   DESC");
+        $req->execute();
+        $resultats = $req->fetchAll();
+        return $resultats;
+    }
+    public static function findChaineParc()
+    {
+        // Obtenir une connexion à la base de données db_GMAO 
+        // (Les deux connexions pointeront vers le même serveur MySQL)
+        $dbGmao = Database::getInstance('db_GMAO');
+        $conn = $dbGmao->getConnection();
+
+        // Utiliser une requête qui spécifie explicitement les bases de données
+        $query = "
+        SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
                 e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
                 e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
                 CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-            FROM gmao__mouvement_machine mm 
-            INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-            INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-            LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
-            LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
-            WHERE mm.type_Mouv = 'chaine_parc'
-            ORDER BY mm.date_mouvement	 DESC");
-        $req->execute();
-        $resultats = $req->fetchAll();
-        return $resultats;
-    }
-    public static function findByMachine($id_machine)
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
+        FROM db_GMAO.gmao__mouvement_machine mm 
+        INNER JOIN db_GMAO.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
+        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
+        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
+        WHERE mm.type_Mouv = 'chaine_parc'
+        ORDER BY mm.date_mouvement DESC";
 
-        $req = $conn->prepare("SELECT mm.*, m.reference, m.designation 
-            FROM gmao__mouvement_machine mm 
-            INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-            WHERE mm.id_machine = ?
-            ORDER BY mm.date_mouvement DESC");
-        $req->execute([$id_machine]);
-        $resultats = $req->fetchAll();
-        return $resultats;
+        try {
+            $req = $conn->query($query);
+            $resultats = $req->fetchAll();
+            return $resultats;
+        } catch (\PDOException $e) {
+            // En cas d'erreur (par exemple si les qualificateurs de bases ne fonctionnent pas)
+            // Logger l'erreur et utiliser la méthode alternative
+            error_log("Erreur dans findChaineParc: " . $e->getMessage());
+            return self::findChaineParcv2();
+        }
     }
 
-    public static function findPendingReception()
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
+    /**
+     * Méthode de secours qui utilise plusieurs requêtes si la jointure entre bases échoue
+     */
 
-        $req = $conn->query("SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name
-            FROM gmao__mouvement_machine mm 
-            INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-            INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-            LEFT JOIN init__employee e1 ON mm.idEmp = e1.matricule
-            WHERE mm.type_Mouv = 'parc_chaine' AND mm.idEmp_accepted IS NULL
-            ORDER BY mm.date_mouvement DESC");
-        $req->execute();
-        $resultats = $req->fetchAll();
-        return $resultats;
-    }
+    // public static function findByMachine($id_machine)
+    // {
+    //     $db = new Database();
+    //     $conn = $db->getConnection();
+
+    //     $req = $conn->prepare("SELECT mm.*, m.reference, m.designation 
+    //         FROM gmao__mouvement_machine mm 
+    //         INNER JOIN init__machine m ON mm.id_machine = m.machine_id
+    //         WHERE mm.id_machine = ?
+    //         ORDER BY mm.date_mouvement DESC");
+    //     $req->execute([$id_machine]);
+    //     $resultats = $req->fetchAll();
+    //     return $resultats;
+    // }
+
+    // public static function findPendingReception()
+    // {
+    //     $db = new Database();
+    //     $conn = $db->getConnection();
+
+    //     $req = $conn->query("SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
+    //             e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
+    //             CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name
+    //         FROM gmao__mouvement_machine mm 
+    //         INNER JOIN init__machine m ON mm.id_machine = m.machine_id
+    //         INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+    //         LEFT JOIN init__employee e1 ON mm.idEmp = e1.matricule
+    //         WHERE mm.type_Mouv = 'parc_chaine' AND mm.idEmp_accepted IS NULL
+    //         ORDER BY mm.date_mouvement DESC");
+    //     $req->execute();
+    //     $resultats = $req->fetchAll();
+    //     return $resultats;
+    // }
 
     public static function historiqueMachine($machine_id)
     {
@@ -187,17 +292,17 @@ class MouvementMachine_model
             FROM 
                 gmao__mouvement_machine mm 
             INNER JOIN 
-                init__machine m ON mm.id_machine = m.machine_id
+                db_mahdco.init__machine m ON mm.id_machine = m.machine_id
             INNER JOIN 
                 gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
             LEFT JOIN 
-                init__employee e1 ON mm.idEmp_moved = e1.id
+                db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
             LEFT JOIN 
-                init__employee e2 ON mm.idEmp_accepted = e2.id
+                db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
             LEFT JOIN 
-                gmao__machines_status ms ON m.machines_status_id = ms.id
+                db_mahdco.gmao__machines_status ms ON m.machines_status_id = ms.id
             LEFT JOIN 
-                	gmao__machine_location ml ON mm.machines_location_id = ml.id
+                db_mahdco.gmao__machine_location ml ON m.machines_location_id = ml.id
             WHERE 
                 mm.id_machine = :machine_id
             ORDER BY 

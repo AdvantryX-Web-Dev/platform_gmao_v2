@@ -62,9 +62,10 @@ class Mouvement_machinesController
             }
 
             // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
-            $db = new Database();
+            $db = Database::getInstance('db_GMAO');
             $conn = $db->getConnection();
-
+            $dbdigitex = Database::getInstance('db_digitex');
+            $connDigitex = $dbdigitex->getConnection();
             try {
                 // Transaction pour assurer l'intégrité des données
                 $conn->beginTransaction();
@@ -91,12 +92,12 @@ class Mouvement_machinesController
                     $locationId = null;
                     if ($type_mouvement === 'chaine_parc') {
                         // Trouver l'ID pour "parc"
-                        $stmt = $conn->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'parc' LIMIT 1");
+                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'parc' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     } else { //  inter_chaine ou parc_chaine
                         // Trouver l'ID pour "chaine"
-                        $stmt = $conn->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'prodline' LIMIT 1");
+                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'prodline' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     }
@@ -120,7 +121,7 @@ class Mouvement_machinesController
                         $updateQuery .= " WHERE machine_id = :machine_id";
                         $params[':machine_id'] = $machineId;
 
-                        $stmt = $conn->prepare($updateQuery);
+                        $stmt = $connDigitex->prepare($updateQuery);
                         foreach ($params as $key => $value) {
                             $stmt->bindValue($key, $value);
                         }
@@ -275,7 +276,6 @@ class Mouvement_machinesController
     }
     public function getTypes($location)
     {
-
         return Machine_model::findAllTypes($location);
     }
     public function getMachinesByType()
@@ -285,7 +285,7 @@ class Mouvement_machinesController
         if (isset($_GET['type'])) {
             $type = $_GET['type'];
             $location = $_GET['location'];
-            $db = new \App\Models\Database();
+            $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
             $conn = $db->getConnection();
 
             $query = "SELECT m.id as id, m.machine_id as machine_id, m.reference as reference, m.designation as designation 

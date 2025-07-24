@@ -33,7 +33,7 @@ class Machines_status_model
 
     public static function findAll()
     {
-        $db = new Database();
+        $db =  Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         $machines_status = array();
         try {
@@ -48,7 +48,7 @@ class Machines_status_model
 
     public static function findById($id)
     {
-        $db = new Database();
+        $db =  Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         $machines_status = null;
         try {
@@ -62,7 +62,7 @@ class Machines_status_model
     }
     public static function StoreMachinesStatus($machines_status)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
             $stmt = $conn->prepare("INSERT INTO gmao__machines_status (`id`, `status_name`) VALUES (?, ?)");
@@ -79,7 +79,7 @@ class Machines_status_model
     }
     public static function UpdateMachinesStatus($machines_status)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
             $stmt = $conn->prepare("UPDATE gmao__machines_status SET status_name = ? WHERE id = '$machines_status->id'");
@@ -97,7 +97,7 @@ class Machines_status_model
 
     public static function deleteById($id)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
             $stmt = $conn->prepare("DELETE FROM gmao__machines_status WHERE id = ?");

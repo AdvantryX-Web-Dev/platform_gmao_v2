@@ -123,7 +123,7 @@ class InterventionPlanningController
                 FROM 
                     gmao__planning p
                 LEFT JOIN 
-                    init__machine m ON p.machine_id = m.id
+                    db_mahdco.init__machine m ON p.machine_id = m.id
                 LEFT JOIN 
                     gmao__type_intervention ti ON p.intervention_type_id = ti.id
                       LEFT JOIN
@@ -251,7 +251,7 @@ class InterventionPlanningController
 
         try {
             $stmt = $conn->prepare("SELECT p.*, m.machine_id FROM gmao__planning p 
-                    JOIN init__machine m ON p.machine_id = m.id 
+                    JOIN db_mahdco.init__machine m ON p.machine_id = m.id 
                     WHERE p.planned_date >= ? 
                     AND p.id NOT IN (
                         SELECT planning_id FROM gmao__intervention_action 

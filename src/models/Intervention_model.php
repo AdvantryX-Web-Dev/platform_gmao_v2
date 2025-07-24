@@ -78,7 +78,7 @@ class Intervention_model
             LEFT JOIN 
                 gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
-                init__machine m ON a.machine_id = m.id
+                db_mahdco.init__machine m ON a.machine_id = m.id
             WHERE 
                 
                     a.planning_id IS NOT NULL 
@@ -144,7 +144,7 @@ class Intervention_model
             LEFT JOIN 
                 gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
-                init__machine m ON a.machine_id = m.id
+                db_mahdco.init__machine m ON a.machine_id = m.id
             WHERE 
                  t.type = 'curative'
                
@@ -193,7 +193,7 @@ class Intervention_model
     }
 
     //historique des interventions par machine
-    public static function findByMachine($id_machine, $type)
+    public static function findByMachinev0($id_machine, $type)
     {
 
         $db = new Database();
@@ -210,7 +210,7 @@ class Intervention_model
                             LEFT JOIN `gmao__type_intervention` t ON a.intervention_type_id = t.id
                             LEFT JOIN `init__machine` m ON a.machine_id = m.id
                             LEFT JOIN `init__prod_line` p ON a.production_line_id = p.id
-                            LEFT JOIN `init__employee` e ON a.maintenance_by = e.id
+                            LEFT JOIN `init__employee` e ON a.maintenance_id
 
                             LEFT JOIN `gmao__planning` pl ON a.planning_id = pl.id
                             WHERE a.machine_id = '" . $id_machine . "' and t.type = '" . $type . "'
@@ -218,11 +218,50 @@ class Intervention_model
         $inters = $req->fetchAll();
         return $inters;
     }
+    public static function findByMachine($id_machine, $type)
+    {
+
+        // Connexion à db_GMAO pour les tables gmao_*
+        $dbGmao = Database::getInstance('db_GMAO');
+        $connGmao = $dbGmao->getConnection();
+
+        // Préparation de la requête avec la syntaxe correcte pour les références cross-database
+        $query = "SELECT a.*, t.type as intervention_type,
+                            m.machine_id as machine,
+                            p.prod_line as prodline,
+                            t.designation as intervention_type_designation,
+                            e.last_name as maintainer_last_name,
+                            e.first_name as maintainer_first_name,
+                            pl.planned_date as planning_date
+            
+            FROM gmao__intervention_action a
+            LEFT JOIN gmao__type_intervention t ON a.intervention_type_id = t.id
+            LEFT JOIN db_mahdco.init__machine m ON a.machine_id = m.id
+            LEFT JOIN db_mahdco.init__prod_line p ON a.production_line_id = p.id
+            LEFT JOIN db_mahdco.init__employee e ON a.maintenance_by = e.id
+            LEFT JOIN gmao__planning pl ON a.planning_id = pl.id
+            
+            WHERE a.machine_id = ? AND t.type = ?
+            ORDER BY a.created_at DESC";
+
+        try {
+            $stmt = $connGmao->prepare($query);
+            $stmt->execute([$id_machine, $type]);
+            $historique = $stmt->fetchAll();
+
+            return $historique;
+        } catch (\PDOException $e) {
+            error_log('Erreur dans findByMachine: ' . $e->getMessage());
+
+            // Si la requête cross-database échoue, essayer une approche alternative
+            return;
+        }
+    }
 
 
     public static function maint_dispo()
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         $req = $conn->query("SELECT last_name, first_name, matricule
         FROM init__employee

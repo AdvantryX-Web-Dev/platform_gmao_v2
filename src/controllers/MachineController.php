@@ -161,7 +161,8 @@ class MachineController
     public function machines_state()
     {
         $machines = Machine_model::MachinesStateTable();
-        
+
+
         include(__DIR__ . '/../views/G_machines/G_machines_status/machineStatus.php');
     }
     public function history_machines_stateBYmachineID()

@@ -11,7 +11,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 // Si $mouvements n'est pas défini dans le contrôleur, créez une instance et récupérez les données
 if (!isset($mouvements)) {
     $controller = new Mouvement_machinesController();
-    $mouvements = $controller->getMouvementsByType('inter_chaine');
+    $mouvements = $controller->getMouvementsByType('chaine_parc');
 }
 ?>
 <!DOCTYPE html>
@@ -120,7 +120,7 @@ if (!isset($mouvements)) {
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
-                                       
+
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
@@ -155,7 +155,7 @@ if (!isset($mouvements)) {
                                     <?php
                                     // Charger les types de machines ici
                                     $controller = new Mouvement_machinesController();
-                                    $location="prodline";
+                                    $location = "prodline";
                                     $types = $controller->getTypes($location);
                                     foreach ($types as $type) {
                                         echo "<option value=\"{$type['type']}\">{$type['type']}</option>";
@@ -231,20 +231,6 @@ if (!isset($mouvements)) {
                             <input type="hidden" name="mouvement_id" id="mouvement_id" value="">
                             <input type="hidden" name="machine_id" id="machine_id" value="">
                             <input type="hidden" name="type_mouvement" value="chaine_parc">
-
-                            <!-- <div class="row mb-3">
-                                <div class="col-12 mb-2">
-                                    <h6 class="font-weight-bold">Choisir le récepteur :</h6>
-                                </div>
-                           
-                                <div class="col-12">
-                                    <button type="submit" name="useConnectedUser" value="<?= $_SESSION['user']['matricule'] ?? ''; ?>" class="btn btn-primary btn-block">
-                                        <i class="fas fa-user"></i> Utiliser mon compte (<?= $_SESSION['user']['matricule'] ?? ''; ?>)
-                                    </button>
-                                </div>
-                            </div> -->
-
-                            <!-- <hr class="my-4"> -->
 
                             <div class="form-group">
                                 <label for="recepteur"> sélectionner un maintenancier :</label>
@@ -354,7 +340,7 @@ if (!isset($mouvements)) {
                             console.log(data);
                             var options = '<option value="">--Sélectionnez une machine--</option>';
                             $.each(data, function(index, machine) {
-                                options += '<option value="' + machine.machine_id+ '">' + machine.machine_id + ' </option>';
+                                options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' </option>';
                             });
                             $('#machine').html(options);
                         },

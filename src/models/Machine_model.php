@@ -43,7 +43,7 @@ class Machine_model
     //all machine de init__machine
     public static function findAllMachine()
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         $machines = array();
 
@@ -64,27 +64,29 @@ class Machine_model
 
     public static function findAll()
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         $machines = array();
         try {
-            $req = $conn->query("SELECT * FROM init__machine m  LEFT JOIN `gmao__numTete` gn on gn.id_machine=m.machine_id
+            $req = $conn->query("SELECT * FROM init__machine m  
             order by m.created_at desc");
             $machines = $req->fetchAll();
         } catch (PDOException $e) {
 
             return false;
         }
+
+
         return $machines;
     }
 
     public static function findById($id_machine)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         $machine = null;
         try {
-            $req = $conn->query("SELECT * FROM init__machine m LEFT JOIN `gmao__numTete` gn on gn.id_machine=m.machine_id WHERE machine_id='$id_machine'");
+            $req = $conn->query("SELECT * FROM init__machine m WHERE machine_id='$id_machine'");
             $machine = $req->fetch();
         } catch (PDOException $e) {
 
@@ -95,7 +97,7 @@ class Machine_model
 
     public static function ModifierMachine($machine)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         try {
             $stmt = $conn->prepare("UPDATE init__machine SET reference = ?, designation = ?, brand = ?, type = ?, billing_num = ?, bill_date = ?, cur_date=NOW() WHERE machine_id = ?");
@@ -116,7 +118,7 @@ class Machine_model
 
     public static function AjouterMachine($machine)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         try {
             $stmt = $conn->prepare("INSERT INTO init__machine (`machine_id`, `reference`, `brand`, `type`, `designation`, `billing_num`, `bill_date`, `cur_date`) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
@@ -137,7 +139,7 @@ class Machine_model
     }
     public static function findBytype($type)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         $machines = array();
         try {
@@ -165,7 +167,7 @@ class Machine_model
     // }
     public static function deleteById($id)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
             $stmt = $conn->prepare("DELETE FROM init__machine WHERE machine_id = ?");
@@ -178,9 +180,10 @@ class Machine_model
         }
     }
 
-    public static function findAllTypes($location   )
+    public static function findAllTypes($location)
     {
-        $db = new Database();
+
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         try {
             $req = $conn->query("SELECT DISTINCT type FROM init__machine 
@@ -193,14 +196,123 @@ class Machine_model
         }
     }
 
+
+    public static function MachinesStateTablev1()
+    {
+        // Connexion à la base de données db_digitex pour init__machine et prod__presence
+        $dbDigitex = Database::getInstance('db_digitex');
+        $connDigitex = $dbDigitex->getConnection();
+
+        // Connexion à la base de données db_GMAO pour les tables gmao__*
+        $dbGmao = Database::getInstance('db_GMAO');
+        $connGmao = $dbGmao->getConnection();
+
+        try {
+            // Obtenir la date d'aujourd'hui
+            $today = date('Y-m-d');
+
+            // D'abord, récupérer les données de gmao__machines_status et gmao__machine_location depuis db_GMAO
+            $statusQuery = "SELECT id, status_name FROM db_GMAO.gmao__machines_status";
+            $stmtStatus = $connGmao->query($statusQuery);
+            $statusMap = [];
+            while ($row = $stmtStatus->fetch(\PDO::FETCH_ASSOC)) {
+                $statusMap[$row['status_name']] = $row['id'];
+            }
+
+            $locationQuery = "SELECT id, location_name FROM db_GMAO.gmao__machine_location";
+            $stmtLocation = $connGmao->query($locationQuery);
+            $locationMap = [];
+            while ($row = $stmtLocation->fetch(\PDO::FETCH_ASSOC)) {
+                $locationMap[$row['id']] = $row['location_name'];
+            }
+
+            // Requête principale sur db_digitex
+            $query = "
+                SELECT 
+                    m.*,
+                    ms.status_name as etat_machine,
+                    ms.id as status_id,
+                    ml.location_name as location,
+                    pp.p_state
+                FROM 
+                    db_digitex.init__machine m
+                    LEFT JOIN db_GMAO.gmao__machines_status ms ON ms.id = m.machines_status_id 
+                    LEFT JOIN db_GMAO.gmao__machine_location ml ON ml.id = m.machines_location_id 
+                    LEFT JOIN db_digitex.prod__presence pp ON pp.machine_id = m.machine_id AND pp.cur_date = :today
+                ORDER BY 
+                    m.updated_at DESC
+            ";
+
+            $stmt = $connDigitex->prepare($query);
+            $stmt->bindParam(':today', $today);
+            $stmt->execute();
+            $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Parcourir les machines et ajuster leur état selon l'emplacement et l'activité
+            foreach ($machines as &$machine) {
+                $machineId = $machine['machine_id'];
+                $location = $machine['location'];
+                $currentStatus = $machine['etat_machine'];
+                $newStatusId = null;
+
+                // Déterminer le nouvel état selon l'emplacement
+                if ($location == 'prodline') {
+                    // Si la machine est en production
+                    if ($machine['p_state'] == 1) {
+                        // Machine active aujourd'hui (présente dans prod__presence avec p_state = 1)
+                        $machine['etat_machine'] = 'active';
+                        $newStatusId = $statusMap['active'];
+                    } elseif ($currentStatus == 'en panne') {
+                        // Si déjà marquée en panne, garder cet état
+                        $machine['etat_machine'] = 'en panne';
+                        $newStatusId = $statusMap['en panne'];
+                    } else {
+                        // Machine en production mais pas active aujourd'hui
+                        $machine['etat_machine'] = 'inactive';
+                        $newStatusId = $statusMap['inactive'];
+                    }
+                }
+                // Pour les machines dans le parc
+                elseif ($location == 'parc') {
+                    if (in_array($currentStatus, ['en panne', 'ferraille', 'fonctionnelle'])) {
+                        // Conserver l'état actuel s'il est approprié pour le parc
+                        $newStatusId = $machine['status_id'];
+                    } else {
+                        // Sinon, mettre par défaut à "fonctionnelle"
+                        $machine['etat_machine'] = 'fonctionnelle';
+                        $newStatusId = $statusMap['fonctionnelle'];
+                    }
+                }
+
+                // Mettre à jour l'état dans la base de données si nécessaire
+                if ($newStatusId && $newStatusId != $machine['machines_status_id']) {
+                    $updateStmt = $connDigitex->prepare("
+                        UPDATE db_digitex.init__machine 
+                        SET machines_status_id = :status_id, updated_at = NOW() 
+                        WHERE machine_id = :machine_id
+                    ");
+                    $updateStmt->bindParam(':status_id', $newStatusId, \PDO::PARAM_INT);
+                    $updateStmt->bindParam(':machine_id', $machineId, \PDO::PARAM_STR);
+                    $updateStmt->execute();
+                }
+            }
+
+            return $machines;
+        } catch (PDOException $e) {
+            error_log('Error in MachinesStateTable: ' . $e->getMessage());
+            // Return empty array instead of false
+            return [];
+        }
+    }
     public static function MachinesStateTable()
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+
         $conn = $db->getConnection();
         try {
             // Obtenir la date d'aujourd'hui
             $today = date('Y-m-d');
-            
+
             // Requête principale pour obtenir les machines et leurs informations
             // avec jointure sur la table de présence pour aujourd'hui
             $query = "
@@ -223,7 +335,7 @@ class Machine_model
             $stmt->bindParam(':today', $today);
             $stmt->execute();
             $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            
+
             // Récupérer les IDs des statuts
             $stmt = $conn->query("
                 SELECT id, status_name 
@@ -233,14 +345,14 @@ class Machine_model
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $statusMap[$row['status_name']] = $row['id'];
             }
-            
+
             // Parcourir les machines et ajuster leur état selon l'emplacement et l'activité
             foreach ($machines as &$machine) {
                 $machineId = $machine['machine_id'];
                 $location = $machine['location'];
                 $currentStatus = $machine['etat_machine'];
                 $newStatusId = null;
-                
+
                 // Déterminer le nouvel état selon l'emplacement
                 if ($location == 'prodline') {
                     // Si la machine est en production
@@ -248,8 +360,7 @@ class Machine_model
                         // Machine active aujourd'hui (présente dans prod__presence avec p_state = 1)
                         $machine['etat_machine'] = 'active';
                         $newStatusId = $statusMap['active'];
-                    }
-                    elseif ($currentStatus == 'en panne') {
+                    } elseif ($currentStatus == 'en panne') {
                         // Si déjà marquée en panne, garder cet état
                         $machine['etat_machine'] = 'en panne';
                         $newStatusId = $statusMap['en panne'];
@@ -258,7 +369,7 @@ class Machine_model
                         $machine['etat_machine'] = 'inactive';
                         $newStatusId = $statusMap['inactive'];
                     }
-                } 
+                }
                 // Pour les machines dans le parc
                 elseif ($location == 'parc') {
                     if (in_array($currentStatus, ['en panne', 'ferraille', 'fonctionnelle'])) {
@@ -270,7 +381,7 @@ class Machine_model
                         $newStatusId = $statusMap['fonctionnelle'];
                     }
                 }
-                
+
                 // Mettre à jour l'état dans la base de données si nécessaire
                 if ($newStatusId && $newStatusId != $machine['machines_status_id']) {
                     $updateStmt = $conn->prepare("
@@ -291,7 +402,6 @@ class Machine_model
             return [];
         }
     }
-
     /**
      * Get all machine statuses from gmao__machines_status table
      * 
@@ -299,7 +409,7 @@ class Machine_model
      */
     public static function getMachineStatus()
     {
-        $db = new Database();
+        $db =  Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
             $query = "SELECT * FROM gmao__machines_status ORDER BY id ASC";
@@ -322,7 +432,7 @@ class Machine_model
      */
     public static function updateMachineStatus($machineId, $statusId)
     {
-        $db = new Database();
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
             $query = "UPDATE init__machine SET machines_status_id = :status_id, updated_at = NOW() 
