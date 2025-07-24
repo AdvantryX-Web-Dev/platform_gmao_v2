@@ -44,24 +44,25 @@ $stmtEquip->execute();
 $totalEquip = $stmtEquip->fetchColumn();
 
 // Récupérer les dernières interventions
-// $stmtInterv = $connGMAO->prepare("
-//     SELECT ia.id, m.reference AS machine_id, 
-//     it.type AS type,
-//     ia.intervention_date AS date,
-//     CASE 
-//       WHEN ia.status_id = 1 THEN 'En cours'
-//        WHEN ia.status_id = 2 THEN 'Terminée'
-//        ELSE 'Planifiée'
-//     END AS statut
-//     FROM gmao__intervention_action ia
-//     JOIN db_mahdco.init__machine m ON ia.machine_id = m.id
-//     LEFT JOIN gmao__intervention_type it ON it.id = ia.intervention_type_id
-//     ORDER BY ia.intervention_date DESC
-//     LIMIT 10
-// ");
-// $stmtInterv->execute();
-// $dernieresInterventions = $stmtInterv->fetchAll(\PDO::FETCH_ASSOC);
-$dernieresInterventions =[];
+$stmtInterv = $connGMAO->prepare("
+    SELECT 
+        ia.id, 
+        m.reference AS machine_id, 
+        it.type AS type,
+        ia.intervention_date AS date
+    FROM 
+        gmao__intervention_action ia
+    JOIN 
+        db_mahdco.init__machine m ON ia.machine_id = m.id
+    LEFT JOIN 
+        gmao__type_intervention it ON it.id = ia.intervention_type_id
+    ORDER BY 
+        ia.intervention_date DESC
+    LIMIT 10
+");
+
+$stmtInterv->execute();
+$dernieresInterventions = $stmtInterv->fetchAll(\PDO::FETCH_ASSOC);
 // Obtenir les statistiques d'interventions par mois (6 derniers mois)
 $stmtMonthlyStats = $connGMAO->prepare("
     SELECT 
@@ -88,6 +89,7 @@ foreach ($monthlyStats as $stat) {
     $months[] = $monthName;
     $preventiveData[] = $stat['preventive'];
     $curativeData[] = $stat['curative'];
+    
 }
 
 // Récupérer les machines par statut
@@ -100,6 +102,7 @@ $stmtMachineStatus = $connDigitex->prepare("
 ");
 $stmtMachineStatus->execute();
 $machinesByStatus = $stmtMachineStatus->fetchAll(\PDO::FETCH_ASSOC);
+
 
 // Récupérer les interventions urgentes ou en retard
 $stmtUrgentInterv = $connGMAO->prepare("
@@ -258,26 +261,21 @@ $urgentInterventions = $stmtUrgentInterv->fetchAll(\PDO::FETCH_ASSOC);
                                                     <th>Machine ID</th>
                                                     <th>Type</th>
                                                     <th>Date</th>
-                                                    <th>Statut</th>
-                                                    <th>Actions</th>
+                                                    <!-- <th>Actions</th> -->
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($dernieresInterventions as $interv): ?>
                                                     <tr>
-                                                        <td><?= htmlspecialchars($interv['machine_id']) ?></td>
-                                                        <td><?= htmlspecialchars($interv['type']) ?></td>
-                                                        <td><?= htmlspecialchars($interv['date']) ?></td>
-                                                        <td>
-                                                            <span class="badge badge-<?= $interv['statut'] === 'Terminée' ? 'success' : ($interv['statut'] === 'En cours' ? 'warning' : 'info') ?>">
-                                                                <?= htmlspecialchars($interv['statut']) ?>
-                                                            </span>
-                                                        </td>
-                                                        <td>
+                                                        <td><?= htmlspecialchars($interv['machine_id'] ?? 'N/A') ?></td>
+                                                        <td><?= htmlspecialchars($interv['type'] ?? 'N/A') ?></td>
+                                                        <td><?= htmlspecialchars($interv['date'] ?? 'N/A') ?></td>
+                                                        
+                                                        <!-- <td>
                                                             <a href="index.php?route=intervention_details&id=<?= $interv['id'] ?>" class="btn btn-sm btn-primary">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
-                                                        </td>
+                                                        </td> -->
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
@@ -331,18 +329,19 @@ $urgentInterventions = $stmtUrgentInterv->fetchAll(\PDO::FETCH_ASSOC);
         <script src="/public/js/bootstrap.bundle.min.js"></script>
         <script src="/public/js/sb-admin-2.min.js"></script>
         <script>
+          
             // Graphique d'évolution des interventions
             var ctx = document.getElementById('interventionsChart').getContext('2d');
             var interventionsChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: <?= json_encode($months) ?>,
                     datasets: [
                         {
                             label: 'Préventives',
                             data: <?= json_encode($preventiveData) ?>,
-                            backgroundColor: 'rgba(54, 185, 204, 0.05)',
-                            borderColor: 'rgba(54, 185, 204, 1)',
+                            backgroundColor: 'rgb(54, 184, 204)',
+                            borderColor: 'rgb(54, 204, 59)',
                             pointBackgroundColor: 'rgba(54, 185, 204, 1)',
                             pointBorderColor: '#fff',
                             tension: 0.3
@@ -350,7 +349,7 @@ $urgentInterventions = $stmtUrgentInterv->fetchAll(\PDO::FETCH_ASSOC);
                         {
                             label: 'Curatives',
                             data: <?= json_encode($curativeData) ?>,
-                            backgroundColor: 'rgba(246, 194, 62, 0.05)',
+                            backgroundColor: 'rgba(246, 194, 62, 0.98)',
                             borderColor: 'rgba(246, 194, 62, 1)',
                             pointBackgroundColor: 'rgba(246, 194, 62, 1)',
                             pointBorderColor: '#fff',
@@ -393,10 +392,11 @@ $urgentInterventions = $stmtUrgentInterv->fetchAll(\PDO::FETCH_ASSOC);
                 type: 'doughnut',
                 data: {
                     labels: <?= json_encode(array_column($machinesByStatus, 'status_name')) ?>,
+                    
                     datasets: [{
                         data: <?= json_encode(array_column($machinesByStatus, 'count')) ?>,
-                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
-                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be3024'],
+                         backgroundColor: ['#f6c23e', '#1cc88a', '#e74a3b', '#e38f87', '#4e73df'],
+                        hoverBackgroundColor: ['#6e707e', '#6e707e', '#6e707e', '#6e707e', '#6e707e'],
                         hoverBorderColor: "rgba(234, 236, 244, 1)",
                     }],
                 },
