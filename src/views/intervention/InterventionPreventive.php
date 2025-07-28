@@ -1,12 +1,12 @@
 <?php
 
 use App\Controllers\InterventionController;
-use App\Models\implantation_Prod_model;
+use App\Models\Implantation_Prod_model;
 
 use App\Models\Database;
 
 // Initialisation du filtre chaîne AVANT tout HTML
-$chaines = implantation_Prod_model::findAllChaines();
+$chaines = Implantation_Prod_model::findAllChaines();
 
 
 ?>
@@ -24,17 +24,17 @@ $chaines = implantation_Prod_model::findAllChaines();
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
     <!-- les icones-->
-    <link href="/public/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="/platform_gmao/public/css/all.min.css" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
     <!-- Custom styles for this template-->
-    <link href="/public/css/sb-admin-2.min.css" rel="stylesheet">
-    <script src="/public/js/jquery-3.6.4.min.js"></script>
-    <script src="/public/js/jquery.dataTables.min.js"></script>
-    <script src="/public/js/chart.js"></script>
-    <link rel="stylesheet" href="/public/css/table.css">
-    <link rel="stylesheet" href="/public/css/InterventionChefMain.css">
+    <link href="/platform_gmao/public/css/sb-admin-2.min.css" rel="stylesheet">
+    <script src="/platform_gmao/public/js/jquery-3.6.4.min.js"></script>
+    <script src="/platform_gmao/public/js/jquery.dataTables.min.js"></script>
+    <script src="/platform_gmao/public/js/chart.js"></script>
+    <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
+    <link rel="stylesheet" href="/platform_gmao/public/css/InterventionChefMain.css">
 
 </head>
 
@@ -209,11 +209,11 @@ $chaines = implantation_Prod_model::findAllChaines();
         <script>
             var allMachinesData = <?php echo json_encode($machinesData); ?>;
         </script>
-        <script src="/public/js/grapheMachine.js"></script>
-        <script src="/public/js/sideBare.js"></script>
-        <script src="/public/js/bootstrap.bundle.min.js"></script>
-        <script src="/public/js/sb-admin-2.min.js"></script>
-        <script src="/public/js/dataTables.bootstrap4.min.js"></script>
+        <script src="/platform_gmao/public/js/grapheMachine.js"></script>
+        <script src="/platform_gmao/public/js/sideBare.js"></script>
+        <script src="/platform_gmao/public/js/bootstrap.bundle.min.js"></script>
+        <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
+        <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
         <script>
             $(document).ready(function() {
                 $('#dataTable').DataTable({

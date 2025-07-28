@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Machine_model;
-use App\Models\implantation_Prod_model;
+use App\Models\Implantation_Prod_model;
 use App\Models\MouvementMachine_model;
 use App\Models\Maintainer_model;
 use App\Models\Database;
@@ -170,12 +170,12 @@ class Mouvement_machinesController
 
     public function getChaines()
     {
-        return implantation_Prod_model::findAllChaines();
+        return Implantation_Prod_model::findAllChaines();
     }
 
     public function findMachines()
     {
-        return implantation_Prod_model::findByMachineNonF();
+        return Implantation_Prod_model::findByMachineNonF();
     }
 
     public function getMouvementsByType($type)

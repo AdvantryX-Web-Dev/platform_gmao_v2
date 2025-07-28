@@ -23,17 +23,17 @@ use App\Controllers\Machine_boxController;
 
 
     <!-- Custom fonts for this template-->
-    <link href="/public/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="/platform_gmao/public/css/all.min.css" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link href="/public/css/sb-admin-2.min.css" rel="stylesheet">
-    <script src="/public/js/jquery-3.6.4.min.js"></script>
-    <script src="/public/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="/public/css/table.css">
-    <link rel="stylesheet" href="/public/css/ImplantationMachBox.css">
+    <link href="/platform_gmao/public/css/sb-admin-2.min.css" rel="stylesheet">
+    <script src="/platform_gmao/public/js/jquery-3.6.4.min.js"></script>
+    <script src="/platform_gmao/public/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
+    <link rel="stylesheet" href="/platform_gmao/public/css/ImplantationMachBox.css">
 </head>
 
 <body id="page-top">
@@ -135,10 +135,10 @@ use App\Controllers\Machine_boxController;
                 });
             });
         </script>
-        <script src="/public/js/sideBare.js"></script>
-        <script src="/public/js/bootstrap.bundle.min.js"></script>
-        <script src="/public/js/sb-admin-2.min.js"></script>
-        <script src="/public/js/dataTables.bootstrap4.min.js"></script>
+        <script src="/platform_gmao/public/js/sideBare.js"></script>
+        <script src="/platform_gmao/public/js/bootstrap.bundle.min.js"></script>
+        <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
+        <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
 
 
 </body>

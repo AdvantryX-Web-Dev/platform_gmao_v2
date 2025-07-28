@@ -10,15 +10,15 @@ services:
     ports:
       - "8082:80"
     volumes:
-      - ./:/var/www/html
-      - ./config/php.ini:/usr/local/etc/php/php.ini
+      - ./:/var/www/html/platform_gmao
+      # - ./config/php.ini:/usr/local/etc/php/php.ini
     depends_on:
       - mysql
     networks:
       - gmao-network
     restart: always
-    environment:
-      - BASE_URL=/platform_gmao
+    # environment:
+    #   - BASE_URL=/platform_gmao
 
   # MySQL Service
   mysql:

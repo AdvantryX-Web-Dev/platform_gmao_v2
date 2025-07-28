@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Database;
 
-class implantation_Prod_model
+class Implantation_Prod_model
 {
     private $id;
     private $prod_line;

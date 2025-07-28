@@ -4,7 +4,7 @@
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="https://advantryx.com/">
         <div class="sidebar-brand-text mx-3">
-            <img src="/public/images/LogoAdvantryX.png" alt="" width="150px" height="50px">
+            <img src="/platform_gmao/public/images/LogoAdvantryX.png" alt="" width="150px" height="50px">
         </div>
     </a>
 

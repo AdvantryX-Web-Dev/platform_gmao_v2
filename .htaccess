@@ -1,4 +1,0 @@
-RewriteEngine On
-# Redirect root to platform_gmao
-RewriteRule ^$ platform_gmao/ [L]
-RewriteRule ^(?!platform_gmao/)(.*)$ platform_gmao/$1 [L]

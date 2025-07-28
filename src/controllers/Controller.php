@@ -2,14 +2,14 @@
 //include("../models/Implantation_Prod_model.php");
 // function getByChaine($nomCh)
 // {
-//     return implantation_prod_Model::findByChaine($nomCh);
+//     return Implantation_Prod_model::findByChaine($nomCh);
 // }
 // function findMachines()
 // {
-//     return implantation_prod_Model::findByMachineNonF();
+//     return Implantation_Prod_model::findByMachineNonF();
 // }
 // function affectationBoxsMachines()
 // {
 
-//     return implantation_prod_Model::findAll();
+//     return Implantation_Prod_model::findAll();
 // }

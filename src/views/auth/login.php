@@ -120,7 +120,7 @@ unset($_SESSION['login_errors'], $_SESSION['login_old_values']);
             </div>
             <?php endif; ?>
             
-            <form action="/platform_gmao/platform_gmao/public/index.php?route=login" method="post">
+            <form action="/platform_gmao/public/index.php?route=login" method="post">
                 <div class="form-group">
                     <label for="email" class="col">Adresse e-mail:</label>
                     <span class="input-group-addon ">
@@ -143,7 +143,7 @@ unset($_SESSION['login_errors'], $_SESSION['login_old_values']);
                 </div>
             </form>
             <div class="text-center mt-3">
-                <p>Pas encore de compte? <a href="/platform_gmao/platform_gmao/public/index.php?route=register">Inscrivez-vous ici</a></p>
+                <p>Pas encore de compte? <a href="/platform_gmao/public/index.php?route=register">Inscrivez-vous ici</a></p>
             </div>
         </div>
     </div>
