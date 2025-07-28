@@ -47,7 +47,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <?php if ($isAdmin): ?>
                                 <div>
 
-                                    <a href="../../public/index.php?route=category/create" class="btn btn-success">
+                                    <a href="../../platform_gmao/public/index.php?route=category/create" class="btn btn-success">
                                         <i class="fas fa-plus"></i> Ajouter un motif
                                     </a>
                                 </div>
@@ -72,8 +72,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
                                                         <td>
-                                                            <a href="../../public/index.php?route=category/edit&id=<?= urlencode($category['id_Raison']) ?>"><i class="fas fa-edit m-2"></i></a>
-                                                            <a href="../../public/index.php?route=category/delete&id=<?= urlencode($category['id_Raison']) ?>" onclick="return confirm('Supprimer cette catégorie ?');"><i class="fas fa-trash text-danger"></i></a>
+                                                            <a href="../../platform_gmao/public/index.php?route=category/edit&id=<?= urlencode($category['id_Raison']) ?>"><i class="fas fa-edit m-2"></i></a>
+                                                            <a href="../../platform_gmao/public/index.php?route=category/delete&id=<?= urlencode($category['id_Raison']) ?>" onclick="return confirm('Supprimer cette catégorie ?');"><i class="fas fa-trash text-danger"></i></a>
                                                         </td>
                                                     <?php endif; ?>
                                                     <td><?= htmlspecialchars($category['raison_mouv_mach'] ?? '') ?></td>

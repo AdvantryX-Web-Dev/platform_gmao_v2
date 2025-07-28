@@ -47,7 +47,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <?php if ($isAdmin): ?>
                                 <div>
 
-                                    <a href="../../public/index.php?route=machine/create" class="btn btn-success">
+                                    <a href="../../platform_gmao/public/index.php?route=machine/create" class="btn btn-success">
                                         <i class="fas fa-plus"></i> Ajouter une machine
                                     </a>
                                 </div>
@@ -76,8 +76,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
                                                         <td>
-                                                            <a href="../../public/index.php?route=machine/edit&id=<?= urlencode($machine['machine_id'] ?? '') ?>"><i class="fas fa-edit m-2"></i></a>
-                                                            <a href="../../public/index.php?route=machine/delete&id=<?= urlencode($machine['machine_id'] ?? '') ?>" onclick="return confirm('Supprimer cette machine ?');"><i class="fas fa-trash text-danger"></i></a>
+                                                            <a href="../../platform_gmao/public/index.php?route=machine/edit&id=<?= urlencode($machine['machine_id'] ?? '') ?>"><i class="fas fa-edit m-2"></i></a>
+                                                            <a href="../../platform_gmao/public/index.php?route=machine/delete&id=<?= urlencode($machine['machine_id'] ?? '') ?>" onclick="return confirm('Supprimer cette machine ?');"><i class="fas fa-trash text-danger"></i></a>
                                                         </td>
                                                     <?php endif; ?>
                                                     <td><?= htmlspecialchars($machine['machine_id'] ?? '') ?></td>
@@ -180,7 +180,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
             // Fonction pour charger les données d'une machine spécifique avec les filtres appliqués
             function loadMachineData(machineId, startDate, endDate) {
-                let url = '/public/index.php?route=machine/stats&id_machine=' + machineId;
+                let url = '/platform_gmao/public/index.php?route=machine/stats&id_machine=' + machineId;
 
                 if (startDate) {
                     url += '&start_date=' + startDate;

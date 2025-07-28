@@ -38,7 +38,7 @@ class Motif_mvtController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout du motif.'];
             }
-            header('Location: /public/index.php?route=categories');
+            header('Location: /platform_gmao/public/index.php?route=categories');
             exit;
         }
 
@@ -51,7 +51,7 @@ class Motif_mvtController
         $id = $_GET['id'] ?? null;
         if (!$id) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du motif non spécifié.'];
-            header('Location: ../../public/index.php?route=categories');
+            header('Location: ../../platform_gmao/public/index.php?route=categories');
             exit;
         }
 
@@ -80,7 +80,7 @@ class Motif_mvtController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la modification du motif.'];
             }
-            header('Location: ../../public/index.php?route=categories');
+            header('Location: ../../platform_gmao/public/index.php?route=categories');
             exit;
         }
         $category = Categories_model::findById($id);
@@ -109,7 +109,7 @@ class Motif_mvtController
         } else {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID de la catégorie non spécifié.'];
         }
-        header('Location: ../../public/index.php?route=categories');
+        header('Location: ../../platform_gmao/public/index.php?route=categories');
         exit;
     }
 
@@ -124,7 +124,7 @@ class Motif_mvtController
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Accès non autorisé.'];
-            header('Location: ../../public/index.php?route=categories');
+            header('Location: ../../platform_gmao/public/index.php?route=categories');
             exit;
         }
 

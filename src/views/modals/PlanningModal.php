@@ -13,7 +13,7 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="planningForm" action="../../public/index.php?route=intervention_planning/save" method="POST">
+            <form id="planningForm" action="../../platform_gmao/public/index.php?route=intervention_planning/save" method="POST">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="machine_id"> Machine :</label>

@@ -145,7 +145,7 @@ if (!isset($mouvements)) {
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="mouvementForm" action="../../public/index.php?route=mouvement_machines/saveMouvement" method="POST">
+                    <form id="mouvementForm" action="../../platform_gmao/public/index.php?route=mouvement_machines/saveMouvement" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="type_mouvement" value="chaine_parc">
                             <div class="form-group">
@@ -226,7 +226,7 @@ if (!isset($mouvements)) {
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="receptionForm" action="../../public/index.php?route=mouvement_machines/accept" method="POST">
+                    <form id="receptionForm" action="../../platform_gmao/public/index.php?route=mouvement_machines/accept" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="mouvement_id" id="mouvement_id" value="">
                             <input type="hidden" name="machine_id" id="machine_id" value="">
@@ -329,7 +329,7 @@ if (!isset($mouvements)) {
                 if (machineType) {
                     // Récupérer les machines du type sélectionné
                     $.ajax({
-                        url: '../../public/index.php?route=mouvement_machines/getMachinesByType',
+                        url: '../../platform_gmao/public/index.php?route=mouvement_machines/getMachinesByType',
                         type: 'GET',
                         data: {
                             type: machineType,

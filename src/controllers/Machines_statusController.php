@@ -35,7 +35,7 @@ class Machines_statusController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout du statut de machine.'];
             }
-            header('Location: /public/index.php?route=machines_status/list');
+            header('Location: /platform_gmao/public/index.php?route=machines_status/list');
             exit;
         }
 
@@ -48,7 +48,7 @@ class Machines_statusController
         $id = $_GET['id'] ?? null;
         if (!$id) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du statut de machine non spécifié.'];
-            header('Location: /public/index.php?route=machines_status/list');
+            header('Location: /platform_gmao/public/index.php?route=machines_status/list');
             exit;
         }
 
@@ -74,7 +74,7 @@ class Machines_statusController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la modification du statut de machine.'];
             }
-            header('Location: /public/index.php?route=machines_status/list');
+            header('Location: /platform_gmao/public/index.php?route=machines_status/list');
             exit;
         }
         $machines_status = Machines_status_model::findById($id);
@@ -103,7 +103,7 @@ class Machines_statusController
         } else {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du statut de machine non spécifié.'];
         }
-        header('Location: /public/index.php?route=machines_status/list');
+        header('Location: /platform_gmao/public/index.php?route=machines_status/list');
         exit;
     }
 
@@ -118,7 +118,7 @@ class Machines_statusController
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Accès non autorisé.'];
-            header('Location: /public/index.php?route=machines_status/list');
+            header('Location: /platform_gmao/public/index.php?route=machines_status/list');
             exit;
         }
 

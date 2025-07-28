@@ -4,6 +4,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Load helpers
+require_once __DIR__ . '/helpers.php';
+
 /**
  * Fonction d'autoload pour charger automatiquement les classes
  */

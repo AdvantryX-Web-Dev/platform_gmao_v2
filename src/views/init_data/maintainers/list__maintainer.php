@@ -46,10 +46,10 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <h6 class="m-0 font-weight-bold text-primary">Liste des mainteneurs :</h6>
                             <?php if ($isAdmin): ?>
                                 <div>
-                                    <!-- <a href="../../public/index.php?route=audit_trails_history" class="btn btn-info mr-2">
+                                    <!-- <a href="../../platform_gmao/public/index.php?route=audit_trails_history" class="btn btn-info mr-2">
                                         <i class="fas fa-history"></i> Historique des modifications
                                     </a> -->
-                                    <a href="../../public/index.php?route=maintainer/create" class="btn btn-success">
+                                    <a href="../../platform_gmao/public/index.php?route=maintainer/create" class="btn btn-success">
                                         <i class="fas fa-plus"></i> Ajouter un mainteneur
                                     </a>
                                 </div>
@@ -75,8 +75,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
                                                         <td>
-                                                            <a href="../../public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>"><i class="fas fa-edit m-2"></i></a>
-                                                            <a href="../../public/index.php?route=maintainer/delete&id=<?= urlencode($maintainer['id']) ?>" onclick="return confirm('Supprimer ce mainteneur ?');"><i class="fas fa-trash text-danger"></i></a>
+                                                            <a href="../../platform_gmao/public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>"><i class="fas fa-edit m-2"></i></a>
+                                                            <a href="../../platform_gmao/public/index.php?route=maintainer/delete&id=<?= urlencode($maintainer['id']) ?>" onclick="return confirm('Supprimer ce mainteneur ?');"><i class="fas fa-trash text-danger"></i></a>
                                                         </td>
                                                     <?php endif; ?>
                                                     <td><?= htmlspecialchars($maintainer['matricule'] ?? '') ?></td>

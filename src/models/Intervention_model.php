@@ -281,7 +281,7 @@ class Intervention_model
         // Check if the request is POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $_SESSION['error'] = "Méthode non autorisée";
-            header('Location: ../../public/index.php?route=intervention_preventive');
+            header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
             return;
         }
 
@@ -290,7 +290,7 @@ class Intervention_model
         foreach ($requiredFields as $field) {
             if (empty($_POST[$field])) {
                 $_SESSION['error'] = "Le champ '$field' est requis";
-                header('Location: ../../public/index.php?route=intervention_preventive');
+                header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
                 return;
             }
         }
@@ -338,7 +338,7 @@ class Intervention_model
             $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
         }
 
-        header('Location: ../../public/index.php?route=intervention_preventive');
+        header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
     }
     public static function savePreventive()
     {
@@ -351,7 +351,7 @@ class Intervention_model
         // Check if the request is POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $_SESSION['error'] = "Méthode non autorisée";
-            header('Location: ../../public/index.php?route=intervention_preventive');
+            header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
             return;
         }
 
@@ -360,7 +360,7 @@ class Intervention_model
         // foreach ($requiredFields as $field) {
         //     if (empty($_POST[$field])) {
         //         $_SESSION['error'] = "Le champ '$field' est requis";
-        //         header('Location: ../../public/index.php?route=intervention_preventive');
+        //         header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
         //         return;
         //     }
         // }
@@ -368,7 +368,7 @@ class Intervention_model
 
         if (empty($_POST['planning_id']) && empty($_POST['intervention_type_id'])) {
             $_SESSION['error'] = "Vous ne pouvez pas sélectionner un planning et un type d'intervention en même temps";
-            header('Location: ../../public/index.php?route=intervention_preventive');
+            header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
             return;
         }
 
@@ -436,6 +436,6 @@ class Intervention_model
             }
             $_SESSION['error'] = "Erreur de base de données: " . $e->getMessage();
         }
-        header('Location: ../../public/index.php?route=intervention_preventive');
+        header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
     }
 }

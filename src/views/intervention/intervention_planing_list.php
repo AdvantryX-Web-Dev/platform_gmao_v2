@@ -97,7 +97,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <button class="btn btn-success mr-2" data-toggle="modal" data-target="#planningModal">
                                         <i class="fas fa-calendar-plus"></i> Ajouter au planning
                                     </button>
-                                    <a href="../../public/index.php?route=intervention_preventive" class="btn btn-primary">
+                                    <a href="../../platform_gmao/public/index.php?route=intervention_preventive" class="btn btn-primary">
                                         <i class="fas fa-arrow-left"></i> Retour
                                     </a>
                                     <!-- <button class="btn btn-success m-2" data-toggle="modal" data-target="#planningModal">

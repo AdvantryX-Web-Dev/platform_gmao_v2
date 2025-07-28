@@ -15,7 +15,7 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                 </button>
             </div>
 
-            <form id="ajoutInterventionPreventiveForm" action="../../public/index.php?route=intervention/savePreventive" method="POST">
+            <form id="ajoutInterventionPreventiveForm" action="../../platform_gmao/public/index.php?route=intervention/savePreventive" method="POST">
                 <div class="modal-body">
                     <div class="form-group planning">
                         <label for="planning_id"> Planning (optionnel) :</label>

@@ -41,16 +41,16 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
                             <h6 class="m-0 font-weight-bold text-primary">Historique des audits - Mainteneurs</h6>
                             <div>
-                                <a href="../../public/index.php?route=maintainers" class="btn btn-secondary"><i class="fas fa-history"></i>  Retour à la liste</a>
+                                <a href="../../platform_gmao/public/index.php?route=maintainers" class="btn btn-secondary"><i class="fas fa-history"></i>  Retour à la liste</a>
                                 <!-- <div class="dropdown d-inline-block">
                                     <button class="btn btn-primary dropdown-toggle" type="button" id="filterDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         Filtrer par action
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="filterDropdown">
-                                        <a class="dropdown-item" href="../../public/index.php?route=maintainer/audit">Tous</a>
-                                        <a class="dropdown-item" href="../../public/index.php?route=maintainer/audit&action=add">Ajouts</a>
-                                        <a class="dropdown-item" href="../../public/index.php?route=maintainer/audit&action=update">Modifications</a>
-                                        <a class="dropdown-item" href="../../public/index.php?route=maintainer/audit&action=delete">Suppressions</a>
+                                        <a class="dropdown-item" href="../../platform_gmao/public/index.php?route=maintainer/audit">Tous</a>
+                                        <a class="dropdown-item" href="../../platform_gmao/public/index.php?route=maintainer/audit&action=add">Ajouts</a>
+                                        <a class="dropdown-item" href="../../platform_gmao/public/index.php?route=maintainer/audit&action=update">Modifications</a>
+                                        <a class="dropdown-item" href="../../platform_gmao/public/index.php?route=maintainer/audit&action=delete">Suppressions</a>
                                     </div>
                                 </div> -->
                             </div>

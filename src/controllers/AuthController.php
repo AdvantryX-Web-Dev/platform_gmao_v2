@@ -329,7 +329,7 @@ class AuthController
         } else {
             $_SESSION['compte_update_error'] = $error;
         }
-        header('Location: ../../public/index.php?route=compte/update_compte&id=' . urlencode($matricule));
+        header('Location: ../../platform_gmao/public/index.php?route=compte/update_compte&id=' . urlencode($matricule));
         exit;
     }
 }

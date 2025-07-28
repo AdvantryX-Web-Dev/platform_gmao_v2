@@ -55,7 +55,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
                                 <div class="d-flex">
                                     <button type="submit" class="btn btn-primary mr-2">Enregistrer</button>
-                                    <a href="../../public/index.php?route=dashboard" class="btn btn-secondary">Annuler</a>
+                                    <a href="../../platform_gmao/public/index.php?route=dashboard" class="btn btn-secondary">Annuler</a>
                                 </div>
                             </form>
                         </div>

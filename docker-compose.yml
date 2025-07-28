@@ -11,10 +11,14 @@ services:
       - "8082:80"
     volumes:
       - ./:/var/www/html
+      - ./config/php.ini:/usr/local/etc/php/php.ini
     depends_on:
       - mysql
     networks:
       - gmao-network
+    restart: always
+    environment:
+      - BASE_URL=/platform_gmao
 
   # MySQL Service
   mysql:
@@ -28,10 +32,11 @@ services:
       MYSQL_ROOT_HOST: "%"
     command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - ./database/mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./database/init:/docker-entrypoint-initdb.d
     networks:
       - gmao-network
+    restart: always
 
   # phpMyAdmin Service
   phpmyadmin:
@@ -48,7 +53,11 @@ services:
       - mysql
     networks:
       - gmao-network
+    restart: always
 
 networks:
   gmao-network:
-    driver: bridge 
+    driver: bridge
+
+volumes:
+  mysql_data: 

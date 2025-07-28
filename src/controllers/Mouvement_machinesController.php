@@ -57,7 +57,7 @@ class Mouvement_machinesController
                     'type' => 'error',
                     'text' => 'Utilisateur non connecté ou non sélectionné.'
                 ];
-                header('Location: ../../public/index.php?route=mouvement_machines/' . $type_mouvement);
+                header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
                 exit;
             }
 
@@ -146,7 +146,7 @@ class Mouvement_machinesController
                 ];
             }
 
-            header('Location: ../../public/index.php?route=mouvement_machines/' . $type_mouvement);
+            header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
             exit;
         }
 
@@ -155,7 +155,7 @@ class Mouvement_machinesController
             'type' => 'error',
             'text' => 'Formulaire de réception non valide.'
         ];
-        header('Location: ../../public/index.php?route=mouvement_machines/parc_chaine');
+        header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine');
         exit;
     }
 
@@ -219,7 +219,7 @@ class Mouvement_machinesController
                     'type' => 'error',
                     'text' => 'Type de mouvement invalide.'
                 ];
-                header('Location: ../../public/index.php?route=mouvement_machines/' . $type_mouvement);
+                header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
                 exit;
             }
 
@@ -228,7 +228,7 @@ class Mouvement_machinesController
                     'type' => 'error',
                     'text' => 'Tous les champs sont obligatoires.'
                 ];
-                header('Location: ../../public/index.php?route=mouvement_machines/' . $type_mouvement);
+                header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
                 exit;
             }
 
@@ -266,12 +266,12 @@ class Mouvement_machinesController
             }
 
             // Rediriger vers la page d'où provient la demande
-            header('Location: ../../public/index.php?route=mouvement_machines/' . $type_mouvement);
+            header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
             exit;
         }
 
         // Si la méthode HTTP n'est pas POST, rediriger vers la page par défaut
-        header('Location: ../../public/index.php?route=mouvement_machines/parc_chaine');
+        header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine');
         exit;
     }
     public function getTypes($location)

@@ -115,7 +115,7 @@ unset($_SESSION['register_errors'], $_SESSION['register_old_values'], $_SESSION[
             <?php if (!empty($success)): ?>
             <div class="alert alert-success" role="alert">
                 <?php echo htmlspecialchars($success); ?>
-                <p>Vous pouvez maintenant <a href="/public/index.php?route=login">vous connecter</a>.</p>
+                <p>Vous pouvez maintenant <a href="/platform_gmao/public/index.php?route=login">vous connecter</a>.</p>
             </div>
             <?php endif; ?>
             
@@ -129,7 +129,7 @@ unset($_SESSION['register_errors'], $_SESSION['register_old_values'], $_SESSION[
             </div>
             <?php endif; ?>
             
-            <form action="/public/index.php?route=register" method="post">
+            <form action="/platform_gmao/public/index.php?route=register" method="post">
                 <div class="form-group">
                     <label for="matricule" class="col">Matricule:</label>
                     <span class="input-group-addon">
@@ -165,7 +165,7 @@ unset($_SESSION['register_errors'], $_SESSION['register_old_values'], $_SESSION[
                 </div>
             </form>
             <div class="text-center mt-3">
-                <p>Déjà inscrit? <a href="/public/index.php?route=login">Connectez-vous ici</a></p>
+                <p>Déjà inscrit? <a href="/platform_gmao/public/index.php?route=login">Connectez-vous ici</a></p>
             </div>
         </div>
     </div>

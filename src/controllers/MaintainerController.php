@@ -43,7 +43,7 @@ class MaintainerController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout du mainteneur.'];
             }
-            header('Location: /public/index.php?route=maintainers');
+            header('Location: /platform_gmao/public/index.php?route=maintainers');
             exit;
         }
 
@@ -56,7 +56,7 @@ class MaintainerController
         $id = $_GET['id'] ?? null;
         if (!$id) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du mainteneur non spécifié.'];
-            header('Location: ../../public/index.php?route=maintainers');
+            header('Location: ../../platform_gmao/public/index.php?route=maintainers');
             exit;
         }
 
@@ -90,7 +90,7 @@ class MaintainerController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la modification du mainteneur.'];
             }
-            header('Location: ../../public/index.php?route=maintainers');
+            header('Location: ../../platform_gmao/public/index.php?route=maintainers');
             exit;
         }
         $maintainer = Maintainer_model::findById($id);
@@ -119,7 +119,7 @@ class MaintainerController
         } else {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du mainteneur non spécifié.'];
         }
-        header('Location: ../../public/index.php?route=maintainers');
+        header('Location: ../../platform_gmao/public/index.php?route=maintainers');
         exit;
     }
 
@@ -134,7 +134,7 @@ class MaintainerController
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Accès non autorisé.'];
-            header('Location: ../../public/index.php?route=maintainers');
+            header('Location: ../../platform_gmao/public/index.php?route=maintainers');
             exit;
         }
 
@@ -155,7 +155,7 @@ class MaintainerController
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Accès non autorisé.'];
-            header('Location: ../../public/index.php?route=maintainers');
+            header('Location: ../../platform_gmao/public/index.php?route=maintainers');
             exit;
         }
 

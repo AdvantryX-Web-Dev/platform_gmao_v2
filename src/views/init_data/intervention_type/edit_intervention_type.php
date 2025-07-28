@@ -29,7 +29,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             <h6 class="m-0 font-weight-bold text-primary">Editer un type de intervention</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" action="/public/index.php?route=intervention_type/edit&id=<?= urlencode($intervention_type['id']) ?>">
+                            <form method="post" action="/platform_gmao/public/index.php?route=intervention_type/edit&id=<?= urlencode($intervention_type['id']) ?>">
                                 <div class="form-group">
                                     <label>Designation</label>
                                     <input type="text" name="designation" class="form-control" value="<?= htmlspecialchars($intervention_type['designation'] ?? '') ?>" required>
@@ -46,7 +46,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <input type="text" name="code" class="form-control" value="<?= htmlspecialchars($intervention_type['code'] ?? '') ?>" required>
                                 </div>
                                 <button type="submit" class="btn btn-success">Modifier</button>
-                                <a href="/public/index.php?route=intervention_type/list" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="/platform_gmao/public/index.php?route=intervention_type/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>

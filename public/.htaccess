@@ -1,4 +1,11 @@
 RewriteEngine On
+RewriteBase /platform_gmao/
+
+# Handle direct access to index.php
+RewriteRule ^index\.php$ - [L]
+
+# Redirect to index.php if file or directory doesn't exist
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L] 
+RewriteRule ^(.*)$ index.php [QSA,L]
+

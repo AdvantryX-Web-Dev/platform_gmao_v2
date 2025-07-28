@@ -29,7 +29,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             <h6 class="m-0 font-weight-bold text-primary">Editer un mainteneur</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" action="../../public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>">
+                            <form method="post" action="../../platform_gmao/public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>">
                                 <div class="form-group">
                                     <label>Card RFID</label>
                                     <input type="text" name="card_rfid" class="form-control" value="<?= htmlspecialchars($maintainer['card_rfid'] ?? '') ?>" readonly>
@@ -56,7 +56,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-success">Enregistrer</button>
-                                <a href="../../public/index.php?route=maintainers" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="../../platform_gmao/public/index.php?route=maintainers" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>

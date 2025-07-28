@@ -16,6 +16,7 @@ use App\Controllers\Motif_mvtController;
 use App\Controllers\Intervention_typeController;
 use App\Controllers\Machines_statusController;
 use App\Controllers\InterventionPlanningController;
+use App\Controllers\EquipementController;
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -27,6 +28,7 @@ $Motif_mvtController = new Motif_mvtController();
 $intervention_typeController = new Intervention_typeController();
 $machines_statusController = new Machines_statusController();
 $intervention_planningController = new InterventionPlanningController();
+$equipementController = new EquipementController();
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -132,6 +134,20 @@ switch ($route) {
     case 'intervention_type/delete':
         $intervention_typeController->delete();
         break;
+    /** Gestion des équipements */
+    case 'equipement/list':
+        $equipementController->list();
+        break;
+    case 'equipement/create':
+        $equipementController->create();
+        break;
+    case 'equipement/edit':
+        $equipementController->edit();
+        break;
+    case 'equipement/delete':
+        $equipementController->delete();
+        break;
+    case 'equipement/audit_trails':
     /** Gestion des états des machines */
     case 'machines_status/list':
         $machines_statusController->list();

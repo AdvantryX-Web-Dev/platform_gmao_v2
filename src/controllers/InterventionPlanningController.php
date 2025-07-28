@@ -86,7 +86,7 @@ class InterventionPlanningController
      */
     private function redirectToPlanning()
     {
-        header('Location: ../../public/index.php?route=intervention_preventive');
+        header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
         exit;
     }
 
@@ -232,7 +232,7 @@ class InterventionPlanningController
      */
     private function redirectToList()
     {
-        header('Location: ../../public/index.php?route=intervention_planning/list');
+        header('Location: ../../platform_gmao/public/index.php?route=intervention_planning/list');
         exit;
     }
 

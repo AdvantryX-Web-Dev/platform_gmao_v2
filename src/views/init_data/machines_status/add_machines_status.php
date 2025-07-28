@@ -44,7 +44,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
 
                                 <button type="submit" class="btn btn-success">Ajouter</button>
-                                <a href="/public/index.php?route=machines_status/list" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="/platform_gmao/public/index.php?route=machines_status/list" class="btn btn-secondary ml-2">Annuler</a>
 
                             </form>
                         </div>

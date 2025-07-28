@@ -26,7 +26,7 @@ class MachineController
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Accès non autorisé. Seuls les administrateurs peuvent ajouter des machines.'];
-            header('Location: /public/index.php?route=machines');
+            header('Location: /platform_gmao/public/index.php?route=machines');
             exit;
         }
 
@@ -60,7 +60,7 @@ class MachineController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout de la machine.'];
             }
-            header('Location: /public/index.php?route=machines');
+            header('Location: /platform_gmao/public/index.php?route=machines');
             exit;
         }
         include(__DIR__ . '/../views/init_data/machines/add_machine.php');
@@ -74,14 +74,14 @@ class MachineController
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Accès non autorisé. Seuls les administrateurs peuvent modifier des machines.'];
-            header('Location: /public/index.php?route=machines');
+            header('Location: /platform_gmao/public/index.php?route=machines');
             exit;
         }
 
         $id = $_GET['id'] ?? null;
         if (!$id) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID de la machine non spécifié.'];
-            header('Location: ../../public/index.php?route=machines');
+            header('Location: ../../platform_gmao/public/index.php?route=machines');
             exit;
         }
 
@@ -117,7 +117,7 @@ class MachineController
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la modification de la machine.'];
             }
-            header('Location: ../../public/index.php?route=machines');
+            header('Location: ../../platform_gmao/public/index.php?route=machines');
             exit;
         }
         $machine = Machine_model::findById($id);
@@ -132,7 +132,7 @@ class MachineController
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         if (!$isAdmin) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Accès non autorisé. Seuls les administrateurs peuvent supprimer des machines.'];
-            header('Location: /public/index.php?route=machines');
+            header('Location: /platform_gmao/public/index.php?route=machines');
             exit;
         }
 
@@ -154,7 +154,7 @@ class MachineController
         } else {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID de la machine non spécifié.'];
         }
-        header('Location: ../../public/index.php?route=machines');
+        header('Location: ../../platform_gmao/public/index.php?route=machines');
         exit;
     }
     /** Gestion des machines */

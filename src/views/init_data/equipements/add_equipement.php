@@ -2,13 +2,16 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+use App\Models\Categories_model;
+use App\Models\Equipement_model;
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
     <meta charset="UTF-8">
-    <title>Ajouter un type de intervention</title>
+    <title>Ajouter un équipement</title>
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" href="/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -26,36 +29,54 @@ if (session_status() === PHP_SESSION_NONE) {
                 <div class="container-fluid">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Ajouter un type de intervention</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Ajouter un équipement</h6>
                         </div>
                         <div class="card-body">
-                            <?php if (!empty($_SESSION['maintainer_success'])): ?>
-                                <div class="alert alert-success"><?= $_SESSION['maintainer_success'];
-                                                                    unset($_SESSION['maintainer_success']); ?></div>
+                            <?php if (!empty($_SESSION['equipement_success'])): ?>
+                                <div class="alert alert-success"><?= $_SESSION['equipement_success'];
+                                                                    unset($_SESSION['equipement_success']); ?></div>
                             <?php endif; ?>
-                            <?php if (!empty($_SESSION['maintainer_error'])): ?>
-                                <div class="alert alert-danger"><?= $_SESSION['maintainer_error'];
-                                                                unset($_SESSION['maintainer_error']); ?></div>
+                            <?php if (!empty($_SESSION['equipement_error'])): ?>
+                                <div class="alert alert-danger"><?= $_SESSION['equipement_error'];
+                                                                    unset($_SESSION['equipement_error']); ?></div>
+                               
                             <?php endif; ?>
                             <form method="post" action="">
+                                <div class="form-group">
+                                    <label>equipement ID</label>
+                                    <input type="text" name="equipment_id" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Référence</label>
+                                    <input type="text" name="reference" class="form-control" required>
+                                </div>
                                 <div class="form-group">
                                     <label>Designation</label>
                                     <input type="text" name="designation" class="form-control" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Type</label>
-                                    <select name="type" class="form-control" required>
-                                        <option value="preventive">Preventive</option>
-                                        <option value="curative">Curative</option>
+                                    <label>Catégorie</label>
+                                    <select name="equipment_category" class="form-control" required>
+                                        <?php
+                                        $categories = Equipement_model::AllCategorie();
+                                        foreach ($categories as $category) {
+                                            echo '<option value="' . $category['id'] . '">' . $category['category_name'] . '</option>';
+                                        }
+                                        ?>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Code</label>
-                                    <input type="text" name="code" class="form-control" required>
+                                    <label>Location</label>
+                                    <select name="location_id" class="form-control" required>
+                                        <?php
+                                        $locations = Equipement_model::AllLocations();
+                                        foreach ($locations as $location) {
+                                            echo '<option value="' . $location['id'] . '">' . $location['location_name'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
                                 </div>
-                                <div class="form-group">
-
-                                </div>
+                               
 
 
 

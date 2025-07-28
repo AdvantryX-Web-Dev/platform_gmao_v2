@@ -29,14 +29,14 @@ if (session_status() === PHP_SESSION_NONE) {
                             <h6 class="m-0 font-weight-bold text-primary">Editer un statut de machine</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" action="/public/index.php?route=machines_status/edit&id=<?= urlencode($machines_status['id']) ?>">
+                            <form method="post" action="/platform_gmao/public/index.php?route=machines_status/edit&id=<?= urlencode($machines_status['id']) ?>">
                                 <div class="form-group">
                                     <label>Statut de machine</label>
                                     <input type="text" name="status_name" class="form-control" value="<?= htmlspecialchars($machines_status['status_name'] ?? '') ?>" required>
                                 </div>
 
                                 <button type="submit" class="btn btn-success">Modifier</button>
-                                <a href="/public/index.php?route=machines_status/list" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="/platform_gmao/public/index.php?route=machines_status/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>

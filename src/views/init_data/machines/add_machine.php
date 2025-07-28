@@ -59,7 +59,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <input type="date" name="bill_date" class="form-control">
                                 </div>
                                 <button type="submit" class="btn btn-success">Ajouter</button>
-                                <a href="../../public/index.php?route=machines" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="../../platform_gmao/public/index.php?route=machines" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>

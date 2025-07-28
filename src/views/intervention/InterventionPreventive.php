@@ -120,7 +120,7 @@ $chaines = implantation_Prod_model::findAllChaines();
                                     $planningController = new \App\Controllers\InterventionPlanningController();
                                     $futureCount = $planningController->getFutureInterventionsCount();
                                     ?>
-                                    <a href="../../public/index.php?route=intervention_planning/list" class="btn btn-info">
+                                    <a href="../../platform_gmao/public/index.php?route=intervention_planning/list" class="btn btn-info">
                                         <i class="fas fa-calendar-alt"></i> Liste des planifications
                                         <?php if ($futureCount > 0): ?>
                                             <span class="badge badge-danger ml-1"><?= $futureCount ?></span>

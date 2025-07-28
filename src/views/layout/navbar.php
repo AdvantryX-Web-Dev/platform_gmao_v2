@@ -16,7 +16,7 @@
                 <i class="fas fa-cog fa-lg text-gray-600"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="settingsDropdown">
-                <a class="dropdown-item" href="../../public/index.php?route=compte/edit_email&id=<?= urlencode($_SESSION['matricule'] ?? '') ?>">
+                <a class="dropdown-item" href="../../platform_gmao/public/index.php?route=compte/edit_email&id=<?= urlencode($_SESSION['matricule'] ?? '') ?>">
                     <i class="fas fa-envelope fa-sm fa-fw mr-2 text-gray-400"></i>
                     Paramètres du compte
                 </a>
@@ -24,7 +24,7 @@
         </li>
         <!-- Icône logout avec tooltip au hover -->
         <li class="nav-item mx-2">
-            <a class="nav-link" href="../../public/index.php?route=logout" title="Se déconnecter" data-toggle="tooltip" data-placement="bottom">
+            <a class="nav-link" href="../../platform_gmao/public/index.php?route=logout" title="Se déconnecter" data-toggle="tooltip" data-placement="bottom">
                 <i class="fas fa-sign-out-alt fa-lg text-gray-600"></i>
             </a>
         </li>
@@ -34,7 +34,7 @@
             $firstLetter = strtoupper(substr($email, 0, 1));
         ?>
         <li class="nav-item mx-2">
-            <a href="../../public/index.php?route=compte/update_compte&id=<?= urlencode($_SESSION['matricule'] ?? '') ?>" title="Modifier mon compte">
+            <a href="../../platform_gmao/public/index.php?route=compte/update_compte&id=<?= urlencode($_SESSION['matricule'] ?? '') ?>" title="Modifier mon compte">
                 <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:40px; height:40px; font-size:1.2rem; cursor:pointer;" data-toggle="tooltip" data-placement="bottom" title="<?= htmlspecialchars($email) ?>">
                     <?= $firstLetter ?>
                 </div>

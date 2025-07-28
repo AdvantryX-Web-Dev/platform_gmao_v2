@@ -47,7 +47,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <?php if ($isAdmin): ?>
                                 <div>
 
-                                    <a href="/public/index.php?route=machines_status/create" class="btn btn-success">
+                                    <a href="/platform_gmao/public/index.php?route=machines_status/create" class="btn btn-success">
                                         <i class="fas fa-plus"></i> Ajouter un statut de machine
                                     </a>
                                 </div>
@@ -72,8 +72,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
                                                         <td>
-                                                            <a href="/public/index.php?route=machines_status/edit&id=<?= urlencode($machines_status['id']) ?>"><i class="fas fa-edit m-2"></i></a>
-                                                            <a href="/public/index.php?route=machines_status/delete&id=<?= urlencode($machines_status['id']) ?>" onclick="return confirm('Supprimer ce statut de machine ?');">
+                                                            <a href="/platform_gmao/public/index.php?route=machines_status/edit&id=<?= urlencode($machines_status['id']) ?>"><i class="fas fa-edit m-2"></i></a>
+                                                            <a href="/platform_gmao/public/index.php?route=machines_status/delete&id=<?= urlencode($machines_status['id']) ?>" onclick="return confirm('Supprimer ce statut de machine ?');">
                                                                 <i class="fas fa-trash text-danger"></i>
                                                         </td>
                                                     <?php endif; ?>

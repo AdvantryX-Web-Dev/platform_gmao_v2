@@ -29,7 +29,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             <h6 class="m-0 font-weight-bold text-primary">Editer un motif</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" action="../../public/index.php?route=category/edit&id=<?= urlencode($category['id_Raison']) ?>">
+                            <form method="post" action="../../platform_gmao/public/index.php?route=category/edit&id=<?= urlencode($category['id_Raison']) ?>">
                                 <div class="form-group">
                                     <label>Motif</label>
                                     <input type="text" name="raison_mouv_mach" class="form-control" value="<?= htmlspecialchars($category['raison_mouv_mach'] ?? '') ?>">
@@ -42,7 +42,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 
                                 <button type="submit" class="btn btn-success">Enregistrer</button>
-                                <a href="../../public/index.php?route=categories" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="../../platform_gmao/public/index.php?route=categories" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>
