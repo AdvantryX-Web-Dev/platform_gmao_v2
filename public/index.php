@@ -17,6 +17,10 @@ use App\Controllers\Intervention_typeController;
 use App\Controllers\Machines_statusController;
 use App\Controllers\InterventionPlanningController;
 use App\Controllers\EquipementController;
+use App\Controllers\EquipementsCategoryController;
+use App\Controllers\Equipment_MachineController;
+use App\Controllers\AccessoryController;
+use App\Controllers\Mouvement_equipmentController;
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -29,6 +33,10 @@ $intervention_typeController = new Intervention_typeController();
 $machines_statusController = new Machines_statusController();
 $intervention_planningController = new InterventionPlanningController();
 $equipementController = new EquipementController();
+$equipementsCategoryController = new EquipementsCategoryController();
+$Equipment_MachineController = new Equipment_MachineController();
+$AccessoryController = new AccessoryController();
+$Mouvement_equipmentController = new Mouvement_equipmentController();
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -147,6 +155,18 @@ switch ($route) {
     case 'equipement/delete':
         $equipementController->delete();
         break;
+    case 'equipementsCategory/list':
+        $equipementsCategoryController->list();
+        break;
+    case 'equipementsCategory/create':
+        $equipementsCategoryController->create();
+        break;
+    case 'equipementsCategory/edit':
+        $equipementsCategoryController->edit();
+        break;
+    case 'equipementsCategory/delete':
+        $equipementsCategoryController->delete();
+        break;
     case 'equipement/audit_trails':
     /** Gestion des états des machines */
     case 'machines_status/list':
@@ -173,7 +193,7 @@ switch ($route) {
     case 'machine/mouvement':
         require_once __DIR__ . '/../src/views/G_machines/MouvMachines.php';
         break;
-    
+
     case 'mouvement_machines/inter_chaine':
         $mouvement_machinesController->inter_chaine();
         break;
@@ -183,7 +203,7 @@ switch ($route) {
     case 'mouvement_machines/chaine_parc':
         $mouvement_machinesController->chaine_parc();
         break;
-   
+
     case 'mouvement_machines/accept':
         $mouvement_machinesController->accept();
         break;
@@ -192,6 +212,38 @@ switch ($route) {
         break;
     case 'mouvement_machines/saveMouvement':
         $mouvement_machinesController->saveMouvement();
+        break;
+    /** Gestion des équipements */
+    case 'Gestion_equipements/status':
+        $equipementController->equipements_state();
+        break;
+    case 'mouvement_equipements/history':
+        $Mouvement_equipmentController->showHistoryEquipement();
+        break;
+    case 'equipement_machine':
+        require_once __DIR__ . '/../src/views/G_equipements/Equipement_machine.php';
+        break;
+    case 'equipement_machine/affectation_equipmentMachine':
+        $Equipment_MachineController->affectation_equipmentMachine();
+        break;
+    case 'equipement_machine/affecter':
+        $AccessoryController->affecter();
+        break;
+
+    case 'mouvement_equipements/entre_magasin':
+        $Mouvement_equipmentController->entre_magasin();
+        break;
+
+    case 'mouvement_equipements/sortie_magasin':
+        $Mouvement_equipmentController->sortie_magasin();
+        break;
+
+    case 'mouvement_equipements/accept':
+        $Mouvement_equipmentController->accept();
+        break;
+
+    case 'mouvement_equipements/saveMouvement':
+        $Mouvement_equipmentController->saveMouvement();
         break;
     /** Gestion des interventions */
     case 'intervention_preventive':

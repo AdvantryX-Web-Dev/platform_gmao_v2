@@ -232,43 +232,7 @@ class MouvementMachine_model
         }
     }
 
-    /**
-     * Méthode de secours qui utilise plusieurs requêtes si la jointure entre bases échoue
-     */
 
-    // public static function findByMachine($id_machine)
-    // {
-    //     $db = new Database();
-    //     $conn = $db->getConnection();
-
-    //     $req = $conn->prepare("SELECT mm.*, m.reference, m.designation 
-    //         FROM gmao__mouvement_machine mm 
-    //         INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-    //         WHERE mm.id_machine = ?
-    //         ORDER BY mm.date_mouvement DESC");
-    //     $req->execute([$id_machine]);
-    //     $resultats = $req->fetchAll();
-    //     return $resultats;
-    // }
-
-    // public static function findPendingReception()
-    // {
-    //     $db = new Database();
-    //     $conn = $db->getConnection();
-
-    //     $req = $conn->query("SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-    //             e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-    //             CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name
-    //         FROM gmao__mouvement_machine mm 
-    //         INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-    //         INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-    //         LEFT JOIN init__employee e1 ON mm.idEmp = e1.matricule
-    //         WHERE mm.type_Mouv = 'parc_chaine' AND mm.idEmp_accepted IS NULL
-    //         ORDER BY mm.date_mouvement DESC");
-    //     $req->execute();
-    //     $resultats = $req->fetchAll();
-    //     return $resultats;
-    // }
 
     public static function historiqueMachine($machine_id)
     {

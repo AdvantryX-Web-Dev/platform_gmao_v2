@@ -34,6 +34,8 @@
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=intervention_type/list">Liste des interventions</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machines_status/list">Liste des états de machine</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=categories">Liste des motifs de mvt</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipementsCategory/list">Liste des catatgories</a>
+
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement/list">Liste des équipements</a>
             </div>
         </div>
@@ -62,11 +64,25 @@
     </li>
 
     <!-- 3. Gestion d'équipement -->
+  
     <li class="nav-item">
-        <a class="nav-link" href="../Vue/GestionEquipement.php">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionEquipement" aria-expanded="true" aria-controls="collapseGestionEquipement">
             <i class="fas fa-fw fa-tools"></i>
             <span>Gestion d'équipement</span>
         </a>
+        <div id="collapseGestionEquipement" class="collapse" aria-labelledby="headingGestionEquipement" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">  
+            <a class="collapse-item" href="../../platform_gmao/public/index.php?route=Gestion_equipements/status">Etat des équipements</a>
+            <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement_machine">Equipement-Machine</a>
+                <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvEquipement" aria-expanded="false" aria-controls="collapseMouvEquipement">Mouvement équipement </a>
+                <div id="collapseMouvEquipement" class="collapse ml-3" aria-labelledby="headingMouvEquipement" data-parent="#collapseGestionEquipement">
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/entre_magasin">Entrer en Magasin</a>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/sortie_magasin">Sortie de Magasin</a>
+
+
+                </div>
+            </div>
+        </div>
     </li>
 
     <!-- 4. Maintenance intervention -->

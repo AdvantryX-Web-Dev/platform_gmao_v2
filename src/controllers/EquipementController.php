@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\AuditTrail_model;
 use App\Models\Intervention_type_model;
 use App\Models\Equipement_model;
+use App\Models\Mouvement_equipment_model;
 
 class EquipementController
 {
@@ -27,7 +28,7 @@ class EquipementController
                 $_POST['equipment_category'],
                 $_POST['location_id']
             );
-    
+
             if (Equipement_model::StoreEquipement($equipement)) {
 
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'équipement ajouté avec succès !'];
@@ -35,7 +36,7 @@ class EquipementController
                 // Audit trail
                 if (isset($_SESSION['user']['matricule'])) {
                     $newValues = [
-                        'equipment_id'=>$_POST['equipment_id'],
+                        'equipment_id' => $_POST['equipment_id'],
                         'designation' => $_POST['designation'],
                         'reference' => $_POST['reference'],
                         'equipment_category' => $_POST['equipment_category'],
@@ -64,16 +65,18 @@ class EquipementController
         }
 
         // Récupérer les anciennes valeurs pour l'audit
-        $oldIntervention_type = Intervention_type_model::findById($id);
+        $oldIntervention_type = Equipement_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $intervention_type = new Intervention_type_model(
+            $equipement = new Equipement_model(
                 $id,
+                $_POST['equipment_id'],
                 $_POST['designation'],
-                $_POST['type'],
-                $_POST['code']
+                $_POST['reference'],
+                $_POST['equipment_category'],
+                $_POST['location_id']
             );
-            if (Intervention_type_model::UpdateInterventionType($intervention_type)) {
+            if (Equipement_model::UpdateEquipement($equipement)) {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'équipement modifié avec succès !'];
 
                 // Audit trail
@@ -81,9 +84,9 @@ class EquipementController
                     $newValues = [
                         'id' => $id,
                         'designation' => $_POST['designation'],
-
-                        'type' => $_POST['type'],
-                        'code' => $_POST['code']
+                        'reference' => $_POST['reference'],
+                        'equipment_category' => $_POST['equipment_category'],
+                        'location_id' => $_POST['location_id']
                     ];
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'update', 'gmao__type_intervention', $oldIntervention_type, $newValues);
                 }
@@ -93,7 +96,7 @@ class EquipementController
             header('Location: ../../platform_gmao/public/index.php?route=equipement/list');
             exit;
         }
-        $intervention_type = Intervention_type_model::findById($id);
+        $equipement = Equipement_model::findById($id);
 
         include(__DIR__ . '/../views/init_data/equipements/edit_equipement.php');
     }
@@ -104,9 +107,9 @@ class EquipementController
         $id = $_GET['id'] ?? null;
         if ($id) {
             // Récupérer les anciennes valeurs pour l'audit
-            $oldIntervention_type = Intervention_type_model::findById($id);
+            $oldIntervention_type = Equipement_model::findById($id);
 
-            if (Intervention_type_model::deleteById($id)) {
+            if (Equipement_model::deleteById($id)) {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Intervention type supprimé avec succès !'];
 
                 // Audit trail
@@ -146,5 +149,13 @@ class EquipementController
         $auditTrails = AuditTrail_model::getFilteredAuditTrails($action, $table, 100);
 
         include(__DIR__ . '/../views/init_data/equipements/audit_trails.php');
+    }
+
+    public function equipements_state()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $equipements = Equipement_model::equipements_state();
+
+        include(__DIR__ . '/../views/G_equipements/G_equipement_status/equipementStatus.php');
     }
 }

@@ -33,46 +33,43 @@ if (session_status() === PHP_SESSION_NONE) {
                         </div>
                         <div class="card-body">
                             <form method="post" action="/platform_gmao/public/index.php?route=equipement/edit&id=<?= urlencode($equipement['id']) ?>">
-                                <div class="form-group">
-                                    <label>Equipement ID</label>
-                                    <input type="text" name="designation" class="form-control" value="<?= htmlspecialchars($equipement['equipment_id'] ?? '') ?>" required>
-                                </div>
+                                
                                 <div class="form-group">
                                     <label>equipement ID</label>
-                                    <input type="text" name="equipment_id" class="form-control" required>
+                                    <input type="text" name="equipment_id" class="form-control" value="<?= htmlspecialchars($equipement['equipment_id'] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Référence</label>
-                                    <input type="text" name="reference" class="form-control" required>
+                                    <input type="text" name="reference" class="form-control" value="<?= htmlspecialchars($equipement['reference'] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Designation</label>
-                                    <input type="text" name="designation" class="form-control" required>
+                                    <input type="text" name="designation" class="form-control" value="<?= htmlspecialchars($equipement['designation'] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Catégorie</label>
-                                    <select name="equipment_category" class="form-control" required>
+                                    <select name="equipment_category" class="form-control" value="<?= htmlspecialchars($equipement['equipment_category'] ?? '') ?>" required>
                                         <?php
                                         $categories = Equipement_model::AllCategorie();
                                         foreach ($categories as $category) {
-                                            echo '<option value="' . $category['id'] . '">' . $category['category_name'] . '</option>';
+                                            echo '<option value="' . $category['id'] . '" ' . (isset($equipement['equipment_category']) && $equipement['equipment_category'] == $category['id'] ? 'selected' : '') . '>' . $category['category_name'] . '</option>';
                                         }
                                         ?>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Location</label>
-                                    <select name="location_id" class="form-control" required>
+                                    <select name="location_id" class="form-control" value="<?= htmlspecialchars($equipement['location_id'] ?? '') ?>" required>
                                         <?php
                                         $locations = Equipement_model::AllLocations();
                                         foreach ($locations as $location) {
-                                            echo '<option value="' . $location['id'] . '">' . $location['location_name'] . '</option>';
+                                            echo '<option value="' . $location['id'] . '" ' . (isset($equipement['location_id']) && $equipement['location_id'] == $location['id'] ? 'selected' : '') . '>' . $location['location_name'] . '</option>';
                                         }
                                         ?>
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-success">Modifier</button>
-                                <a href="/platform_gmao/public/index.php?route=intervention_type/list" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="/platform_gmao/public/index.php?route=equipement/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>

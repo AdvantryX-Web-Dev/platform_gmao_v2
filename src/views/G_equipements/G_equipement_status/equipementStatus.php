@@ -34,7 +34,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Etat des machines</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Etat des équipements</h6>
                             <!-- Suppression du filtre par état -->
                         </div>
                         <div class="card-body">
@@ -44,28 +44,27 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <?php
                                     // Calculer les statistiques
                                     $countProduction = 0;
-                                    $countParc = 0;
-                                    $countPanne = 0;
-                                    $countEmpty = 0;
-                                    $countInactive = 0;
-                                    $countTotal = is_array($machines) ? count($machines) : 0;
+                                    $countmagasin = 0;
+                                    $countFonctionnel = 0;
+                                    $countNonFonctionnel = 0;
+                                    $countnondefini = 0;
+                                    $countTotal = is_array($equipements) ? count($equipements) : 0;
 
-                                    if (is_array($machines)) {
-                                        foreach ($machines as $m) {
-                                            if (!empty($m['location']) && $m['location'] == 'prodline') {
+                                    if (is_array($equipements)) {
+                                        foreach ($equipements as $m) {
+                                            if (!empty($m['location_name']) && $m['location_name'] == 'prodline' || $m['location_name'] == 'CH4') {
                                                 $countProduction++;
                                             }
-                                            if (!empty($m['location']) && $m['location'] == 'parc') {
-                                                $countParc++;
+                                            if (!empty($m['location_name']) && $m['location_name'] == 'magasin') {
+                                                $countmagasin++;
                                             }
-                                            if (!empty($m['etat_machine']) && ($m['etat_machine'] == 'en panne' || $m['etat_machine'] == 'ferraille')) {
-                                                $countPanne++;
+                                            if (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'fonctionnel')) {
+                                                $countFonctionnel++;
+                                            } else {
+                                                $countNonFonctionnel++;
                                             }
-                                            if (!empty($m['etat_machine']) && $m['etat_machine'] == 'inactive') {
-                                                $countInactive++;
-                                            }
-                                            if (empty($m['etat_machine'])) {
-                                                $countEmpty++;
+                                            if (empty($m['etat_equipement'])) {
+                                                $countnondefini++;
                                             }
                                         }
                                     }
@@ -78,8 +77,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">En production</div>
-                                                        <div class="status-count text-gray-800" id="count-production"><?php echo $countProduction; ?></div>
+                                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">dans le magasin</div>
+                                                        <div class="status-count text-gray-800" id="count-magasin"><?php echo $countmagasin; ?></div>
                                                     </div>
                                                     <div class="col-auto">
                                                         <i class="fas fa-cogs fa-2x status-card-icon text-success"></i>
@@ -89,14 +88,14 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </div>
                                     </div>
 
-                                    <!-- Parc Card -->
+                                    <!-- prod Card -->
                                     <div class="col-xl-2 col-md-4 mb-4">
                                         <div class="card border-left-primary shadow h-100 py-3">
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Dans le parc</div>
-                                                        <div class="status-count text-gray-800" id="count-parc"><?php echo $countParc; ?></div>
+                                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Dans le production</div>
+                                                        <div class="status-count text-gray-800" id="count-production"><?php echo $countProduction; ?></div>
                                                     </div>
                                                     <div class="col-auto">
                                                         <i class="fas fa-warehouse fa-2x status-card-icon text-primary"></i>
@@ -106,14 +105,14 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </div>
                                     </div>
 
-                                    <!-- Panne Card -->
+                                    <!-- non fonctionnel Card -->
                                     <div class="col-xl-2 col-md-4 mb-4">
                                         <div class="card border-left-danger shadow h-100 py-3">
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">En panne - ferraille</div>
-                                                        <div class="status-count text-gray-800" id="count-panne"><?php echo $countPanne; ?></div>
+                                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Non fonctionnel</div>
+                                                        <div class="status-count text-gray-800" id="count-nonFonctionnel"><?php echo $countNonFonctionnel; ?></div>
                                                     </div>
                                                     <div class="col-auto">
                                                         <i class="fas fa-exclamation-triangle fa-2x status-card-icon text-danger"></i>
@@ -123,30 +122,29 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </div>
                                     </div>
 
-                                    <!-- Inactive Card -->
+                                    <!-- fonctionnel Card -->
                                     <div class="col-xl-2 col-md-4 mb-4">
-                                        <div class="card border-left-warning shadow h-100 py-3">
+                                        <div class="card border-left-success shadow h-100 py-3">
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Inactives</div>
-                                                        <div class="status-count text-gray-800" id="count-inactive"><?php echo $countInactive; ?></div>
+                                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Fonctionnel</div>
+                                                        <div class="status-count text-gray-800" id="count-Fonctionnel"><?php echo $countFonctionnel; ?></div>
                                                     </div>
                                                     <div class="col-auto">
-                                                        <i class="fas fa-pause-circle fa-2x status-card-icon text-warning"></i>
+                                                        <i class="fas fa-check-circle fa-2x status-card-icon text-success"></i>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                     <!-- Total Card -->
                                     <div class="col-xl-2 col-md-4 mb-4">
                                         <div class="card border-left-info shadow h-100 py-3">
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total machines</div>
+                                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total equipements implementés</div>
                                                         <div class="status-count text-gray-800" id="count-total"><?php echo $countTotal; ?></div>
                                                     </div>
                                                     <div class="col-auto">
@@ -156,15 +154,14 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </div>
                                         </div>
                                     </div>
-
                                     <!-- No Status Card -->
                                     <div class="col-xl-2 col-md-4 mb-4">
                                         <div class="card border-left-warning shadow h-100 py-3">
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Machines non définies</div>
-                                                        <div class="status-count text-gray-800" id="count-empty-status"><?php echo $countEmpty; ?></div>
+                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Equipements non définies</div>
+                                                        <div class="status-count text-gray-800" id="count-empty-status"><?php echo $countnondefini; ?></div>
                                                     </div>
                                                     <div class="col-auto">
                                                         <i class="fas fa-question-circle fa-2x status-card-icon text-warning"></i>
@@ -173,73 +170,64 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
+
                                 </div>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th></th>
-
-                                            <th>Machine</th>
+                                            <!-- <th></th> -->
+                                            <th>Equipement</th>
                                             <th>Référence</th>
-                                            <th>Désignation</th>
-                                            <th>Type</th>
+                                            <th>Machine</th>
                                             <th>Emplacement</th>
                                             <th>Etat</th>
-                                            <th>Date de la dernière action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (is_array($machines) && count($machines) > 0): ?>
-                                            <?php foreach ($machines as $machine): ?>
+                                        <?php if (is_array($equipements) && count($equipements) > 0): ?>
+                                            <?php foreach ($equipements as $equipement): ?>
                                                 <tr>
-                                                    <td>
-                                                        <a href="?route=mouvement_machines/history&machine_id=<?= htmlspecialchars($machine['machine_id']) ?>" class="btn btn-info btn-sm" title="Voir l'historique des mouvements">
+                                                    <!-- <td>
+                                                        <a href="?route=mouvement_equipements/history&equipement_id=<?= htmlspecialchars($equipement['id']) ?>" class="btn btn-info btn-sm" title="Voir l'historique des mouvements">
                                                             <i class="fas fa-history"></i>
                                                         </a>
 
-                                                    </td>
-                                                    <td><?= isset($machine['machine_id']) ? htmlspecialchars($machine['machine_id']) : 'Non défini' ?></td>
-                                                    <td><?= isset($machine['reference']) ? htmlspecialchars($machine['reference']) : 'Non défini' ?></td>
-                                                    <td><?= isset($machine['designation']) ? htmlspecialchars($machine['designation']) : 'Non défini' ?></td>
+                                                    </td> -->
+                                                    <td><?= isset($equipement['equipment_id']) ? htmlspecialchars($equipement['equipment_id']) : 'Non défini' ?></td>
+                                                    <td><?= isset($equipement['reference']) ? htmlspecialchars($equipement['reference']) : 'Non défini' ?></td>
+                                                    <td><?= isset($equipement['machine_id']) ? htmlspecialchars($equipement['machine_id']) : 'Non défini' ?></td>
 
-                                                    <td><?= isset($machine['type']) ? htmlspecialchars($machine['type']) : 'Non défini' ?></td>
                                                     <td>
                                                         <?php
-                                                        if (empty($machine['location'])) {
+                                                        if (empty($equipement['location_name'])) {
                                                             echo '<span class="badge badge-secondary">Non défini</span>';
-                                                        } elseif ($machine['location'] == 'parc') {
-                                                            echo '<span class="badge badge-primary">Parc</span>';
-                                                        } elseif ($machine['location'] == 'prodline') {
+                                                        } elseif ($equipement['location_name'] == 'prodline') {
                                                             echo '<span class="badge badge-success">En production</span>';
                                                         } else {
-                                                            echo htmlspecialchars($machine['location']);
+                                                            echo '<span class="badge badge-primary">' . htmlspecialchars($equipement['location_name']) . '</span>';
                                                         }
                                                         ?>
                                                     </td>
                                                     <td class="text-center">
                                                         <?php
-                                                        $status = $machine['etat_machine'] ?? 'Non défini';
-
-                                                        if ($status == 'active') {
+                                                        $status = $equipement['etat_equipement'] ?? 'Non défini';
+                                                        if (empty($equipement['etat_equipement'])) {
+                                                            echo '<span class="badge badge-secondary ">' . 'non défini' . '</span>';
+                                                        } elseif ($status == 'fonctionnel') {
                                                             echo '<span class="badge badge-success ">' . htmlspecialchars($status) . '</span>';
-                                                        } elseif ($status == 'en panne' || $status == 'ferraille') {
-                                                            echo '<span class="badge badge-danger">' . htmlspecialchars($status) . '</span>';
-                                                        } elseif ($status == 'inactive') {
-                                                            echo '<span class="badge badge-warning ">' . htmlspecialchars($status) . '</span>';
                                                         } else {
-                                                            echo '<span class="badge badge-secondary ">' . htmlspecialchars($status) . '</span>';
+                                                            echo '<span class="badge badge-danger ">' . 'non fonctionnel' . '</span>';
                                                         }
                                                         ?>
                                                     </td>
-                                                    <td><?= isset($machine['updated_at']) ? htmlspecialchars($machine['updated_at']) : 'Non défini' ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="6">Aucune machine trouvée.</td>
+                                                <td colspan="6">Aucun équipement trouvé.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>

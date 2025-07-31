@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Import the controller class
-use App\Controllers\Machine_boxController;
+use App\Controllers\Equipment_MachineController;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,41 +51,73 @@ use App\Controllers\Machine_boxController;
             <div id="content">
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"></nav>
                 <!-- Begin Page Content -->
+
                 <div class="container-fluid">
+                    <?php
+                    if (isset($_SESSION['equipement_success'])) {
+                        echo '<div class="alert alert-success alert-dismissible fade show">' . $_SESSION['equipement_success'] .
+                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button></div>';
+                        unset($_SESSION['equipement_success']);
+                    }
+                    if (isset($_SESSION['equipement_error'])) {
+                        echo '<div class="alert alert-danger alert-dismissible fade show">' . $_SESSION['equipement_error'] .
+                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button></div>';
+                        unset($_SESSION['equipement_error']);
+                    }
+                    ?>
                     <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Affectation machine – Box:</h6>
+                            <div class="d-flex justify-content-end">
+                                <a href="?route=equipement_machine/affectation_equipmentMachine" class="btn btn-primary">Ajouter un affectation</a>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>Chaine de production <i class="fas fa-sort"></i></th>
+                                            <th>Equipement <i class="fas fa-sort"></i></th>
                                             <th>Machine <i class="fas fa-sort"></i></th>
-                                            <th>Désignation machine <i class="fas fa-sort"></i></th>
-                                            <th>DigiTex<i class="fas fa-sort"></i></th>
-                                            <th>Poste <i class="fas fa-sort"></i></th>
+                                            <th>Référence <i class="fas fa-sort"></i></th>
+                                            <th>Emplacement <i class="fas fa-sort"></i></th>
+                                            <th>Responsable <i class="fas fa-sort"></i></th>
                                             <th>Date <i class="fas fa-sort"></i></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
-                                        // Use the correct path to the controller
-                                        $machs_box = Machine_boxController::affectationBoxsMachines();
+                                        $machs_box = Equipment_MachineController::ListEquipementsMachines();
 
                                         foreach ($machs_box as $mach_box) {
+                                            echo '<tr>';
+                                            echo '<td>' . $mach_box['accessory_ref'] . '</td>';
+                                            echo '<td>' . $mach_box['machine_id'] . '</td>';
+                                            echo '<td>' . $mach_box['reference'] . '</td>';
 
-                                            echo '<tr><td > ' . $mach_box['prod_line'] . '</td>
-                                            <td > ' . $mach_box['machine_id'] . '</td>
-                                            <td > ' . $mach_box['designation'] . '</td> <td> ' . $mach_box['smartbox'] . '</td><td > ' . $mach_box['position'] . '</td><td> D: ' . $mach_box['cur_date'] . '<br> H: ' . $mach_box['cur_time'] .
-                                                '</td></tr>';
+                                            echo '<td>';
+                                            if (empty($mach_box['location_name'])) {
+                                                echo '<span class="badge badge-secondary">Non défini</span>';
+                                            } elseif ($mach_box['location_name'] == 'prodline') {
+                                                echo '<span class="badge badge-success">En production</span>';
+                                            } else {
+                                                echo '<span class="badge badge-primary">' . htmlspecialchars($mach_box['location_name']) . '</span>';
+                                            }
+                                            echo '</td>';
+
+                                            echo '<td>' . $mach_box['maintainer'] . '</td>';
+                                            echo '<td>' . $mach_box['allocation_date'] . '<br> H: ' . $mach_box['allocation_time'] . '</td>';
+                                            echo '</tr>';
                                         }
                                         ?>
-
                                     </tbody>
+
                                 </table>
                             </div>
                         </div>

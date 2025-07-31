@@ -46,6 +46,7 @@ class MachineController
 
                 // Audit trail
                 if (isset($_SESSION['user']['matricule'])) {
+                    
                     $newValues = [
                         'machine_id' => $machine_id,
                         'designation' => $_POST['designation'],
@@ -57,6 +58,7 @@ class MachineController
                     ];
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'init__machine', null, $newValues);
                 }
+              
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout de la machine.'];
             }
