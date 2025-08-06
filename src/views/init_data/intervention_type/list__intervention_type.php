@@ -48,7 +48,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                 <div>
 
                                     <a href="/platform_gmao/public/index.php?route=intervention_type/create" class="btn btn-success">
-                                        <i class="fas fa-plus"></i> Ajouter un type de intervention
+                                        <i class="fas fa-plus"></i> Ajouter un type d'intervention
                                     </a>
                                 </div>
                             <?php endif; ?>

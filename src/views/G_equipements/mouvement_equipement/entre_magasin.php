@@ -223,7 +223,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="receptionModalLabel">
-                            <i class="fas fa-check-circle"></i> Réception de Equipement
+                            <i class="fas fa-check-circle"></i> Réception d'équipement
                         </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -254,7 +254,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     ?>
                                 </select>
                                 <div class="form-group">
-                                    <label for="etat_equipement">Etat de l'Equipement :</label>
+                                    <label for="etat_equipement">Etat de l'équipement :</label>
                                     <select class="form-control" id="etat_equipement" name="etat_equipement" required>
                                         <option value="">--Etat de l'Equipement--</option>
                                         <?php
