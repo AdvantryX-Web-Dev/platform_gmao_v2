@@ -17,10 +17,15 @@ $prodline_id = $selectedChaine;
 $findChaineById = Implantation_Prod_model::findChaineById($prodline_id);
 $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
 
+// Récupérer les dates de filtre
+$date_debut = $_GET['date_debut'] ?? date('Y-m-d', strtotime('-1 month'));
+$date_fin = $_GET['date_fin'] ?? date('Y-m-d');
+
+// Passer les dates au contrôleur
 
 
 $interventionController = new \App\Controllers\InterventionController();
-$aleas = $interventionController->getAleasProduction($nomCh);
+$aleas = $interventionController->getAleasProduction($nomCh, $date_debut, $date_fin);
 
 ?>
 
@@ -94,7 +99,26 @@ $aleas = $interventionController->getAleasProduction($nomCh);
                                         <i class="fas fa-arrow-left"></i> Retour
                                     </a>
                                 </div>
+
                             </div>
+
+                        </div>
+                        <!-- Filtre de date -->
+                        <div class="card-body border-bottom date-filter-section">
+                            <form id="dateFilterForm" method="GET" class="row justify-content-end align-items-end ">
+                                <input type="hidden" name="route" value="intervention_aleas">
+                                <input type="hidden" name="chaine" value="<?= htmlspecialchars($selectedChaine) ?>">
+                                <div class="col-md-3">
+                                    <label for="date_debut" class="form-label">Date de début :</label>
+                                    <input type="date" class="form-control" id="date_debut" name="date_debut"
+                                        value="<?= $_GET['date_debut'] ?? date('Y-m-d', strtotime('-1 month')) ?>" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="date_fin" class="form-label">Date de fin :</label>
+                                    <input type="date" class="form-control" id="date_fin" name="date_fin"
+                                        value="<?= $_GET['date_fin'] ?? date('Y-m-d') ?>" required>
+                                </div>
+                            </form>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -175,6 +199,22 @@ $aleas = $interventionController->getAleasProduction($nomCh);
                     initComplete: function(settings, json) {
                         if ($('#dataTable tbody tr').length === 0) {
                             $('#dataTable tbody').append('<tr><td colspan="9" class="text-center">Aucune donnée disponible</td></tr>');
+                        }
+                    }
+                });
+                // Soumission automatique du filtre dès qu'une date change
+                $('#date_debut, #date_fin').on('change', function() {
+                    var dateDebut = $('#date_debut').val();
+                    var dateFin = $('#date_fin').val();
+                    // Validation simple
+                    if (dateDebut && dateFin && dateDebut <= dateFin) {
+                        $('#date_fin').removeClass('is-invalid');
+                        $('#date_fin').next('.invalid-feedback').remove();
+                        $('#dateFilterForm')[0].submit();
+                    } else if (dateDebut && dateFin && dateDebut > dateFin) {
+                        $('#date_fin').addClass('is-invalid');
+                        if (!$('#date_fin').next('.invalid-feedback').length) {
+                            $('#date_fin').after('<div class="invalid-feedback">La date de fin doit être postérieure à la date de début</div>');
                         }
                     }
                 });

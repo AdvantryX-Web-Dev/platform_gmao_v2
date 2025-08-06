@@ -119,7 +119,7 @@ class InterventionPlanningController
                     p.comments, 
                     p.created_at,
                     p.updated_at,
-                    ia.created_at as intervention_date
+                    ia.	intervention_date as intervention_date
                 FROM 
                     gmao__planning p
                 LEFT JOIN 

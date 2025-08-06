@@ -116,6 +116,22 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                                 </div>
                             </div>
                         </div>
+                        <!-- Filtre de date -->
+                        <div class="card-body border-bottom date-filter-section">
+                            <form id="dateFilterForm" method="GET" class="row justify-content-end align-items-end ">
+                                <input type="hidden" name="route" value="intervention_curative">
+                                <div class="col-md-3">
+                                    <label for="date_debut" class="form-label">Date de début :</label>
+                                    <input type="date" class="form-control" id="date_debut" name="date_debut"
+                                        value="<?= $_GET['date_debut'] ?? date('Y-m-d', strtotime('-1 month')) ?>" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="date_fin" class="form-label">Date de fin :</label>
+                                    <input type="date" class="form-control" id="date_fin" name="date_fin"
+                                        value="<?= $_GET['date_fin'] ?? date('Y-m-d') ?>" required>
+                                </div>
+                            </form>
+                        </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -132,12 +148,15 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
 
                                     <tbody>
                                         <?php
+                                        // Récupérer les dates de filtre
+                                        $date_debut = $_GET['date_debut'] ?? date('Y-m-d', strtotime('-1 month'));
+                                        $date_fin = $_GET['date_fin'] ?? date('Y-m-d');
 
                                         $interventionController = new \App\Controllers\InterventionController();
 
                                         // Récupérer les interventions curatives avec prodline_id et nomCh
 
-                                        $machines = $interventionController->curativeByChaine();
+                                        $machines = $interventionController->curativeByChaine($date_debut, $date_fin);
 
                                         foreach ($machines as $machine) {
                                             // Les données sont déjà agrégées par machine par la méthode curativeByChaine
@@ -215,6 +234,22 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                         url: '//cdn.datatables.net/plug-ins/1.11.6/i18n/fr_fr.json'
                     }
                 });
+            });
+            // Soumission automatique du filtre dès qu'une date change
+            $('#date_debut, #date_fin').on('change', function() {
+                var dateDebut = $('#date_debut').val();
+                var dateFin = $('#date_fin').val();
+                // Validation simple
+                if (dateDebut && dateFin && dateDebut <= dateFin) {
+                    $('#date_fin').removeClass('is-invalid');
+                    $('#date_fin').next('.invalid-feedback').remove();
+                    $('#dateFilterForm')[0].submit();
+                } else if (dateDebut && dateFin && dateDebut > dateFin) {
+                    $('#date_fin').addClass('is-invalid');
+                    if (!$('#date_fin').next('.invalid-feedback').length) {
+                        $('#date_fin').after('<div class="invalid-feedback">La date de fin doit être postérieure à la date de début</div>');
+                    }
+                }
             });
         </script>
 

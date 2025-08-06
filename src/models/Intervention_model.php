@@ -34,33 +34,27 @@ class Intervention_model
         $this->$attr = $value;
     }
 
-    // public static function findByChaine($nomCh)
-    // {
-    //     $db = new Database();
-    //     $conn = $db->getConnection();
-    //     $req = $conn->query("SELECT m.designation, pi.*
-    //     FROM prod__implantation pi
-    //      JOIN init__machine m on (pi.machine_id=m.machine_id)
-    //      where pi.prod_line ='$nomCh'
-    //       and pi.machine_id NOT IN (
-    //       select id_machine from `gmao__mouvement_machine`
-    //         WHERE (type_Mouv = 'chaine_parc' ) 
-    //         OR (type_Mouv = 'parc_chaine')
-    //         )
-    //      ORDER BY pi.cur_date, pi.cur_time
 
-    //      ");
-    //     $machines = $req->fetchAll();
-    //     return $machines;
-    // }
-    public static function preventiveByChaine()
+    public static function preventiveByChaine($date_debut, $date_fin)
     {
+        // echo print_r($date_debut , $date_fin);die();
 
         $db = new Database();
         $conn = $db->getConnection();
 
+        // Construire la requête avec les filtres de date
+        $whereClause = "WHERE (a.planning_id IS NOT NULL OR (a.planning_id IS NULL AND t.type = 'preventive'))";
+        $params = [];
+
+        if ($date_debut && $date_fin) {
+
+            $whereClause .= " AND a.intervention_date BETWEEN :date_debut AND :date_fin";
+            $params[':date_debut'] = $date_debut;
+            $params[':date_fin'] = $date_fin;
+        }
+
         // Récupérer toutes les interventions préventives
-        $req = $conn->query("
+        $sql = "
             SELECT 
                 a.*, 
                 t.type, 
@@ -79,14 +73,13 @@ class Intervention_model
                 gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
                 db_mahdco.init__machine m ON a.machine_id = m.id
-            WHERE 
-                
-                    a.planning_id IS NOT NULL 
-                    OR (a.planning_id IS NULL AND t.type = 'preventive')
-                
+            $whereClause
             ORDER BY 
                 a.created_at DESC
-        ");
+        ";
+
+        $req = $conn->prepare($sql);
+        $req->execute($params);
 
         $interventionspreventive = $req->fetchAll();
 
@@ -119,14 +112,23 @@ class Intervention_model
 
     }
 
-    public static function curativeByChaine()
+    public static function curativeByChaine($date_debut, $date_fin)
     {
+
 
         $db = new Database();
         $conn = $db->getConnection();
+        // Construire la requête avec les filtres de date
+        $whereClause = "WHERE  t.type = 'curative'";
+        $params = [];
+        if ($date_debut && $date_fin) {
 
+            $whereClause .= " AND a.intervention_date BETWEEN :date_debut AND :date_fin";
+            $params[':date_debut'] = $date_debut;
+            $params[':date_fin'] = $date_fin;
+        }
         // Récupérer toutes les interventions préventives
-        $req = $conn->query("
+        $sql  = ("
             SELECT 
                 a.*, 
                 t.type, 
@@ -145,13 +147,15 @@ class Intervention_model
                 gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
                 db_mahdco.init__machine m ON a.machine_id = m.id
-            WHERE 
-                 t.type = 'curative'
+           
+             $whereClause
+
                
             ORDER BY 
                 a.created_at DESC
         ");
-
+        $req = $conn->prepare($sql);
+        $req->execute($params);
         $interventionspreventive = $req->fetchAll();
 
         // Compter le nombre d'interventions par machine et récupérer la dernière date

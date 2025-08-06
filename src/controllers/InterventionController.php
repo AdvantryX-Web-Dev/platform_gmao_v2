@@ -15,9 +15,10 @@ class InterventionController
     {
         include(__DIR__ . '/../views/intervention/InterventionPreventive.php');
     }
-    public function preventiveByChaine()
+    public function preventiveByChaine($date_debut, $date_fin)
     {
-        $machines = Intervention_model::preventiveByChaine();
+
+        $machines = Intervention_model::preventiveByChaine($date_debut, $date_fin);
 
         return $machines;
     }
@@ -31,10 +32,10 @@ class InterventionController
     /**
      * Display the curative by chaine
      */
-    public function curativeByChaine()
+    public function curativeByChaine($date_debut, $date_fin)
     {
 
-        $machines = Intervention_model::curativeByChaine();
+        $machines = Intervention_model::curativeByChaine($date_debut, $date_fin);
 
         return $machines;
     }
@@ -181,7 +182,7 @@ class InterventionController
      * @param string|null $prodline_id Filtre optionnel par chaîne de production
      * @return array Liste des aléas en production
      */
-    public function getAleasProduction($nomCh = null)
+    public function getAleasProduction($nomCh = null, $date_debut = null, $date_fin = null)
     {
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
@@ -225,6 +226,11 @@ class InterventionController
         if (!empty($nomCh)) {
             $query .= " AND pi.prod_line = :nomCh";
             $params[':nomCh'] = $nomCh;
+        }
+        if (!empty($date_debut) && !empty($date_fin)) {
+            $query .= " AND ari.created_at BETWEEN :date_debut AND :date_fin";
+            $params[':date_debut'] = $date_debut;
+            $params[':date_fin'] = $date_fin;
         }
 
         // Grouper par machine_id

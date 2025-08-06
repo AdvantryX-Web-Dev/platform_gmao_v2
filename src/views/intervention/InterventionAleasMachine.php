@@ -88,6 +88,7 @@ if (empty($aleas)) {
                                     <i class="fas fa-arrow-left"></i> Retour à la liste
                                 </a>
                             </div>
+
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">

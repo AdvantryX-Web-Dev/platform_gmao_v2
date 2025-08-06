@@ -1,9 +1,7 @@
 <?php
 
-use App\Controllers\InterventionController;
 use App\Models\Implantation_Prod_model;
 
-use App\Models\Database;
 
 // Initialisation du filtre chaîne AVANT tout HTML
 $chaines = Implantation_Prod_model::findAllChaines();
@@ -35,6 +33,34 @@ $chaines = Implantation_Prod_model::findAllChaines();
     <script src="/platform_gmao/public/js/chart.js"></script>
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/InterventionChefMain.css">
+    <style>
+        .date-filter-section {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .date-filter-section .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .date-filter-section .btn {
+            margin-top: 5px;
+        }
+
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+    </style>
 
 </head>
 
@@ -105,10 +131,10 @@ $chaines = Implantation_Prod_model::findAllChaines();
                         <div class="card-header py-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h6 class="m-0 font-weight-bold text-primary"> Liste des interventions préventives sur les Machines de chaine
-                                     :
+                                    :
                                 </h6>
                                 <div class="d-flex align-items-center">
-                                    
+
                                     <button class="btn btn-primary mr-2" data-toggle="modal" data-target="#ajoutInterventionPreventiveModal">
                                         <i class="fas fa-tools"></i> Ajouter intervention préventive
                                     </button>
@@ -129,6 +155,25 @@ $chaines = Implantation_Prod_model::findAllChaines();
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Filtre de date -->
+                        <div class="card-body border-bottom date-filter-section">
+                            <form id="dateFilterForm" method="GET" class="row justify-content-end align-items-end ">
+                                <input type="hidden" name="route" value="intervention_preventive">
+                                <div class="col-md-3">
+                                    <label for="date_debut" class="form-label">Date de début :</label>
+                                    <input type="date" class="form-control" id="date_debut" name="date_debut"
+                                        value="<?= $_GET['date_debut'] ?? date('Y-m-d', strtotime('-1 month')) ?>" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="date_fin" class="form-label">Date de fin :</label>
+                                    <input type="date" class="form-control" id="date_fin" name="date_fin"
+                                        value="<?= $_GET['date_fin'] ?? date('Y-m-d') ?>" required>
+                                </div>
+                            </form>
+                        </div>
+
+
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -146,7 +191,13 @@ $chaines = Implantation_Prod_model::findAllChaines();
                                         <?php
 
                                         $interventionController = new \App\Controllers\InterventionController();
-                                        $machines = $interventionController->preventiveByChaine();
+
+                                        // Récupérer les dates de filtre
+                                        $date_debut = $_GET['date_debut'] ?? date('Y-m-d', strtotime('-1 month'));
+                                        $date_fin = $_GET['date_fin'] ?? date('Y-m-d');
+
+                                        // Passer les dates au contrôleur
+                                        $machines = $interventionController->preventiveByChaine($date_debut, $date_fin);
 
                                         foreach ($machines as $machine) {
 
@@ -160,17 +211,6 @@ $chaines = Implantation_Prod_model::findAllChaines();
                                             <td><a href="?route=historique_intervs_mach&type=preventive&machine=' . $machine['machine_id'] . '&id_machine=' . $id_machine . '">' . $machine['nb_interventions'] . '</a></td>
                                             <td>' . date('d/m/Y', strtotime($machine['last_date'])) . '</td>
                                             </tr>';
-                                           // $nbInterAndpannes = $interventionController->getNbInterPannMach($id_machine);
-
-                                            // $machineData = array();
-                                            // foreach ($nbInterAndpannes as $resultat) {
-
-                                            //     $machineData[] = array(
-                                            //         'codePanne' => $resultat['codePanne'],
-                                            //         'nbInter' => $resultat['nbInter'],
-                                            //     );
-                                            // }
-                                            // $machinesData[$id_machine] = $machineData;
                                         }
                                         ?>
                                     </tbody>
@@ -180,19 +220,6 @@ $chaines = Implantation_Prod_model::findAllChaines();
                     </div>
 
                 </div>
-                <!-- <div class="container-fluid" id="statsCard"
-                    style="display: none; margin: 20px auto;">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="m-0">
-                            <i class="fas fa-chart-bar"></i> Statistiques de la Machine
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <canvas id="myChart" width="800" height="400"></canvas>
-                        </div>
-                    </div>
-                </div> -->
 
 
 
@@ -221,6 +248,25 @@ $chaines = Implantation_Prod_model::findAllChaines();
                         url: '//cdn.datatables.net/plug-ins/1.11.6/i18n/fr_fr.json'
                     }
                 });
+
+                // Soumission automatique du filtre dès qu'une date change
+                $('#date_debut, #date_fin').on('change', function() {
+                    var dateDebut = $('#date_debut').val();
+                    var dateFin = $('#date_fin').val();
+                    // Validation simple
+                    if (dateDebut && dateFin && dateDebut <= dateFin) {
+                        $('#date_fin').removeClass('is-invalid');
+                        $('#date_fin').next('.invalid-feedback').remove();
+                        $('#dateFilterForm')[0].submit();
+                    } else if (dateDebut && dateFin && dateDebut > dateFin) {
+                        $('#date_fin').addClass('is-invalid');
+                        if (!$('#date_fin').next('.invalid-feedback').length) {
+                            $('#date_fin').after('<div class="invalid-feedback">La date de fin doit être postérieure à la date de début</div>');
+                        }
+                    }
+                });
+
+
             });
         </script>
     </div>
@@ -229,7 +275,5 @@ $chaines = Implantation_Prod_model::findAllChaines();
     <?php include(__DIR__ . "/../../views/modals/PlanningModal.php") ?>
     <?php include(__DIR__ . "/../../views/modals/AjoutInterventionPreventive.php") ?>
 </body>
-
-</html>
 
 </html>
