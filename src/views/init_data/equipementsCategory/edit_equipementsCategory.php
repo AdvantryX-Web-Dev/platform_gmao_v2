@@ -24,7 +24,7 @@ if (!isset($categorie) || !is_array($categorie)) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Modifier une catégorie</title>
+    <title>Editer une catégorie</title>
     <link rel="icon" type="image/x-icon" href="/platform_gmao/public/images/images.png" />
     <link rel="stylesheet" href="/platform_gmao/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -43,7 +43,7 @@ if (!isset($categorie) || !is_array($categorie)) {
                     <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Modifier une catégorie</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Editer une catégorie</h6>
                         </div>
                         <div class="card-body">
                             <form action="/platform_gmao/public/index.php?route=equipementsCategory/edit&id=<?= $categorie['id'] ?>" method="post">

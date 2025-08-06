@@ -15,7 +15,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
 <head>
     <meta charset="UTF-8">
-    <title>Liste des types de intervention </title>
+    <title>Liste des interventions </title>
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" href="/platform_gmao/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -43,7 +43,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Liste des types de intervention :</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Liste des interventions :</h6>
                             <?php if ($isAdmin): ?>
                                 <div>
 

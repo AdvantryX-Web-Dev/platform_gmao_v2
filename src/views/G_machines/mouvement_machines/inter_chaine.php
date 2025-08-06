@@ -79,6 +79,7 @@ if (!isset($mouvements)) {
                                             <th>Date mouvement</th>
                                             <th>Initiateur</th>
                                             <th>Réceptionneur</th>
+                                            <th>Statut</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -110,12 +111,34 @@ if (!isset($mouvements)) {
                                                         ?>
                                                     </td>
                                                     <td>
-                                                        <?php if (empty($mouvement['idEmp_accepted'])): ?>
-                                                            <button class="btn btn-success btn-sm reception-btn" data-toggle="modal" data-target="#receptionModal"
-                                                                data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach']) ?>"
-                                                                data-machine-id="<?= htmlspecialchars($mouvement['id_machine']) ?>">
-                                                                <i class="fas fa-check"></i> Réceptionner
-                                                            </button>
+                                                        <?php
+                                                        if (!empty($mouvement['status'] == 'rejeté')) {
+                                                            echo '<span class="badge badge-danger">Rejeté</span>';
+                                                        } elseif (!empty($mouvement['status'] == 'accepté')) {
+                                                            echo '<span class="badge badge-success">Accepté</span>';
+                                                        } else {
+                                                            echo '<span class="badge badge-warning">En attente</span>';
+                                                        }
+
+
+                                                        ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php if (empty($mouvement['idEmp_accepted']) && empty($mouvement['status'])): ?>
+                                                            <div class="btn-group" role="group">
+                                                                <button class="btn btn-success btn-sm reception-btn" data-toggle="modal" data-target="#receptionModal"
+                                                                    data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
+                                                                    data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
+                                                                    <i class="fas fa-check"></i> Réceptionner
+                                                                </button>
+                                                                <button class="btn btn-danger btn-sm reject-btn" data-toggle="modal" data-target="#rejectModal"
+                                                                    data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
+                                                                    data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
+                                                                    <i class="fas fa-times"></i> Rejeter
+                                                                </button>
+                                                            </div>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">Traité</span>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
@@ -156,7 +179,7 @@ if (!isset($mouvements)) {
                                     <?php
                                     // Charger les types de machines ici
                                     $controller = new Mouvement_machinesController();
-                                    $location="prodline";
+                                    $location = "parc";
                                     $types = $controller->getTypes($location);
                                     foreach ($types as $type) {
                                         echo "<option value=\"{$type['type']}\">{$type['type']}</option>";
@@ -202,6 +225,14 @@ if (!isset($mouvements)) {
                                     ?>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="raisonMouvement"> Machine avec équipement :</label>
+                                <select class="form-control" id="equipement" name="equipement" required>
+                                    <option value="">--Machine avec équipement--</option>
+                                    <option value="non">Non</option>
+                                    <option value="oui">Oui</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-success">Enregistrer</button>
@@ -211,7 +242,6 @@ if (!isset($mouvements)) {
                 </div>
             </div>
         </div>
-
         <!-- Modal pour la réception -->
         <div class="modal fade" id="receptionModal" tabindex="-1" role="dialog" aria-labelledby="receptionModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -229,10 +259,6 @@ if (!isset($mouvements)) {
                             <input type="hidden" name="mouvement_id" id="mouvement_id" value="">
                             <input type="hidden" name="machine_id" id="machine_id" value="">
                             <input type="hidden" name="type_mouvement" value="inter_chaine">
-
-
-
-                            <!-- <hr class="my-4"> -->
 
                             <div class="form-group">
                                 <label for="recepteur"> sélectionner un maintenancier :</label>
@@ -268,6 +294,14 @@ if (!isset($mouvements)) {
                                         ?>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="raisonMouvement"> Machine avec équipement :</label>
+                                    <select class="form-control" id="equipement" name="equipement" required>
+                                        <option value="">--Machine avec équipement--</option>
+                                        <option value="non">Non</option>
+                                        <option value="oui">Oui</option>
+                                    </select>
+                                </div>
                                 <div class="text-right mt-2">
                                     <button type="submit" class="btn btn-success">
                                         <i class="fas fa-check"></i> Confirmer avec ce maintenancier
@@ -282,10 +316,60 @@ if (!isset($mouvements)) {
         </div>
 
 
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
+        <!-- Modal pour le rejet -->
+        <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectModalLabel">
+                            <i class="fas fa-times-circle"></i> Rejet de Machine
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="rejectForm" action="../../platform_gmao/public/index.php?route=mouvement_machines/reject" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="mouvement_id" id="reject_mouvement_id" value="">
+                            <input type="hidden" name="type_mouvement" value="inter_chaine">
 
+                            <div class="form-group">
+                                <label for="rejecteur">Sélectionner un maintenancier :</label>
+                                <select class="form-control" id="rejecteur" name="rejecteur" required>
+                                    <option value="">--Sélectionner un maintenancier--</option>
+                                    <?php
+                                    $controller = new Mouvement_machinesController();
+                                    // Récupérer les maintenanciers depuis la base de données
+                                    $maintainers = $controller->getMaintainers();
+
+                                    if (!empty($maintainers)) {
+                                        foreach ($maintainers as $maintainer) {
+                                            echo "<option value=\"{$maintainer['id']}\">{$maintainer['first_name']} {$maintainer['last_name']}</option>";
+                                        }
+                                    } else {
+                                        echo "<option value=\"\" disabled>Aucun maintenancier trouvé</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="raisonMouvement"> Machine avec équipement :</label>
+                                <select class="form-control" id="equipement" name="equipement" required>
+                                    <option value="">--Machine avec équipement--</option>
+                                    <option value="non">Non</option>
+                                    <option value="oui">Oui</option>
+                                </select>
+                            </div>
+                            <div class="text-right mt-2">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-times"></i> Confirmer le rejet
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <!-- Scripts JavaScript -->
         <script src="/platform_gmao/public/js/jquery-3.6.4.min.js"></script>
         <script src="/platform_gmao/public/js/bootstrap.bundle.min.js"></script>
@@ -359,6 +443,13 @@ if (!isset($mouvements)) {
                     var machineId = $(this).data('machine-id');
                     $('#mouvement_id').val(mouvementId);
                     $('#machine_id').val(machineId);
+                });
+                // Mettre à jour l'ID du mouvement dans le modal de rejet
+                $('.reject-btn').click(function() {
+                    var mouvementId = $(this).data('id');
+                    var machineId = $(this).data('machine-id');
+                    $('#reject_mouvement_id').val(mouvementId);
+                    $('#reject_machine_id').val(machineId);
                 });
             });
         </script>

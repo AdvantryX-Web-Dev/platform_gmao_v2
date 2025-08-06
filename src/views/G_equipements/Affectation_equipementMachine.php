@@ -63,7 +63,7 @@ use App\Models\Machine_model;
                                             $equipements = Equipement_model::findAll();
                                             foreach ($equipements as $equipement) {
                                                 echo '<option value="' . htmlspecialchars($equipement['equipment_id']) . '">' .
-                                                    htmlspecialchars($equipement['equipment_id'] . ' - ' . $equipement['designation']) . '</option>';
+                                                    htmlspecialchars($equipement['equipment_id'] . ' - ' . $equipement['reference']) . '</option>';
                                             }
                                             ?>
                                         </select>
@@ -73,17 +73,17 @@ use App\Models\Machine_model;
                                         <select name="machine_id" id="machine_id" class="form-control select2" required>
                                             <option value="">Sélectionnez une machine</option>
                                             <?php
-                                            $machines = Machine_model::findAll();
+                                            $machines = Machine_model::ProdMachine();
                                             foreach ($machines as $machine) {
                                                 echo '<option value="' . htmlspecialchars($machine['machine_id']) . '">' .
-                                                    htmlspecialchars($machine['machine_id'] . ' - ' . $machine['designation']) . '</option>';
+                                                    htmlspecialchars($machine['machine_id'] . ' - ' . $machine['reference']) . '</option>';
                                             }
                                             ?>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md mb-3">
                                         <label for="maintainer">Maintenicien</label>
                                         <select name="maintainer" id="maintainer" class="form-control select2" required>
                                             <option value="">Sélectionnez un maintenicien</option>
@@ -96,14 +96,7 @@ use App\Models\Machine_model;
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="mvt_state">Etat du mouvement</label>
-                                        <select name="mvt_state" id="mvt_state" class="form-control" required>
-                                            <option value="SS" selected>SS</option>
-                                            <!-- <option value="ES">ES</option>
-                                            <option value="MS">MS</option> -->
-                                        </select>
-                                    </div>
+
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">

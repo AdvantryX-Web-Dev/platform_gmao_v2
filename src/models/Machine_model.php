@@ -79,6 +79,24 @@ class Machine_model
 
         return $machines;
     }
+    public static function ProdMachine()
+    {
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+        $conn = $db->getConnection();
+        $machines = array();
+        //m.machines_location_id=1 = prodline
+        try {
+            $req = $conn->query("SELECT * FROM init__machine m  where m.machines_location_id=1 
+            order by m.machine_id desc");
+            $machines = $req->fetchAll();
+        } catch (PDOException $e) {
+
+            return false;
+        } //
+
+
+        return $machines;
+    }
 
     public static function findById($id_machine)
     {
@@ -151,20 +169,7 @@ class Machine_model
         }
         return $machines;
     }
-    // public static function findTypeByMachine($id_machine)
-    // {
-    //     $db = new Database();
-    //     $conn = $db->getConnection();
-    //     $machines = array();
-    //     try {
-    //         $req = $conn->query("SELECT type FROM init__machine  where machine_id='$id_machine'");
-    //         $type = $req->fetchColumn();
-    //     } catch (PDOException $e) {
 
-    //         return false;
-    //     }
-    //     return $type;
-    // }
     public static function deleteById($id)
     {
         $db = Database::getInstance('db_digitex');

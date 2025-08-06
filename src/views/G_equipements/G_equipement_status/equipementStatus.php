@@ -55,12 +55,12 @@ if (session_status() === PHP_SESSION_NONE) {
                                             if (!empty($m['location_name']) && $m['location_name'] == 'prodline' || $m['location_name'] == 'CH4') {
                                                 $countProduction++;
                                             }
-                                            if (!empty($m['location_name']) && $m['location_name'] == 'magasin') {
+                                            if (!empty($m['location_name']) && $m['location_name'] == 'Magasin A') {
                                                 $countmagasin++;
                                             }
                                             if (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'fonctionnel')) {
                                                 $countFonctionnel++;
-                                            } else {
+                                            } elseif (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'non fonctionnel')) {
                                                 $countNonFonctionnel++;
                                             }
                                             if (empty($m['etat_equipement'])) {

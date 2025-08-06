@@ -17,7 +17,7 @@ use App\Controllers\Machine_boxController;
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title> ISA Digitex by AdvantryX</title>
+    <title> GMAO Digitex by AdvantryX</title>
     <!-- Favicon-- logo dans l'ongle-->
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
 
@@ -49,8 +49,8 @@ use App\Controllers\Machine_boxController;
 
             <!-- Main Content -->
             <div id="content">
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"></nav>
-                <!-- Begin Page Content -->
+            <?php include(__DIR__ . "/../../views/layout/navbar.php"); ?>
+            <!-- Begin Page Content -->
                 <div class="container-fluid">
                     <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
                     <!-- DataTales Example -->

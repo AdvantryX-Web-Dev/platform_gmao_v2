@@ -17,7 +17,7 @@ use App\Controllers\Equipment_MachineController;
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title> ISA Digitex by AdvantryX</title>
+    <title> GMAO Digitex by AdvantryX</title>
     <!-- Favicon-- logo dans l'ongle-->
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
 
@@ -49,7 +49,7 @@ use App\Controllers\Equipment_MachineController;
 
             <!-- Main Content -->
             <div id="content">
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"></nav>
+                <?php include(__DIR__ . "/../../views/layout/navbar.php"); ?>
                 <!-- Begin Page Content -->
 
                 <div class="container-fluid">
@@ -73,9 +73,9 @@ use App\Controllers\Equipment_MachineController;
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Affectation machine – Box:</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Affectation machine – équipement:</h6>
                             <div class="d-flex justify-content-end">
-                                <a href="?route=equipement_machine/affectation_equipmentMachine" class="btn btn-primary">Ajouter un affectation</a>
+                                <a href="?route=equipement_machine/affectation_equipmentMachine" class="btn btn-primary">Ajouter une affectation</a>
                             </div>
                         </div>
                         <div class="card-body">
@@ -86,33 +86,25 @@ use App\Controllers\Equipment_MachineController;
                                             <th>Equipement <i class="fas fa-sort"></i></th>
                                             <th>Machine <i class="fas fa-sort"></i></th>
                                             <th>Référence <i class="fas fa-sort"></i></th>
-                                            <th>Emplacement <i class="fas fa-sort"></i></th>
                                             <th>Responsable <i class="fas fa-sort"></i></th>
                                             <th>Date <i class="fas fa-sort"></i></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $machs_box = Equipment_MachineController::ListEquipementsMachines();
+                                        $machs_equip = Equipment_MachineController::ListEquipementsMachines();
 
-                                        foreach ($machs_box as $mach_box) {
+                                        foreach ($machs_equip as $mach_equip) {
                                             echo '<tr>';
-                                            echo '<td>' . $mach_box['accessory_ref'] . '</td>';
-                                            echo '<td>' . $mach_box['machine_id'] . '</td>';
-                                            echo '<td>' . $mach_box['reference'] . '</td>';
-
-                                            echo '<td>';
-                                            if (empty($mach_box['location_name'])) {
-                                                echo '<span class="badge badge-secondary">Non défini</span>';
-                                            } elseif ($mach_box['location_name'] == 'prodline') {
-                                                echo '<span class="badge badge-success">En production</span>';
+                                            echo '<td>' . $mach_equip['accessory_ref'] . '</td>';
+                                            echo '<td>' . $mach_equip['machine_id'] . '</td>';
+                                            echo '<td>' . $mach_equip['reference'] . '</td>';
+                                            if (empty($mach_equip['Responsable'])) {
+                                                echo '<td>' . $mach_equip['maintainer'] . '</td>';
                                             } else {
-                                                echo '<span class="badge badge-primary">' . htmlspecialchars($mach_box['location_name']) . '</span>';
+                                                echo '<td>' . $mach_equip['Responsable'] . '</td>';
                                             }
-                                            echo '</td>';
-
-                                            echo '<td>' . $mach_box['maintainer'] . '</td>';
-                                            echo '<td>' . $mach_box['allocation_date'] . '<br> H: ' . $mach_box['allocation_time'] . '</td>';
+                                            echo '<td>' . $mach_equip['allocation_date'] . '<br> H: ' . $mach_equip['allocation_time'] . '</td>';
                                             echo '</tr>';
                                         }
                                         ?>

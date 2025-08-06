@@ -32,136 +32,6 @@ class Mouvement_machinesController
         include(__DIR__ . '/../views/G_machines/mouvement_machines/parc_chaine.php');
     }
 
-
-
-    public function accept()
-    {
-        // Vérifier si le formulaire a été soumis
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mouvement_id'])) {
-            $mouvementId = $_POST['mouvement_id'];
-            $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine'; // Valeur par défaut
-            $machineId = $_POST['machine_id'] ?? null;
-            $etat_machine = $_POST['etat_machine'] ?? null;
-
-            // Valider le type de mouvement
-            if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
-                $type_mouvement = 'parc_chaine'; // Valeur par défaut si invalide
-            }
-
-            // Déterminer l'ID de l'utilisateur récepteur
-            $userId = $_POST['recepteur'] ?? null;
-
-
-            if (!$userId) {
-                $_SESSION['flash_message'] = [
-                    'type' => 'error',
-                    'text' => 'Utilisateur non connecté ou non sélectionné.'
-                ];
-                header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
-                exit;
-            }
-
-            // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
-            $db = Database::getInstance('MAHDCO_MAINT');
-            $conn = $db->getConnection();
-            $dbdigitex = Database::getInstance('db_digitex');
-            $connDigitex = $dbdigitex->getConnection();
-            try {
-                // Transaction pour assurer l'intégrité des données
-                $conn->beginTransaction();
-
-                // 1. Mettre à jour le mouvement
-                $stmt = $conn->prepare("UPDATE gmao__mouvement_machine 
-                    SET idEmp_accepted = :user_id
-                    WHERE num_Mouv_Mach = :mouvement_id");
-
-                $stmt->bindParam(':user_id', $userId);
-                $stmt->bindParam(':mouvement_id', $mouvementId);
-                $stmt->execute();
-
-                // 2. Récupérer l'ID de la machine associée au mouvement si non fourni
-                if (!$machineId) {
-                    $stmt = $conn->prepare("SELECT id_machine FROM gmao__mouvement_machine WHERE num_Mouv_Mach = :mouvement_id");
-                    $stmt->bindParam(':mouvement_id', $mouvementId);
-                    $stmt->execute();
-                    $machineId = $stmt->fetchColumn();
-                }
-
-                if ($machineId) {
-                    // 3. Déterminer l'ID de l'emplacement en fonction du type de mouvement
-                    $locationId = null;
-                    if ($type_mouvement === 'chaine_parc') {
-                        // Trouver l'ID pour "parc"
-                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'parc' LIMIT 1");
-                        $stmt->execute();
-                        $locationId = $stmt->fetchColumn();
-                    } else { //  inter_chaine ou parc_chaine
-                        // Trouver l'ID pour "chaine"
-                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'prodline' LIMIT 1");
-                        $stmt->execute();
-                        $locationId = $stmt->fetchColumn();
-                    }
-
-                    // 4. Mettre à jour la machine avec le nouvel emplacement et état
-                    $updateQuery = "UPDATE init__machine SET ";
-                    $params = [];
-
-                    if ($locationId) {
-                        $updateQuery .= "machines_location_id = :location_id";
-                        $params[':location_id'] = $locationId;
-                    }
-
-                    if ($etat_machine) {
-                        if ($locationId) $updateQuery .= ", ";
-                        $updateQuery .= "machines_status_id = :status_id";
-                        $params[':status_id'] = $etat_machine;
-                    }
-
-                    if (!empty($params)) {
-                        $updateQuery .= " WHERE machine_id = :machine_id";
-                        $params[':machine_id'] = $machineId;
-
-                        $stmt = $connDigitex->prepare($updateQuery);
-                        foreach ($params as $key => $value) {
-                            $stmt->bindValue($key, $value);
-                        }
-                        $stmt->execute();
-                    }
-                }
-
-                // Commit la transaction
-                $conn->commit();
-
-                $_SESSION['flash_message'] = [
-                    'type' => 'success',
-                    'text' => 'Réception acceptée avec succès et machine mise à jour.'
-                ];
-            } catch (PDOException $e) {
-                // Annuler la transaction en cas d'erreur
-                $conn->rollBack();
-
-                $_SESSION['flash_message'] = [
-                    'type' => 'error',
-                    'text' => 'Erreur de base de données: ' . $e->getMessage()
-                ];
-            }
-
-            header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
-            exit;
-        }
-
-        // Si on arrive ici, c'est qu'il y a eu un problème avec la soumission du formulaire
-        $_SESSION['flash_message'] = [
-            'type' => 'error',
-            'text' => 'Formulaire de réception non valide.'
-        ];
-        header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine');
-        exit;
-    }
-
-
-
-
     public function afficherMachines()
     {
         $machines = Machine_model::findAll();
@@ -183,10 +53,10 @@ class Mouvement_machinesController
         return MouvementMachine_model::findByType($type);
     }
 
-    public function getMouvementsByMachine($id_machine)
-    {
-        return MouvementMachine_model::findByMachine($id_machine);
-    }
+    // public function getMouvementsByMachine($id_machine)
+    // {
+    //     return MouvementMachine_model::findByMachine($id_machine);
+    // }
 
     public function getMaintainers()
     {
@@ -274,6 +144,211 @@ class Mouvement_machinesController
         header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine');
         exit;
     }
+    public function accept()
+    {
+        // Vérifier si le formulaire a été soumis
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mouvement_id'])) {
+            $mouvementId = $_POST['mouvement_id'];
+            $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine'; // Valeur par défaut
+            $machineId = $_POST['machine_id'] ?? null;
+            $etat_machine = $_POST['etat_machine'] ?? null;
+            $equipement = $_POST['equipement'] ?? null;
+            // Valider le type de mouvement
+            if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
+                $type_mouvement = 'parc_chaine'; // Valeur par défaut si invalide
+            }
+
+            // Déterminer l'ID de l'utilisateur récepteur
+            $userId = $_POST['recepteur'] ?? null;
+
+
+            if (!$userId) {
+                $_SESSION['flash_message'] = [
+                    'type' => 'error',
+                    'text' => 'Utilisateur non connecté ou non sélectionné.'
+                ];
+                header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
+                exit;
+            }
+
+            // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
+            $db = Database::getInstance('MAHDCO_MAINT');
+            $conn = $db->getConnection();
+            $dbdigitex = Database::getInstance('db_digitex');
+            $connDigitex = $dbdigitex->getConnection();
+            try {
+                // Transaction pour assurer l'intégrité des données
+                $conn->beginTransaction();
+
+                // 1. Mettre à jour le mouvement
+                $stmt = $conn->prepare("UPDATE gmao__mouvement_machine 
+                    SET idEmp_accepted = :user_id, status = 'accepté',equipement = :equipement
+                    WHERE num_Mouv_Mach = :mouvement_id");
+
+                $stmt->bindParam(':user_id', $userId);
+                $stmt->bindParam(':mouvement_id', $mouvementId);
+                $stmt->bindParam(':equipement', $equipement);
+                $stmt->execute();
+
+                // 2. Récupérer l'ID de la machine associée au mouvement si non fourni
+                if (!$machineId) {
+                    $stmt = $conn->prepare("SELECT id_machine FROM gmao__mouvement_machine WHERE num_Mouv_Mach = :mouvement_id");
+                    $stmt->bindParam(':mouvement_id', $mouvementId);
+                    $stmt->execute();
+                    $machineId = $stmt->fetchColumn();
+                }
+
+                if ($machineId) {
+                    // 3. Déterminer l'ID de l'emplacement en fonction du type de mouvement
+                    $locationId = null;
+                    if ($type_mouvement === 'chaine_parc') {
+                        // Trouver l'ID pour "parc"
+                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'parc' LIMIT 1");
+                        $stmt->execute();
+                        $locationId = $stmt->fetchColumn();
+                    } else { //  inter_chaine ou parc_chaine
+                        // Trouver l'ID pour "chaine"
+                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'prodline' LIMIT 1");
+                        $stmt->execute();
+                        $locationId = $stmt->fetchColumn();
+                    }
+
+                    // 4. Mettre à jour la machine avec le nouvel emplacement et état
+                    $updateQuery = "UPDATE init__machine SET ";
+                    $params = [];
+
+                    if ($locationId) {
+                        $updateQuery .= "machines_location_id = :location_id";
+                        $params[':location_id'] = $locationId;
+                    }
+
+                    if ($etat_machine) {
+                        if ($locationId) $updateQuery .= ", ";
+                        $updateQuery .= "machines_status_id = :status_id";
+                        $params[':status_id'] = $etat_machine;
+                    }
+
+                    if (!empty($params)) {
+                        $updateQuery .= " WHERE machine_id = :machine_id";
+                        $params[':machine_id'] = $machineId;
+
+                        $stmt = $connDigitex->prepare($updateQuery);
+                        foreach ($params as $key => $value) {
+                            $stmt->bindValue($key, $value);
+                        }
+                        $stmt->execute();
+                    }
+                }
+
+                // Commit la transaction
+                $conn->commit();
+
+                $_SESSION['flash_message'] = [
+                    'type' => 'success',
+                    'text' => 'Réception acceptée avec succès et machine mise à jour.'
+                ];
+            } catch (PDOException $e) {
+                // Annuler la transaction en cas d'erreur
+                $conn->rollBack();
+
+                $_SESSION['flash_message'] = [
+                    'type' => 'error',
+                    'text' => 'Erreur de base de données: ' . $e->getMessage()
+                ];
+            }
+
+            header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
+            exit;
+        }
+
+        // Si on arrive ici, c'est qu'il y a eu un problème avec la soumission du formulaire
+        $_SESSION['flash_message'] = [
+            'type' => 'error',
+            'text' => 'Formulaire de réception non valide.'
+        ];
+        header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine');
+        exit;
+    }
+
+    public function reject()
+
+    {
+        
+        // Vérifier si le formulaire a été soumis
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mouvement_id'])) {
+            $mouvementId = $_POST['mouvement_id'];
+            $type_mouvement = $_POST['type_mouvement'] ?? 'chaine_parc'; // Valeur par défaut
+            $equipement = $_POST['equipement'] ?? '';
+           
+            // Valider le type de mouvement
+            if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
+                $type_mouvement = 'chaine_parc'; // Valeur par défaut si invalide
+            }
+
+            // Déterminer l'ID de l'utilisateur qui rejette
+            $userId = $_POST['rejecteur'] ?? null;
+
+            if (!$userId) {
+                $_SESSION['flash_message'] = [
+                    'type' => 'error',
+                    'text' => 'Utilisateur non connecté ou non sélectionné.'
+                ];
+                header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
+                exit;
+            }
+            if (!$mouvementId) {
+                $_SESSION['flash_message'] = [
+                    'type' => 'error',
+                    'text' => 'ID du mouvement manquant ou invalide.'
+                ];
+                header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
+                exit;
+            }
+            // Mettre à jour le mouvement avec le statut rejeté
+            $db = Database::getInstance('MAHDCO_MAINT');
+            $conn = $db->getConnection();
+
+            try {
+                // Transaction pour assurer l'intégrité des données
+                $conn->beginTransaction();
+
+                // 1. Mettre à jour le mouvement avec le statut rejeté
+                $stmt = $conn->prepare("UPDATE gmao__mouvement_machine 
+                    SET idEmp_accepted = :user_id, status = 'rejeté',equipement = :equipement
+                    WHERE num_Mouv_Mach = :mouvement_id");
+
+                $stmt->bindParam(':user_id', $userId);
+                $stmt->bindParam(':mouvement_id', $mouvementId);
+                $stmt->bindParam(':equipement', $equipement);
+                $stmt->execute();
+
+             
+
+                $conn->commit();
+
+                $_SESSION['flash_message'] = [
+                    'type' => 'success',
+                    'text' => 'Le mouvement a été rejeté avec succès.'
+                ];
+
+            } catch (PDOException $e) {
+                $conn->rollback();
+                $_SESSION['flash_message'] = [
+                    'type' => 'error',
+                    'text' => 'Erreur lors du rejet: ' . $e->getMessage()
+                ];
+            }
+
+            // Rediriger vers la page d'où provient la demande
+            header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
+            exit;
+        }
+
+        // Si la méthode HTTP n'est pas POST, rediriger vers la page par défaut
+        header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/chaine_parc');
+        exit;
+    }
+
     public function getTypes($location)
     {
         return Machine_model::findAllTypes($location);

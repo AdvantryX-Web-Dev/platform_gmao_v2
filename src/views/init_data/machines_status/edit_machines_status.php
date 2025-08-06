@@ -35,7 +35,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <input type="text" name="status_name" class="form-control" value="<?= htmlspecialchars($machines_status['status_name'] ?? '') ?>" required>
                                 </div>
 
-                                <button type="submit" class="btn btn-success">Modifier</button>
+                                <button type="submit" class="btn btn-success">Editer</button>
                                 <a href="/platform_gmao/public/index.php?route=machines_status/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>

@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" style="width: 260px !important;height: 100%; ">
 
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="https://advantryx.com/">
@@ -23,7 +23,8 @@
 
     <!-- 1. Données de base -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBaseData" aria-expanded="true" aria-controls="collapseBaseData">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBaseData" aria-expanded="true" aria-controls="collapseBaseData"
+            style="width: 260px !important;">
             <i class="fas fa-fw fa-database"></i>
             <span>Données de base</span>
         </a>
@@ -32,7 +33,7 @@
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machines">Liste des machines</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=maintainers">Liste des maintenanciers</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=intervention_type/list">Liste des interventions</a>
-                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machines_status/list">Liste des états de machine</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machines_status/list">Liste des statuts de machine</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=categories">Liste des motifs de mvt</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipementsCategory/list">Liste des catatgories</a>
 
@@ -43,9 +44,10 @@
 
     <!-- 2. Gestion de machine -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionMachine" aria-expanded="true" aria-controls="collapseGestionMachine">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionMachine" aria-expanded="true" aria-controls="collapseGestionMachine"
+        style="width: 260px !important;">
             <i class="fas fa-fw fa-cogs"></i>
-            <span>Gestion de machine</span>
+            <span>Gestion des machines</span>
         </a>
         <div id="collapseGestionMachine" class="collapse" aria-labelledby="headingGestionMachine" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
@@ -66,9 +68,10 @@
     <!-- 3. Gestion d'équipement -->
   
     <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionEquipement" aria-expanded="true" aria-controls="collapseGestionEquipement">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionEquipement" aria-expanded="true" aria-controls="collapseGestionEquipement"
+            style="width: 260px !important;">
             <i class="fas fa-fw fa-tools"></i>
-            <span>Gestion d'équipement</span>
+            <span>Gestion des équipements</span>
         </a>
         <div id="collapseGestionEquipement" class="collapse" aria-labelledby="headingGestionEquipement" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">  
@@ -87,9 +90,10 @@
 
     <!-- 4. Maintenance intervention -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMaintenance" aria-expanded="true" aria-controls="collapseMaintenance">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMaintenance" aria-expanded="true" aria-controls="collapseMaintenance"
+        style="width: 260px !important;">
             <i class="fas fa-fw fa-wrench"></i>
-            <span>Maintenance intervention</span>
+            <span>Interventions de maintenance</span>
         </a>
         <div id="collapseMaintenance" class="collapse" aria-labelledby="headingMaintenance" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">

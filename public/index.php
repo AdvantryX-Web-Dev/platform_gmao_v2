@@ -207,6 +207,11 @@ switch ($route) {
     case 'mouvement_machines/accept':
         $mouvement_machinesController->accept();
         break;
+    case 'mouvement_machines/reject':
+       
+        $mouvement_machinesController->reject();
+        break;
+
     case 'mouvement_machines/getMachinesByType':
         $mouvement_machinesController->getMachinesByType();
         break;

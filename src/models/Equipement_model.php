@@ -212,7 +212,9 @@ class Equipement_model
                ie.reference AS reference,
                im.machine_id AS machine_id,
                il.location_name AS location_name,
-               pa.maintainer as maintainer
+               concat(em.first_name, ' ', em.last_name) as Responsable
+               
+              
         FROM prod__accessories pa
         LEFT JOIN (
             SELECT accessory_ref, MAX(id) AS max_id
@@ -222,6 +224,7 @@ class Equipement_model
         LEFT JOIN init__equipement ie ON pa.accessory_ref = ie.equipment_id
         LEFT JOIN db_mahdco.init__machine im ON pa.machine_id = im.machine_id
         LEFT JOIN init__location il ON ie.location_id = il.id
+        left join db_mahdco.init__employee em on pa.maintainer = em.matricule
         WHERE latest.max_id IS NOT NULL
     ");
         $equipements = $req->fetchAll();
