@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Import the controller class
 use App\Controllers\Equipment_MachineController;
+use App\Controllers\Machine_boxController;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -83,32 +84,33 @@ use App\Controllers\Equipment_MachineController;
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>Equipement <i class="fas fa-sort"></i></th>
-                                            <th>Machine <i class="fas fa-sort"></i></th>
-                                            <th>Référence <i class="fas fa-sort"></i></th>
-                                            <th>Responsable <i class="fas fa-sort"></i></th>
-                                            <th>Date <i class="fas fa-sort"></i></th>
+                                            <th>Equipement</th>
+                                            <th>Machine</th>
+                                            <th>Référence </th>
+                                            <th>Responsable </th>
+                                            <th>Date </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
+                                        // Use the correct path to the controller
                                         $machs_equip = Equipment_MachineController::ListEquipementsMachines();
 
                                         foreach ($machs_equip as $mach_equip) {
-                                            echo '<tr>';
-                                            echo '<td>' . $mach_equip['accessory_ref'] . '</td>';
-                                            echo '<td>' . $mach_equip['machine_id'] . '</td>';
-                                            echo '<td>' . $mach_equip['reference'] . '</td>';
-                                            if (empty($mach_equip['Responsable'])) {
-                                                echo '<td>' . $mach_equip['maintainer'] . '</td>';
-                                            } else {
-                                                echo '<td>' . $mach_equip['Responsable'] . '</td>';
-                                            }
-                                            echo '<td>' . $mach_equip['allocation_date'] . '<br> H: ' . $mach_equip['allocation_time'] . '</td>';
-                                            echo '</tr>';
+
+                                            echo '<tr>
+                                            <td > ' . $mach_equip['accessory_ref']  . '</td>
+                                            <td > ' . $mach_equip['machine_id'] . '</td>
+                                            <td > ' . $mach_equip['reference'] . '</td>
+                                            <td > ' . $mach_equip['Responsable'] . '</td>
+                                            <td > ' . $mach_equip['allocation_date'] . '<br> H: ' . $mach_equip['allocation_time'] . '</td>
+
+                                            </tr>';
                                         }
                                         ?>
+
                                     </tbody>
+                                  
 
                                 </table>
                             </div>

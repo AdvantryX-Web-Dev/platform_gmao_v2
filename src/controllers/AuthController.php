@@ -95,29 +95,7 @@ class AuthController
 
                                     break;
 
-                                // case 'chefmaintenancier':
-                                //    header("Location: index.php?route=HomeChefmaintenancier");
-                                //     break;
-
-                                // case 'magasinier':
-                                //     header("Location: index.php?route=StockArticles");
-                                //     break;
-
-                                // case 'administrateur':
-                                    
-                                //     require_once __DIR__ . '/../views/Employes.php';
-
-                                //   //  header("Location: index.php?route=employes");
-                                //     break;
-
-                                // case 'responsableparcmachine':
-                                //     header("Location: index.php?route=ParcMachine");
-                                //     break;
-
-                                // case 'responsableservachat':
-                                //     header("Location: index.php?route=HistoriqueCommInter");
-                                //     break;
-
+                               
                                 default:
                                     header("Location: index.php?route=dashboard");
                                     break;
@@ -226,9 +204,9 @@ class AuthController
                                 'lastname' => $employe['nom'] ?? '',
                                 'role' => $employe['role'] ?? 'user'
                             ];
-                            
+                            $this->logout();
                             // Rediriger vers le tableau de bord
-                            header("Location: index.php?route=dashboard");
+                            header("Location: index.php?route=login");
                             exit;
                         } else {
                             // Échec de la création

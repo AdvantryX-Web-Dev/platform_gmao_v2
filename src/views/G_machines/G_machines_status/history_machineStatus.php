@@ -148,44 +148,49 @@ if (!empty($machine_id)) {
                                                 <th>Raison</th>
                                                 <th>Initié par</th>
                                                 <th>Accepté par</th>
-                                                <th>Statut</th>
                                                 <th>Emplacement</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($mouvements as $mouvement): ?>
+                                            <?php foreach ($mouvements as $mouvement):  ?>
+
                                                 <tr>
+                                                    <?php
+                                                    $typeClass = '';
+                                                    $typeText = '';
+                                                    $location = '';
+                                                    switch ($mouvement['type_Mouv']) {
+                                                        case 'parc_chaine':
+                                                            $typeClass = 'badge-parc-chaine';
+                                                            $typeText = 'Sorti de parc';
+                                                            $location = 'Chaîne';
+                                                            break;
+                                                        case 'chaine_parc':
+                                                            $typeClass = 'badge-chaine-parc';
+                                                            $typeText = 'Entrée au parc';
+                                                            $location = 'Parc';
+
+                                                            break;
+                                                        case 'inter_chaine':
+                                                            $typeClass = 'badge-inter-chaine';
+                                                            $typeText = 'Inter-Chaîne';
+                                                            $location = 'Chaîne';
+
+                                                            break;
+                                                        default:
+                                                            $typeClass = 'badge-secondary';
+                                                            $typeText = $mouvement['type_Mouv'];
+                                                    }
+                                                    ?>
                                                     <td><?= date('d/m/Y', strtotime($mouvement['date_mouvement'])) ?></td>
                                                     <td>
-                                                        <?php
-                                                        $typeClass = '';
-                                                        $typeText = '';
 
-                                                        switch ($mouvement['type_Mouv']) {
-                                                            case 'parc_chaine':
-                                                                $typeClass = 'badge-parc-chaine';
-                                                                $typeText = 'Sorti de parc';
-                                                                break;
-                                                            case 'chaine_parc':
-                                                                $typeClass = 'badge-chaine-parc';
-                                                                $typeText = 'Entrée au parc';
-                                                                break;
-                                                            case 'inter_chaine':
-                                                                $typeClass = 'badge-inter-chaine';
-                                                                $typeText = 'Inter-Chaîne';
-                                                                break;
-                                                            default:
-                                                                $typeClass = 'badge-secondary';
-                                                                $typeText = $mouvement['type_Mouv'];
-                                                        }
-                                                        ?>
                                                         <span class="badge <?= $typeClass ?>"><?= $typeText ?></span>
                                                     </td>
                                                     <td><?= htmlspecialchars($mouvement['raison_mouv'] ?? 'Non définie') ?></td>
                                                     <td><?= htmlspecialchars($mouvement['emp_initiator_name'] ?? 'Non défini') ?></td>
                                                     <td><?= htmlspecialchars($mouvement['emp_acceptor_name'] ?? 'Non défini') ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['status_name'] ?? 'Non défini') ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['location_name'] ?? 'Non défini') ?></td>
+                                                    <td><?= $location ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>

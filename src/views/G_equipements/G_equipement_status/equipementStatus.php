@@ -282,9 +282,9 @@ if (session_status() === PHP_SESSION_NONE) {
                 }, 4000);
 
                 // Mettre à jour les compteurs lors de la recherche
-                table.on('search.dt', function() {
-                    updateCountersFromTable(table);
-                });
+                // table.on('search.dt', function() {
+                //     updateCountersFromTable(table);
+                // });
             });
         </script>
     </div>

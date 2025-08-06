@@ -87,11 +87,11 @@ if (!isset($mouvements)) {
                                         <?php if (is_array($mouvements) && count($mouvements) > 0): ?>
                                             <?php foreach ($mouvements as $mouvement): ?>
                                                 <tr>
-                                                    <td><?= htmlspecialchars($mouvement['id_machine']) ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['reference']) ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['designation']) ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['raison_mouv']) ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['date_mouvement']) ?></td>
+                                                    <td><?= htmlspecialchars($mouvement['id_machine'] ?? "") ?></td>
+                                                    <td><?= htmlspecialchars($mouvement['reference'] ?? "") ?></td>
+                                                    <td><?= htmlspecialchars($mouvement['designation'] ?? "") ?></td>
+                                                    <td><?= htmlspecialchars($mouvement['raison_mouv'] ?? "") ?></td>
+                                                    <td><?= htmlspecialchars($mouvement['date_mouvement'] ?? "") ?></td>
                                                     <td>
                                                         <?php
                                                         if (!empty($mouvement['idEmp_moved'])) {
@@ -179,7 +179,7 @@ if (!isset($mouvements)) {
                                     <?php
                                     // Charger les types de machines ici
                                     $controller = new Mouvement_machinesController();
-                                    $location = "parc";
+                                    $location = "prodline";
                                     $types = $controller->getTypes($location);
                                     foreach ($types as $type) {
                                         echo "<option value=\"{$type['type']}\">{$type['type']}</option>";
@@ -261,7 +261,7 @@ if (!isset($mouvements)) {
                             <input type="hidden" name="type_mouvement" value="inter_chaine">
 
                             <div class="form-group">
-                                <label for="recepteur"> sélectionner un maintenancier :</label>
+                                <label for="recepteur"> Sélectionner un maintenancier :</label>
                                 <select class="form-control" id="recepteur" name="recepteur">
                                     <option value="">--Sélectionner un maintenancier--</option>
                                     <?php

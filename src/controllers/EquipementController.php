@@ -110,17 +110,17 @@ class EquipementController
             $oldIntervention_type = Equipement_model::findById($id);
 
             if (Equipement_model::deleteById($id)) {
-                $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Intervention type supprimé avec succès !'];
+                $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Equipement supprimé avec succès !'];
 
                 // Audit trail
                 if (isset($_SESSION['user']['matricule']) && $oldIntervention_type) {
-                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'gmao__type_intervention', $oldIntervention_type, null);
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'init_equipment', $oldIntervention_type, null);
                 }
             } else {
-                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la suppression du intervention type.'];
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la suppression du équipement.'];
             }
         } else {
-            $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du intervention type non spécifié.'];
+            $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du équipement non spécifié.'];
         }
         header('Location: /platform_gmao/public/index.php?route=equipement/list');
         exit;

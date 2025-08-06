@@ -49,8 +49,8 @@ use App\Controllers\Machine_boxController;
 
             <!-- Main Content -->
             <div id="content">
-            <?php include(__DIR__ . "/../../views/layout/navbar.php"); ?>
-            <!-- Begin Page Content -->
+                <?php include(__DIR__ . "/../../views/layout/navbar.php"); ?>
+                <!-- Begin Page Content -->
                 <div class="container-fluid">
                     <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
                     <!-- DataTales Example -->

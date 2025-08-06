@@ -112,7 +112,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <tr>
                                                 <th>Machine</th>
                                                 <th>Type d'intervention</th>
-                                                <th>État</th>
+                                                <th>Etat</th>
                                                 <th>Date de création</th>
                                                 <th>Date planifiée</th>
                                                 <th>Date d'intervention</th>

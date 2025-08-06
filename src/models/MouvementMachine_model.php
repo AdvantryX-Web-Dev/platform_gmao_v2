@@ -246,7 +246,6 @@ class MouvementMachine_model
                 m.designation, 
                 rm.raison_mouv_mach as raison_mouv,
                 ms.status_name,
-                ml.location_name,
                 e1.first_name as initiator_first_name, 
                 e1.last_name as initiator_last_name,
                 e2.first_name as acceptor_first_name, 
@@ -265,12 +264,11 @@ class MouvementMachine_model
                 db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
             LEFT JOIN 
                 db_mahdco.gmao__machines_status ms ON m.machines_status_id = ms.id
-            LEFT JOIN 
-                db_mahdco.gmao__machine_location ml ON m.machines_location_id = ml.id
+           
             WHERE 
                 mm.id_machine = :machine_id
             ORDER BY 
-                mm.date_mouvement DESC, mm.created_at DESC
+                mm.num_Mouv_Mach DESC
         ");
         $req->bindParam(':machine_id', $machine_id, PDO::PARAM_STR);
         $req->execute();

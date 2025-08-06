@@ -266,7 +266,7 @@ if (!isset($mouvements)) {
                             <input type="hidden" name="type_mouvement" value="parc_chaine">
 
                             <div class="form-group">
-                                <label for="recepteur"> sélectionner un maintenancier :</label>
+                                <label for="recepteur"> Sélectionner un maintenancier :</label>
                                 <select class="form-control" id="recepteur" name="recepteur">
                                     <option value="">--Sélectionner un maintenancier--</option>
                                     <?php

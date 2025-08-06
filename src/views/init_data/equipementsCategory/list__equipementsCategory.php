@@ -77,7 +77,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                     <?php if ($isAdmin): ?>
                                                         <td>
                                                             <a href="/platform_gmao/public/index.php?route=equipementsCategory/edit&id=<?= urlencode($categorie['id']) ?>"><i class="fas fa-edit m-2"></i></a>
-                                                            <a href="/platform_gmao/public/index.php?route=equipementsCategory/delete&id=<?= urlencode($categorie['id']) ?>" onclick="return confirm('Supprimer ce type de intervention ?');">
+                                                            <a href="/platform_gmao/public/index.php?route=equipementsCategory/delete&id=<?= urlencode($categorie['id']) ?>" onclick="return confirm('Supprimer cette catégorie ?');">
                                                                 <i class="fas fa-trash text-danger"></i>
                                                         </td>
                                                     <?php endif; ?>

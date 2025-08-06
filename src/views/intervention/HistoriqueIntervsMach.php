@@ -49,7 +49,7 @@
                                 $id_machine = $_GET['id_machine']; ?>
                                 <?php $machine = $_GET['machine']; ?>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="m-0 font-weight-bold text-primary">Historique des Interventions
+                                    <h6 class="m-0 font-weight-bold text-primary">Historique des interventions
                                         <?php echo ($_GET['type'] == "curative") ? "curatives" : "préventives"; ?> sur la Machine
                                         <?php echo $machine; ?> :
                                     </h6>

@@ -267,36 +267,33 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <script>
             $(document).ready(function() {
-                var table = $('#dataTable').DataTable({
-                    language: {
-                        search: "Rechercher:",
-                        lengthMenu: "Afficher _MENU_ éléments par page",
-                        info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-                        infoEmpty: "Aucun élément à afficher",
-                        infoFiltered: "(filtré de _MAX_ éléments au total)",
-                        zeroRecords: "Aucun enregistrement correspondant trouvé",
-                        paginate: {
-                            first: "Premier",
-                            previous: "Précédent",
-                            next: "Suivant",
-                            last: "Dernier"
-                        }
-                    },
-                    pageLength: 10,
-                    order: [
-                        [0, 'asc']
-                    ]
-                });
-
+            var table = $('#dataTable').DataTable({
+                language: {
+                    search: "Rechercher:",
+                    lengthMenu: "Afficher _MENU_ éléments par page",
+                    info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+                    infoEmpty: "Aucun élément à afficher",
+                    infoFiltered: "(filtré de _MAX_ éléments au total)",
+                    zeroRecords: "Aucun enregistrement correspondant trouvé",
+                    paginate: {
+                        first: "Premier",
+                        previous: "Précédent",
+                        next: "Suivant",
+                        last: "Dernier"
+                    }
+                },
+                pageLength: 10,
+                order: [
+                    [0, 'asc']
+                ]
+            });
+      
                 // Faire disparaître les messages flash après 3 secondes
                 setTimeout(function() {
                     $("#flash-message").fadeOut("slow");
                 }, 4000);
 
-                // Mettre à jour les compteurs lors de la recherche
-                table.on('search.dt', function() {
-                    updateCountersFromTable(table);
-                });
+                
             });
         </script>
     </div>
