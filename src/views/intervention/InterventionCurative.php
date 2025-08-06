@@ -140,7 +140,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                                             <th> Machine </th>
                                             <th> Désignation </th>
                                             <th>SmartBox </th>
-                                            <th>Nombre D'intervention Curative </th>
+                                            <th>Nombre d'intervention Curative </th>
                                             <th>Dernière date intervention </th>
 
                                         </tr>
