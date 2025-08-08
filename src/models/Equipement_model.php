@@ -262,4 +262,27 @@ class Equipement_model
         $equipements = $req->fetchAll();
         return $equipements;
     }
+
+    public static function equipmentByMachine_id($machine_id)
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+
+        $stmt = $conn->prepare("
+        SELECT pa.*, ie.designation, ie.reference
+        FROM prod__accessories pa
+        INNER JOIN (
+            SELECT accessory_ref, MAX(id) AS max_id
+            FROM prod__accessories
+            GROUP BY accessory_ref
+        ) latest ON pa.id = latest.max_id
+        LEFT JOIN init__equipement ie ON pa.accessory_ref = ie.equipment_id
+        WHERE pa.machine_id LIKE ? AND pa.is_removed = 0
+    ");
+        $stmt->execute(["%$machine_id%"]);
+
+
+        $machine_equipement = $stmt->fetchAll();
+        return $machine_equipement;
+    }
 }

@@ -53,7 +53,7 @@ if (!isset($categorie) || !is_array($categorie)) {
                                         <input type="text" class="form-control" id="category_name" name="category_name" value="<?= htmlspecialchars($categorie['category_name'] ?? '') ?>" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="category_type">Type de catégorie:</label>
+                                        <label for="category_type">Type de la catégorie:</label>
                                         <input type="text" class="form-control" id="category_type" name="category_type" value="<?= htmlspecialchars($categorie['category_type'] ?? '') ?>" required>
                                     </div>
                                 </div>

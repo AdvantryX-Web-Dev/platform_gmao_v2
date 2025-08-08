@@ -28,6 +28,129 @@ if (!isset($mouvements)) {
     <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/datatables.min.css">
 </head>
+<style>
+    .equipment-list-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6 !important;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .equipment-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .equipment-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+
+    .equipment-item:hover {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .equipment-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+
+    .equipment-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .equipment-ref {
+        color: #495057;
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+
+    .equipment-designation {
+        color: #6c757d;
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
+
+    .equipment-reference {
+        font-size: 11px;
+    }
+
+    .loading-equipment {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-style: italic;
+        padding: 20px;
+    }
+
+    .loading-equipment i {
+        margin-right: 8px;
+        color: #007bff;
+    }
+
+    .no-equipment {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-style: italic;
+        padding: 20px;
+    }
+
+    .no-equipment i {
+        margin-right: 8px;
+        color: #ffc107;
+    }
+
+    .error-equipment {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dc3545;
+        font-style: italic;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .error-equipment i {
+        margin-right: 8px;
+    }
+
+    .equipment-list-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .equipment-list-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .equipment-list-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    .equipment-list-container::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>
 
 <body id="page-top">
     <div id="wrapper">
@@ -225,14 +348,7 @@ if (!isset($mouvements)) {
                                     ?>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="raisonMouvement"> Machine avec équipement :</label>
-                                <select class="form-control" id="equipement" name="equipement" required>
-                                    <option value="">--Machine avec équipement--</option>
-                                    <option value="non">Non</option>
-                                    <option value="oui">Oui</option>
-                                </select>
-                            </div>
+
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-success">Enregistrer</button>
@@ -258,6 +374,7 @@ if (!isset($mouvements)) {
                         <div class="modal-body">
                             <input type="hidden" name="mouvement_id" id="mouvement_id" value="">
                             <input type="hidden" name="machine_id" id="machine_id" value="">
+                            <input type="hidden" name="equipment_ids" id="equipment_ids" value="">
                             <input type="hidden" name="type_mouvement" value="inter_chaine">
 
                             <div class="form-group">
@@ -295,12 +412,8 @@ if (!isset($mouvements)) {
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="raisonMouvement"> Machine avec équipement :</label>
-                                    <select class="form-control" id="equipement" name="equipement" required>
-                                        <option value="">--Machine avec équipement--</option>
-                                        <option value="non">Non</option>
-                                        <option value="oui">Oui</option>
-                                    </select>
+                                    <label><i class="fas fa-tools"></i> Équipements associés à la machine :</label>
+                                    <div id="equipementsList" class="equipment-list-container" style="min-height: 60px; max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 10px; background: #f8f9fa;"></div>
                                 </div>
                                 <div class="text-right mt-2">
                                     <button type="submit" class="btn btn-success">
@@ -331,6 +444,8 @@ if (!isset($mouvements)) {
                     <form id="rejectForm" action="../../platform_gmao/public/index.php?route=mouvement_machines/reject" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="mouvement_id" id="reject_mouvement_id" value="">
+                            <input type="hidden" name="machine_id" id="reject_machine_id" value="">
+                            <input type="hidden" name="equipment_ids" id="reject_equipment_ids" value="">
                             <input type="hidden" name="type_mouvement" value="inter_chaine">
 
                             <div class="form-group">
@@ -353,12 +468,8 @@ if (!isset($mouvements)) {
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="raisonMouvement"> Machine avec équipement :</label>
-                                <select class="form-control" id="equipement" name="equipement" required>
-                                    <option value="">--Machine avec équipement--</option>
-                                    <option value="non">Non</option>
-                                    <option value="oui">Oui</option>
-                                </select>
+                                <label><i class="fas fa-tools"></i> Équipements associés à la machine :</label>
+                                <div id="rejectEquipementsList" class="equipment-list-container" style="min-height: 60px; max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 10px; background: #f8f9fa;"></div>
                             </div>
                             <div class="text-right mt-2">
                                 <button type="submit" class="btn btn-danger">
@@ -443,13 +554,110 @@ if (!isset($mouvements)) {
                     var machineId = $(this).data('machine-id');
                     $('#mouvement_id').val(mouvementId);
                     $('#machine_id').val(machineId);
+
+                    // Charger dynamiquement les équipements de la machine
+                    $('#equipementsList').html('<div class="loading-equipment"><i class="fas fa-spinner fa-spin"></i> <em>Chargement des équipements...</em></div>');
+                    $.ajax({
+                        url: '../../platform_gmao/public/index.php?route=mouvement_machines/getEquipementsByMachine',
+                        type: 'GET',
+                        data: {
+                            machine_id: machineId
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data && data.length > 0) {
+                                var html = '<div class="equipment-grid">';
+                                var equipmentIds = [];
+                                data.forEach(function(equipement) {
+                                    equipmentIds.push(equipement.accessory_ref);
+                                    html += '<div class="equipment-item">';
+                                    html += '<div class="equipment-icon"><i class="fas fa-cog"></i></div>';
+                                    html += '<div class="equipment-details">';
+                                    html += '<div class="equipment-ref"><strong>' + (equipement.accessory_ref || 'N/A') + '</strong></div>';
+                                    if (equipement.designation) {
+                                        html += '<div class="equipment-designation">' + equipement.designation + '</div>';
+                                    }
+                                    if (equipement.reference && equipement.reference !== equipement.accessory_ref) {
+                                        html += '<div class="equipment-reference"><small class="text-muted">Réf: ' + equipement.reference + '</small></div>';
+                                    }
+                                    html += '</div>';
+                                    html += '</div>';
+                                });
+                                html += '</div>';
+                                $('#equipementsList').html(html);
+                                // Sauvegarder les equipment_id en JSON
+                                $('#equipment_ids').val(JSON.stringify(equipmentIds));
+                            } else {
+                                $('#equipementsList').html('<div class="no-equipment"><i class="fas fa-info-circle"></i> <em>Aucun équipement trouvé pour cette machine</em></div>');
+                                $('#equipment_ids').val(JSON.stringify([]));
+                            }
+                        },
+                        error: function(xhr) {
+                            let msg = '<div class="error-equipment"><i class="fas fa-exclamation-triangle"></i> <em>Erreur lors du chargement des équipements</em>';
+                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                msg += '<br><span style="color:red">' + xhr.responseJSON.error + '</span>';
+                            }
+                            msg += '</div>';
+                            $('#equipementsList').html(msg);
+                            $('#equipment_ids').val(JSON.stringify([]));
+                        }
+                    });
                 });
+
                 // Mettre à jour l'ID du mouvement dans le modal de rejet
                 $('.reject-btn').click(function() {
                     var mouvementId = $(this).data('id');
                     var machineId = $(this).data('machine-id');
                     $('#reject_mouvement_id').val(mouvementId);
                     $('#reject_machine_id').val(machineId);
+
+                    // Charger dynamiquement les équipements de la machine pour le rejet
+                    $('#rejectEquipementsList').html('<div class="loading-equipment"><i class="fas fa-spinner fa-spin"></i> <em>Chargement des équipements...</em></div>');
+                    $.ajax({
+                        url: '../../platform_gmao/public/index.php?route=mouvement_machines/getEquipementsByMachine',
+                        type: 'GET',
+                        data: {
+                            machine_id: machineId
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data && data.length > 0) {
+                                var html = '<div class="equipment-grid">';
+                                var equipmentIds = [];
+                                data.forEach(function(equipement) {
+                                    equipmentIds.push(equipement.accessory_ref);
+                                    html += '<div class="equipment-item">';
+                                    html += '<div class="equipment-icon"><i class="fas fa-cog"></i></div>';
+                                    html += '<div class="equipment-details">';
+                                    html += '<div class="equipment-ref"><strong>' + (equipement.accessory_ref || 'N/A') + '</strong></div>';
+                                    if (equipement.designation) {
+                                        html += '<div class="equipment-designation">' + equipement.designation + '</div>';
+                                    }
+                                    if (equipement.reference && equipement.reference !== equipement.accessory_ref) {
+                                        html += '<div class="equipment-reference"><small class="text-muted">Réf: ' + equipement.reference + '</small></div>';
+                                    }
+                                    html += '</div>';
+                                    html += '</div>';
+                                });
+                                html += '</div>';
+                                $('#rejectEquipementsList').html(html);
+                                // Sauvegarder les equipment_id en JSON
+                                $('#reject_equipment_ids').val(JSON.stringify(equipmentIds));
+                            } else {
+                                $('#rejectEquipementsList').html('<div class="no-equipment"><i class="fas fa-info-circle"></i> <em>Aucun équipement trouvé pour cette machine</em></div>');
+                                $('#reject_equipment_ids').val(JSON.stringify([]));
+                            }
+                        },
+                        error: function(xhr) {
+                            let msg = '<div class="error-equipment"><i class="fas fa-exclamation-triangle"></i> <em>Erreur lors du chargement des équipements</em>';
+                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                msg += '<br><span style="color:red">' + xhr.responseJSON.error + '</span>';
+                            }
+                            msg += '</div>';
+                            $('#rejectEquipementsList').html(msg);
+                            $('#reject_equipment_ids').val(JSON.stringify([]));
+                        }
+                    });
                 });
             });
         </script>

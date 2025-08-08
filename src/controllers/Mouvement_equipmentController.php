@@ -125,6 +125,25 @@ class Mouvement_equipmentController
                         }
                         $stmt->execute();
                     }
+
+                    // 5. Récupérer l'equipment_id depuis la table init__equipement
+                    // $stmt = $conn->prepare("SELECT equipment_id FROM init__equipement WHERE id = :equipment_id");
+                    // $stmt->bindParam(':equipment_id', $equipmentId);
+                    // $stmt->execute();
+                    // $equipmentIdFromInit = $stmt->fetchColumn();
+                    // echo '<pre>';
+                    // print_r($equipmentId);
+
+                    // echo '</pre>';die;
+                    if ($equipmentId) {
+
+                        // 6. Mettre à jour la table prod__accessories - marquer l'équipement comme retiré
+                        $stmt = $conn->prepare("UPDATE prod__accessories 
+                            SET is_removed = 1, removed_at = CURRENT_TIMESTAMP 
+                            WHERE accessory_ref = :equipment_id");
+                        $stmt->bindParam(':equipment_id', $equipmentId);
+                        $stmt->execute();
+                    }
                 }
 
                 // Commit la transaction

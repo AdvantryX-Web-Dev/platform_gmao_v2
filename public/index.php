@@ -208,7 +208,7 @@ switch ($route) {
         $mouvement_machinesController->accept();
         break;
     case 'mouvement_machines/reject':
-       
+
         $mouvement_machinesController->reject();
         break;
 
@@ -218,6 +218,10 @@ switch ($route) {
     case 'mouvement_machines/saveMouvement':
         $mouvement_machinesController->saveMouvement();
         break;
+    case 'mouvement_machines/getEquipementsByMachine':
+        $equipementController->getEquipementsByMachine();
+        break;
+
     /** Gestion des équipements */
     case 'Gestion_equipements/status':
         $equipementController->equipements_state();

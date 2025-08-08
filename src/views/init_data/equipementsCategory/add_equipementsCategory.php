@@ -44,7 +44,7 @@ if (!$isAdmin) {
                                         <input type="text" class="form-control" id="category_name" name="category_name" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="category_type">Type de catégorie:</label>
+                                        <label for="category_type">Type de la catégorie:</label>
                                         <input type="text" class="form-control" id="category_type" name="category_type" required>
                                     </div>
                                 </div>

@@ -158,4 +158,28 @@ class EquipementController
 
         include(__DIR__ . '/../views/G_equipements/G_equipement_status/equipementStatus.php');
     }
+
+    public function getEquipementsByMachine()
+    {
+        header('Content-Type: application/json');
+        $machine_id = $_GET['machine_id'] ?? null;
+
+        if (!$machine_id) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Paramètre machine_id manquant']);
+            exit;
+        }
+        try {
+            $equipements = Equipement_model::equipmentByMachine_id($machine_id);
+
+
+
+
+            echo json_encode($equipements);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+        exit;
+    }
 }

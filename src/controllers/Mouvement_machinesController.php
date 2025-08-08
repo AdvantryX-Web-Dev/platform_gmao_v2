@@ -152,7 +152,8 @@ class Mouvement_machinesController
             $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine'; // Valeur par défaut
             $machineId = $_POST['machine_id'] ?? null;
             $etat_machine = $_POST['etat_machine'] ?? null;
-            $equipement = $_POST['equipement'] ?? null;
+            $equipment_ids = $_POST['equipment_ids'] ?? '[]';
+
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
                 $type_mouvement = 'parc_chaine'; // Valeur par défaut si invalide
@@ -171,6 +172,12 @@ class Mouvement_machinesController
                 exit;
             }
 
+            // Valider et décoder les equipment_ids JSON
+            $equipmentArray = json_decode($equipment_ids, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $equipmentArray = [];
+            }
+
             // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
             $db = Database::getInstance('MAHDCO_MAINT');
             $conn = $db->getConnection();
@@ -180,14 +187,14 @@ class Mouvement_machinesController
                 // Transaction pour assurer l'intégrité des données
                 $conn->beginTransaction();
 
-                // 1. Mettre à jour le mouvement
+                // 1. Mettre à jour le mouvement avec les equipment_ids en JSON
                 $stmt = $conn->prepare("UPDATE gmao__mouvement_machine 
-                    SET idEmp_accepted = :user_id, status = 'accepté',equipement = :equipement
+                    SET idEmp_accepted = :user_id, status = 'accepté', equipement = :equipment_ids
                     WHERE num_Mouv_Mach = :mouvement_id");
 
                 $stmt->bindParam(':user_id', $userId);
                 $stmt->bindParam(':mouvement_id', $mouvementId);
-                $stmt->bindParam(':equipement', $equipement);
+                $stmt->bindParam(':equipment_ids', $equipment_ids);
                 $stmt->execute();
 
                 // 2. Récupérer l'ID de la machine associée au mouvement si non fourni
@@ -273,13 +280,13 @@ class Mouvement_machinesController
     public function reject()
 
     {
-        
+
         // Vérifier si le formulaire a été soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mouvement_id'])) {
             $mouvementId = $_POST['mouvement_id'];
             $type_mouvement = $_POST['type_mouvement'] ?? 'chaine_parc'; // Valeur par défaut
-            $equipement = $_POST['equipement'] ?? '';
-           
+            $equipment_ids = $_POST['equipment_ids'] ?? '[]';
+
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
                 $type_mouvement = 'chaine_parc'; // Valeur par défaut si invalide
@@ -304,6 +311,13 @@ class Mouvement_machinesController
                 header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
                 exit;
             }
+
+            // Valider et décoder les equipment_ids JSON
+            $equipmentArray = json_decode($equipment_ids, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $equipmentArray = [];
+            }
+
             // Mettre à jour le mouvement avec le statut rejeté
             $db = Database::getInstance('MAHDCO_MAINT');
             $conn = $db->getConnection();
@@ -312,17 +326,15 @@ class Mouvement_machinesController
                 // Transaction pour assurer l'intégrité des données
                 $conn->beginTransaction();
 
-                // 1. Mettre à jour le mouvement avec le statut rejeté
+                // 1. Mettre à jour le mouvement avec le statut rejeté et les equipment_ids en JSON
                 $stmt = $conn->prepare("UPDATE gmao__mouvement_machine 
-                    SET idEmp_accepted = :user_id, status = 'rejeté',equipement = :equipement
+                    SET idEmp_accepted = :user_id, status = 'rejeté', equipement = :equipment_ids
                     WHERE num_Mouv_Mach = :mouvement_id");
 
                 $stmt->bindParam(':user_id', $userId);
                 $stmt->bindParam(':mouvement_id', $mouvementId);
-                $stmt->bindParam(':equipement', $equipement);
+                $stmt->bindParam(':equipment_ids', $equipment_ids);
                 $stmt->execute();
-
-             
 
                 $conn->commit();
 
@@ -330,7 +342,6 @@ class Mouvement_machinesController
                     'type' => 'success',
                     'text' => 'Le mouvement a été rejeté avec succès.'
                 ];
-
             } catch (PDOException $e) {
                 $conn->rollback();
                 $_SESSION['flash_message'] = [
