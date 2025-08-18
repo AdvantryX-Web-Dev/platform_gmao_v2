@@ -18,6 +18,12 @@ class Intervention_typeController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du code
+            if (Intervention_type_model::existsByCode($_POST['code'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Code déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=intervention_type/create');
+                exit;
+            }
             $intervention_type = new Intervention_type_model(
                 null,
                 $_POST['designation'],
@@ -60,6 +66,12 @@ class Intervention_typeController
         $oldIntervention_type = Intervention_type_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du code (exclure l'élément en cours d'édition)
+            if (Intervention_type_model::existsByCode($_POST['code'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Code déjà utilisé par un autre type d\'intervention.'];
+                header('Location: ../../platform_gmao/public/index.php?route=intervention_type/edit&id=' . urlencode($id));
+                exit;
+            }
             $intervention_type = new Intervention_type_model(
                 $id,
                 $_POST['designation'],

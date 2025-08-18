@@ -29,6 +29,12 @@ if (session_status() === PHP_SESSION_NONE) {
                             <h6 class="m-0 font-weight-bold text-primary">Ajouter un maintenancier</h6>
                         </div>
                         <div class="card-body">
+                            <?php if (!empty($_SESSION['flash_message'])): ?>
+                                <div id="flash-message" class="alert alert-<?= $_SESSION['flash_message']['type'] === 'success' ? 'success' : 'danger' ?> mb-4">
+                                    <?= htmlspecialchars($_SESSION['flash_message']['text']) ?>
+                                </div>
+                                <?php unset($_SESSION['flash_message']); ?>
+                            <?php endif; ?>
                             <?php if (!empty($_SESSION['maintainer_success'])): ?>
                                 <div class="alert alert-success"><?= $_SESSION['maintainer_success'];
                                                                     unset($_SESSION['maintainer_success']); ?></div>

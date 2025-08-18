@@ -151,6 +151,58 @@ class Equipement_model
     }
 
     /**
+     * Vérifie l'existence d'un équipement par equipment_id
+     */
+    public static function existsByEquipmentId($equipmentId, $excludeId = null)
+    {
+        if ($equipmentId === null || $equipmentId === '') {
+            return false;
+        }
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE equipment_id = ? AND id <> ? LIMIT 1");
+                $stmt->bindParam(1, $equipmentId);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE equipment_id = ? LIMIT 1");
+                $stmt->bindParam(1, $equipmentId);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Vérifie l'existence d'un équipement par référence
+     */
+    public static function existsByReference($reference, $excludeId = null)
+    {
+        if ($reference === null || $reference === '') {
+            return false;
+        }
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE reference = ? AND id <> ? LIMIT 1");
+                $stmt->bindParam(1, $reference);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE reference = ? LIMIT 1");
+                $stmt->bindParam(1, $reference);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
      * Find intervention types by type (preventive/curative)
      * 
      * @param string $type Type of intervention ('preventive' or 'curative')

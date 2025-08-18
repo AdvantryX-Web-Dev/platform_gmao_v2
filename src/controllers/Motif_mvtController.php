@@ -19,6 +19,17 @@ class Motif_mvtController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité: raison_mouv_mach et typeR
+            if (Categories_model::existsByRaison($_POST['raison_mouv_mach'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Motif déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=category/create');
+                exit;
+            }
+            if (Categories_model::existsByTypeR($_POST['typeR'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Code de motif (typeR) déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=category/create');
+                exit;
+            }
             $category = new Categories_model(
                 null,
                 $_POST['raison_mouv_mach'],
@@ -59,6 +70,17 @@ class Motif_mvtController
         $oldCategory = Categories_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité à l'édition: exclure l'ID courant
+            if (Categories_model::existsByRaison($_POST['raison_mouv_mach'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Motif déjà utilisé par un autre enregistrement.'];
+                header('Location: ../../platform_gmao/public/index.php?route=category/edit&id=' . urlencode($id));
+                exit;
+            }
+            if (Categories_model::existsByTypeR($_POST['typeR'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Code de motif (typeR) déjà utilisé par un autre enregistrement.'];
+                header('Location: ../../platform_gmao/public/index.php?route=category/edit&id=' . urlencode($id));
+                exit;
+            }
             $category = new Categories_model(
                 $id,
                 $_POST['raison_mouv_mach'],

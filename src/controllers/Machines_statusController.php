@@ -18,6 +18,12 @@ class Machines_statusController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du nom de statut
+            if (Machines_status_model::existsByStatusName($_POST['status_name'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Statut de machine déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=machines_status/create');
+                exit;
+            }
             $machines_status = new Machines_status_model(
                 null,
                 $_POST['status_name']
@@ -56,6 +62,12 @@ class Machines_statusController
         $oldMachines_status = Machines_status_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du nom de statut (exclure l'élément en cours d'édition)
+            if (Machines_status_model::existsByStatusName($_POST['status_name'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom de statut déjà utilisé par un autre enregistrement.'];
+                header('Location: /platform_gmao/public/index.php?route=machines_status/edit&id=' . urlencode($id));
+                exit;
+            }
             $machines_status = new Machines_status_model(
                 $id,
                 $_POST['status_name']

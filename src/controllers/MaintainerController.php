@@ -18,6 +18,12 @@ class MaintainerController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du matricule
+            if (Maintainer_model::existsByMatricule($_POST['matricule'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Matricule déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=maintainer/create');
+                exit;
+            }
             $maintainer = new Maintainer_model(
                 null,
                 $_POST['card_rfid'],
@@ -64,6 +70,12 @@ class MaintainerController
         $oldMaintainer = Maintainer_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du matricule (exclure le mainteneur en cours d'édition)
+            if (Maintainer_model::existsByMatricule($_POST['matricule'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Matricule déjà utilisé par un autre mainteneur.'];
+                header('Location: ../../platform_gmao/public/index.php?route=maintainer/edit&id=' . urlencode($id));
+                exit;
+            }
             $maintainer = new Maintainer_model(
                 $id,
                 $_POST['card_rfid'],

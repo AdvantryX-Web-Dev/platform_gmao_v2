@@ -92,6 +92,33 @@ class Machines_status_model
         }
     }
 
+    /**
+     * Vérifie si un statut de machine existe déjà par son nom.
+     * Si $excludeId est fourni, exclut cet enregistrement (utile pour l'édition).
+     */
+    public static function existsByStatusName($statusName, $excludeId = null)
+    {
+        if ($statusName === null || $statusName === '') {
+            return false;
+        }
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__machines_status WHERE status_name = ? AND id <> ? LIMIT 1");
+                $stmt->bindParam(1, $statusName);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__machines_status WHERE status_name = ? LIMIT 1");
+                $stmt->bindParam(1, $statusName);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
 
 
 

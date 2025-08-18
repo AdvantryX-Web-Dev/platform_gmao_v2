@@ -98,6 +98,33 @@ class Intervention_type_model
         }
     }
 
+    /**
+     * Vérifie si un code d'intervention existe déjà.
+     * Si $excludeId est fourni, exclut cet enregistrement (utile pour l'édition).
+     */
+    public static function existsByCode($code, $excludeId = null)
+    {
+        if ($code === null || $code === '') {
+            return false;
+        }
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__type_intervention WHERE code = ? AND id <> ? LIMIT 1");
+                $stmt->bindParam(1, $code);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__type_intervention WHERE code = ? LIMIT 1");
+                $stmt->bindParam(1, $code);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
 
 
 

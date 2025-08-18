@@ -18,6 +18,12 @@ class EquipementsCategoryController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du nom de catégorie
+            if (EquipementsCategory_model::existsByCategoryName($_POST['category_name'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom de catégorie déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=equipementsCategory/create');
+                exit;
+            }
             $categorie = new EquipementsCategory_model(
                 null,
                 $_POST['category_name'],
@@ -60,6 +66,12 @@ class EquipementsCategoryController
         $oldIntervention_type = EquipementsCategory_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité du nom de catégorie (exclure la catégorie éditée)
+            if (EquipementsCategory_model::existsByCategoryName($_POST['category_name'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom de catégorie déjà utilisé par une autre catégorie.'];
+                header('Location: /platform_gmao/public/index.php?route=equipementsCategory/edit&id=' . urlencode($id));
+                exit;
+            }
             $categorie = new EquipementsCategory_model(
                 $id,
                 $_POST['category_name'],

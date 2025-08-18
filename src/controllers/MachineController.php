@@ -32,6 +32,12 @@ class MachineController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $machine_id = substr($_POST['machine_id'], 0, 16);
+            // Unicité: machine_id et reference
+            if (Machine_model::existsByMachineId($machine_id) || Machine_model::existsByReference($_POST['reference'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Machine déjà existante (ID ou Référence).'];
+                header('Location: /platform_gmao/public/index.php?route=machine/create');
+                exit;
+            }
             $machine = new Machine_model(
                 $machine_id,
                 $_POST['designation'],
@@ -91,6 +97,12 @@ class MachineController
         $oldMachine = Machine_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité: la référence ne doit pas appartenir à une autre machine
+            if (Machine_model::existsByReference($_POST['reference'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Référence déjà utilisée par une autre machine.'];
+                header('Location: ../../platform_gmao/public/index.php?route=machine/edit&id=' . urlencode($id));
+                exit;
+            }
             $machine = new Machine_model(
                 $id,
                 $_POST['designation'],

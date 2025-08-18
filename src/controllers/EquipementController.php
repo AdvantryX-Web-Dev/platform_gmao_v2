@@ -20,6 +20,17 @@ class EquipementController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité: equipment_id et reference
+            if (Equipement_model::existsByEquipmentId($_POST['equipment_id'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => "ID d'équipement déjà existant."];
+                header('Location: /platform_gmao/public/index.php?route=equipement/create');
+                exit;
+            }
+            if (Equipement_model::existsByReference($_POST['reference'] ?? null)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Référence déjà existante.'];
+                header('Location: /platform_gmao/public/index.php?route=equipement/create');
+                exit;
+            }
             $equipement = new Equipement_model(
                 null,
                 $_POST['equipment_id'],
@@ -68,6 +79,17 @@ class EquipementController
         $oldIntervention_type = Equipement_model::findById($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Unicité à l'édition: exclure l'enregistrement courant
+            if (Equipement_model::existsByEquipmentId($_POST['equipment_id'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => "ID d'équipement déjà utilisé par un autre enregistrement."];
+                header('Location: ../../platform_gmao/public/index.php?route=equipement/edit&id=' . urlencode($id));
+                exit;
+            }
+            if (Equipement_model::existsByReference($_POST['reference'] ?? null, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Référence déjà utilisée par un autre enregistrement.'];
+                header('Location: ../../platform_gmao/public/index.php?route=equipement/edit&id=' . urlencode($id));
+                exit;
+            }
             $equipement = new Equipement_model(
                 $id,
                 $_POST['equipment_id'],

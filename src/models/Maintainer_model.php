@@ -106,6 +106,33 @@ class Maintainer_model
         }
     }
 
+    /**
+     * Vérifie si un matricule existe déjà.
+     * Si $excludeId est fourni, cette ligne est exclue (utile pour l'édition).
+     */
+    public static function existsByMatricule($matricule, $excludeId = null)
+    {
+        if ($matricule === null || $matricule === '') {
+            return false;
+        }
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM init__employee WHERE matricule = ? AND id <> ? LIMIT 1");
+                $stmt->bindParam(1, $matricule);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM init__employee WHERE matricule = ? LIMIT 1");
+                $stmt->bindParam(1, $matricule);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
 
 
 

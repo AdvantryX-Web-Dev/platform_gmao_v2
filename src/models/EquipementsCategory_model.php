@@ -104,6 +104,33 @@ class EquipementsCategory_model
     }
 
     /**
+     * Vérifie si un nom de catégorie existe déjà.
+     * Si $excludeId est fourni, exclut cet enregistrement (utile pour l'édition).
+     */
+    public static function existsByCategoryName($categoryName, $excludeId = null)
+    {
+        if ($categoryName === null || $categoryName === '') {
+            return false;
+        }
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM init__categoris WHERE category_name = ? AND id <> ? LIMIT 1");
+                $stmt->bindParam(1, $categoryName);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM init__categoris WHERE category_name = ? LIMIT 1");
+                $stmt->bindParam(1, $categoryName);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
      * Find intervention types by type (preventive/curative)
      * 
      * @param string $type Type of intervention ('preventive' or 'curative')

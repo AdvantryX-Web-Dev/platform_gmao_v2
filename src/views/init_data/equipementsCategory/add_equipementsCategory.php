@@ -37,6 +37,12 @@ if (!$isAdmin) {
                             <h6 class="m-0 font-weight-bold text-primary">Ajouter une catégorie</h6>
                         </div>
                         <div class="card-body">
+                            <?php if (!empty($_SESSION['flash_message'])): ?>
+                                <div id="flash-message" class="alert alert-<?= $_SESSION['flash_message']['type'] === 'success' ? 'success' : 'danger' ?> mb-4">
+                                    <?= htmlspecialchars($_SESSION['flash_message']['text']) ?>
+                                </div>
+                                <?php unset($_SESSION['flash_message']); ?>
+                            <?php endif; ?>
                             <form action="/platform_gmao/public/index.php?route=equipementsCategory/create" method="post">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -66,6 +72,12 @@ if (!$isAdmin) {
         <script src="/platform_gmao/public/js/sideBare.js"></script>
         <script src="/platform_gmao/public/js/bootstrap.bundle.min.js"></script>
         <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
+        <script>
+            setTimeout(function(){
+                var el = document.getElementById('flash-message');
+                if (el) { el.style.display = 'none'; }
+            }, 4000);
+        </script>
     </div>
 </body>
 

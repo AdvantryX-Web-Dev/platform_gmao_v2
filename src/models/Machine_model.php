@@ -155,6 +155,50 @@ class Machine_model
             return false;
         }
     }
+
+    /**
+     * Vérifie l'existence d'une machine par son ID
+     */
+    public static function existsByMachineId($machineId)
+    {
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        try {
+            $stmt = $conn->prepare("SELECT 1 FROM init__machine WHERE machine_id = ? LIMIT 1");
+            $stmt->bindParam(1, $machineId);
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Vérifie l'existence d'une machine par sa référence
+     * Optionnellement exclut une machine donnée (lors de l'édition)
+     */
+    public static function existsByReference($reference, $excludeMachineId = null)
+    {
+        if ($reference === null || $reference === '') {
+            return false;
+        }
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        try {
+            if ($excludeMachineId) {
+                $stmt = $conn->prepare("SELECT 1 FROM init__machine WHERE reference = ? AND machine_id <> ? LIMIT 1");
+                $stmt->bindParam(1, $reference);
+                $stmt->bindParam(2, $excludeMachineId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM init__machine WHERE reference = ? LIMIT 1");
+                $stmt->bindParam(1, $reference);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
     public static function findBytype($type)
     {
         $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex

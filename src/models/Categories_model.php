@@ -93,6 +93,59 @@ class Categories_model
         }
     }
 
+    /**
+     * Vérifie si un motif existe déjà par son libellé raison_mouv_mach.
+     * Si $excludeId est fourni, exclut cet enregistrement (utile pour l'édition).
+     */
+    public static function existsByRaison($raison, $excludeId = null)
+    {
+        if ($raison === null || $raison === '') {
+            return false;
+        }
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__raison_mouv_mach WHERE raison_mouv_mach = ? AND id_Raison <> ? LIMIT 1");
+                $stmt->bindParam(1, $raison);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__raison_mouv_mach WHERE raison_mouv_mach = ? LIMIT 1");
+                $stmt->bindParam(1, $raison);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Vérifie si un code existe déjà par son champ typeR.
+     * Si $excludeId est fourni, exclut cet enregistrement (utile pour l'édition).
+     */
+    public static function existsByTypeR($typeR, $excludeId = null)
+    {
+        if ($typeR === null || $typeR === '') {
+            return false;
+        }
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            if ($excludeId) {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__raison_mouv_mach WHERE typeR = ? AND id_Raison <> ? LIMIT 1");
+                $stmt->bindParam(1, $typeR);
+                $stmt->bindParam(2, $excludeId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__raison_mouv_mach WHERE typeR = ? LIMIT 1");
+                $stmt->bindParam(1, $typeR);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
    
   
 
