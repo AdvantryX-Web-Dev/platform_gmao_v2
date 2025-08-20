@@ -35,6 +35,8 @@
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=intervention_type/list">Liste des interventions</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machines_status/list">Liste des statuts de machine</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=categories">Liste des motifs de mvt</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=location/list">Liste des emplacements</a>
+
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipementsCategory/list">Liste des catatgories</a>
 
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement/list">Liste des équipements</a>

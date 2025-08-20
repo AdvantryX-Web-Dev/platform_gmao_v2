@@ -21,6 +21,7 @@ use App\Controllers\EquipementsCategoryController;
 use App\Controllers\Equipment_MachineController;
 use App\Controllers\AccessoryController;
 use App\Controllers\Mouvement_equipmentController;
+use App\Controllers\LocationController;
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -37,6 +38,7 @@ $equipementsCategoryController = new EquipementsCategoryController();
 $Equipment_MachineController = new Equipment_MachineController();
 $AccessoryController = new AccessoryController();
 $Mouvement_equipmentController = new Mouvement_equipmentController();
+$locationController = new LocationController();
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -141,6 +143,38 @@ switch ($route) {
         break;
     case 'intervention_type/delete':
         $intervention_typeController->delete();
+        break;
+         /** init location */
+    case 'location/list':
+        $locationController->list();
+        break;
+    case 'location/create':
+        $locationController->create();
+        break;
+    case 'location/edit':
+        $locationController->edit();
+        break;
+    case 'location/delete':
+        $locationController->delete();
+        break;
+    // New separated routes (backwards-compatible with above)
+    case 'equipment_location/create':
+        $locationController->create();
+        break;
+    case 'equipment_location/edit':
+        $locationController->edit();
+        break;
+    case 'equipment_location/delete':
+        $locationController->delete();
+        break;
+    case 'machine_location/create':
+        $locationController->create();
+        break;
+    case 'machine_location/edit':
+        $locationController->edit();
+        break;
+    case 'machine_location/delete':
+        $locationController->delete();
         break;
     /** Gestion des équipements */
     case 'equipement/list':

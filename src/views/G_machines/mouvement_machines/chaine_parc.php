@@ -149,6 +149,27 @@ if (!isset($mouvements)) {
         .equipment-list-container::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
+
+        /* Minimal modern action icons: small, no background; show label and tint on hover */
+        .action-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 6px;
+            border-radius: 8px;
+            background: transparent;
+            color: #6c757d;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+            margin-right: 6px;
+        }
+        .action-icon i { font-size: 12px; }
+        .action-icon .label { display: none; font-size: 12px; font-weight: 500; }
+        .action-icon:hover .label { display: inline; }
+        .action-icon.accept:hover { background: rgba(40, 167, 69, 0.08); color: #28a745; border-color: rgba(40, 167, 69, 0.25); }
+        .action-icon.reject:hover { background: rgba(220, 53, 69, 0.08); color: #dc3545; border-color: rgba(220, 53, 69, 0.25); }
+        .action-icon:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,123,255,.2); }
     </style>
 </head>
 
@@ -248,18 +269,20 @@ if (!isset($mouvements)) {
                                                     </td>
                                                     <td>
                                                         <?php if (empty($mouvement['idEmp_accepted']) && empty($mouvement['status'])): ?>
-                                                            <div class="btn-group" role="group">
-                                                                <button class="btn btn-success btn-sm reception-btn" data-toggle="modal" data-target="#receptionModal"
-                                                                    data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
-                                                                    data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
-                                                                    <i class="fas fa-check"></i> Réceptionner
-                                                                </button>
-                                                                <button class="btn btn-danger btn-sm reject-btn" data-toggle="modal" data-target="#rejectModal"
-                                                                    data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
-                                                                    data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
-                                                                    <i class="fas fa-times"></i> Rejeter
-                                                                </button>
-                                                            </div>
+                                                            <button class="action-icon accept  reception-btn" data-toggle="modal" data-target="#receptionModal"
+                                                                title="Réceptionner"
+                                                                data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
+                                                                data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
+                                                                <i class="fas fa-check text-success"></i>
+                                                               
+                                                            </button>
+                                                            <button class="action-icon reject reject-btn" data-toggle="modal" data-target="#rejectModal"
+                                                                title="Rejeter"
+                                                                data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
+                                                                data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
+                                                                <i class="fas fa-times text-danger"></i>
+                                                              
+                                                            </button>
                                                         <?php else: ?>
                                                             <span class="text-muted">Traité</span>
                                                         <?php endif; ?>
