@@ -151,7 +151,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     <option value="">--Sélectionnez un équipement--</option>
                                     <?php
                                     $controller = new Mouvement_equipmentController();
-                                    $location = "Magasin A";
+                                    $location = "magasin";
                                     $equipements = $controller->getEquipements($location);
 
                                     foreach ($equipements as $equipement) {

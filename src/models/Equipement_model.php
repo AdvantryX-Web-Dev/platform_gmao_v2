@@ -237,7 +237,8 @@ class Equipement_model
                    ie.reference AS reference,
                    ec.etat AS etat_equipement,
                    im.machine_id AS machine_id,
-                   il.location_name AS location_name
+                   il.location_name AS location_name,
+                   il.location_category AS location_category
             FROM prod__accessories pa
             LEFT JOIN (
                 SELECT accessory_ref, MAX(id) AS max_id

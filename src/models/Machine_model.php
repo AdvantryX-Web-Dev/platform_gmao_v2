@@ -237,7 +237,7 @@ class Machine_model
         try {
             $req = $conn->query("SELECT DISTINCT type FROM init__machine 
             left join gmao__machine_location ml on ml.id=init__machine.machines_location_id
-             where ml.location_name='$location'
+             where ml.location_category='$location'
             ORDER BY type");
             return $req->fetchAll();
         } catch (PDOException $e) {
@@ -246,113 +246,7 @@ class Machine_model
     }
 
 
-    public static function MachinesStateTablev1()
-    {
-        // Connexion à la base de données db_digitex pour init__machine et prod__presence
-        $dbDigitex = Database::getInstance('db_digitex');
-        $connDigitex = $dbDigitex->getConnection();
 
-        // Connexion à la base de données MAHDCO_MAINT pour les tables gmao__*
-        $dbGmao = Database::getInstance('MAHDCO_MAINT');
-        $connGmao = $dbGmao->getConnection();
-
-        try {
-            // Obtenir la date d'aujourd'hui
-            $today = date('Y-m-d');
-
-            // D'abord, récupérer les données de gmao__machines_status et gmao__machine_location depuis MAHDCO_MAINT
-            $statusQuery = "SELECT id, status_name FROM MAHDCO_MAINT.gmao__machines_status";
-            $stmtStatus = $connGmao->query($statusQuery);
-            $statusMap = [];
-            while ($row = $stmtStatus->fetch(\PDO::FETCH_ASSOC)) {
-                $statusMap[$row['status_name']] = $row['id'];
-            }
-
-            $locationQuery = "SELECT id, location_name FROM MAHDCO_MAINT.gmao__machine_location";
-            $stmtLocation = $connGmao->query($locationQuery);
-            $locationMap = [];
-            while ($row = $stmtLocation->fetch(\PDO::FETCH_ASSOC)) {
-                $locationMap[$row['id']] = $row['location_name'];
-            }
-
-            // Requête principale sur db_digitex
-            $query = "
-                SELECT 
-                    m.*,
-                    ms.status_name as etat_machine,
-                    ms.id as status_id,
-                    ml.location_name as location,
-                    pp.p_state
-                FROM 
-                    db_digitex.init__machine m
-                    LEFT JOIN MAHDCO_MAINT.gmao__machines_status ms ON ms.id = m.machines_status_id 
-                    LEFT JOIN MAHDCO_MAINT.gmao__machine_location ml ON ml.id = m.machines_location_id 
-                    LEFT JOIN db_digitex.prod__presence pp ON pp.machine_id = m.machine_id AND pp.cur_date = :today
-                ORDER BY 
-                    m.updated_at DESC
-            ";
-
-            $stmt = $connDigitex->prepare($query);
-            $stmt->bindParam(':today', $today);
-            $stmt->execute();
-            $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            // Parcourir les machines et ajuster leur état selon l'emplacement et l'activité
-            foreach ($machines as &$machine) {
-                $machineId = $machine['machine_id'];
-                $location = $machine['location'];
-                $currentStatus = $machine['etat_machine'];
-                $newStatusId = null;
-
-                // Déterminer le nouvel état selon l'emplacement
-                if ($location == 'prodline') {
-                    // Si la machine est en production
-                    if ($machine['p_state'] == 1) {
-                        // Machine active aujourd'hui (présente dans prod__presence avec p_state = 1)
-                        $machine['etat_machine'] = 'active';
-                        $newStatusId = $statusMap['active'];
-                    } elseif ($currentStatus == 'en panne') {
-                        // Si déjà marquée en panne, garder cet état
-                        $machine['etat_machine'] = 'en panne';
-                        $newStatusId = $statusMap['en panne'];
-                    } else {
-                        // Machine en production mais pas active aujourd'hui
-                        $machine['etat_machine'] = 'inactive';
-                        $newStatusId = $statusMap['inactive'];
-                    }
-                }
-                // Pour les machines dans le parc
-                elseif ($location == 'parc') {
-                    if (in_array($currentStatus, ['en panne', 'ferraille', 'fonctionnelle'])) {
-                        // Conserver l'état actuel s'il est approprié pour le parc
-                        $newStatusId = $machine['status_id'];
-                    } else {
-                        // Sinon, mettre par défaut à "fonctionnelle"
-                        $machine['etat_machine'] = 'fonctionnelle';
-                        $newStatusId = $statusMap['fonctionnelle'];
-                    }
-                }
-
-                // Mettre à jour l'état dans la base de données si nécessaire
-                if ($newStatusId && $newStatusId != $machine['machines_status_id']) {
-                    $updateStmt = $connDigitex->prepare("
-                        UPDATE db_digitex.init__machine 
-                        SET machines_status_id = :status_id, updated_at = NOW() 
-                        WHERE machine_id = :machine_id
-                    ");
-                    $updateStmt->bindParam(':status_id', $newStatusId, \PDO::PARAM_INT);
-                    $updateStmt->bindParam(':machine_id', $machineId, \PDO::PARAM_STR);
-                    $updateStmt->execute();
-                }
-            }
-
-            return $machines;
-        } catch (PDOException $e) {
-            error_log('Error in MachinesStateTable: ' . $e->getMessage());
-            // Return empty array instead of false
-            return [];
-        }
-    }
     public static function MachinesStateTable()
     {
         $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
@@ -370,6 +264,7 @@ class Machine_model
                     ms.status_name as etat_machine,
                     ms.id as status_id,
                     ml.location_name as location,
+                    ml.location_category as location_category,
                     pp.p_state
                 FROM 
                     init__machine m

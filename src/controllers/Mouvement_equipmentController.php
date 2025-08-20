@@ -87,12 +87,12 @@ class Mouvement_equipmentController
                     $locationId = null;
                     if ($type_mouvement === 'entre_magasin') {
                         // Trouver l'ID pour "parc"
-                        $stmt = $conn->prepare("SELECT id FROM init__location WHERE location_name = 'Magasin A' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM init__location WHERE location_category = 'magasin' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     } else { //  inter_chaine ou parc_chaine
                         // Trouver l'ID pour "chaine"
-                        $stmt = $conn->prepare("SELECT id FROM init__location WHERE location_name = 'prodline' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM init__location WHERE location_category = 'prodline' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     }

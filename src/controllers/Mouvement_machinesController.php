@@ -210,12 +210,12 @@ class Mouvement_machinesController
                     $locationId = null;
                     if ($type_mouvement === 'chaine_parc') {
                         // Trouver l'ID pour "parc"
-                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'parc' LIMIT 1");
+                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_category = 'parc' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     } else { //  inter_chaine ou parc_chaine
                         // Trouver l'ID pour "chaine"
-                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_name = 'prodline' LIMIT 1");
+                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_category = 'prodline' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     }
@@ -286,7 +286,7 @@ class Mouvement_machinesController
             $mouvementId = $_POST['mouvement_id'];
             $type_mouvement = $_POST['type_mouvement'] ?? 'chaine_parc'; // Valeur par défaut
             $equipment_ids = $_POST['equipment_ids'] ?? '[]';
-
+            $reject_comment = trim($_POST['reject_comment'] ?? '');
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
                 $type_mouvement = 'chaine_parc'; // Valeur par défaut si invalide
@@ -326,14 +326,15 @@ class Mouvement_machinesController
                 // Transaction pour assurer l'intégrité des données
                 $conn->beginTransaction();
 
-                // 1. Mettre à jour le mouvement avec le statut rejeté et les equipment_ids en JSON
+                // 1. Mettre à jour le mouvement avec le statut rejeté et les equipment_ids en JSON et Commentaire raison
                 $stmt = $conn->prepare("UPDATE gmao__mouvement_machine 
-                    SET idEmp_accepted = :user_id, status = 'rejeté', equipement = :equipment_ids
+                    SET idEmp_accepted = :user_id, status = 'rejeté', equipement = :equipment_ids, `Comment` = :comment
                     WHERE num_Mouv_Mach = :mouvement_id");
 
                 $stmt->bindParam(':user_id', $userId);
                 $stmt->bindParam(':mouvement_id', $mouvementId);
                 $stmt->bindParam(':equipment_ids', $equipment_ids);
+                $stmt->bindParam(':comment', $reject_comment);
                 $stmt->execute();
 
                 $conn->commit();
@@ -378,7 +379,7 @@ class Mouvement_machinesController
                       FROM init__machine m
                       left join gmao__machine_location ml on ml.id=m.machines_location_id
                       WHERE type = :type 
-                      and ml.location_name='$location'
+                      and ml.location_category='$location'
                       ORDER BY machine_id";
 
             $stmt = $conn->prepare($query);

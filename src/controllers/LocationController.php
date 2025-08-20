@@ -40,6 +40,15 @@ class LocationController
                     $stmt = $conn->prepare('INSERT INTO init__location (location_name, location_category) VALUES (?, ?)');
                 }
                 $stmt->execute([$locationName, $location_category]);
+                // Audit trail - création
+                if (isset($_SESSION['user']['matricule'])) {
+                    $newValues = [
+                        'location_name' => $locationName,
+                        'location_category' => $location_category
+                    ];
+                    $affectedTable = ($kind === 'machine') ? 'gmao__machine_location' : 'init__location';
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', $affectedTable, null, $newValues);
+                }
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Emplacement ajouté avec succès.'];
             } catch (\PDOException $e) {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout de l\'emplacement.'];
@@ -96,6 +105,16 @@ class LocationController
                     $stmt = $conn->prepare('UPDATE init__location SET location_name = ?, location_category = ? WHERE id = ?');
                 }
                 $stmt->execute([$locationName, $location_category, $id]);
+                // Audit trail - modification
+                if (isset($_SESSION['user']['matricule']) && $location) {
+                    $newValues = [
+                        'id' => $id,
+                        'location_name' => $locationName,
+                        'location_category' => $location_category
+                    ];
+                    $affectedTable = ($kind === 'machine') ? 'gmao__machine_location' : 'init__location';
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'update', $affectedTable, $location, $newValues);
+                }
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Emplacement modifié avec succès.'];
             } catch (\PDOException $e) {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la modification.'];
@@ -117,12 +136,26 @@ class LocationController
                 $conn = $db->getConnection();
                 $db_digitex =  Database::getInstance('db_digitex');
                 $conn_digitex = $db_digitex->getConnection();
+                // Récupérer l'enregistrement avant suppression pour l'audit
+                if ($kind === 'machine') {
+                    $stmtFetch = $conn_digitex->prepare('SELECT * FROM gmao__machine_location WHERE id = ?');
+                    $affectedTable = 'gmao__machine_location';
+                } else {
+                    $stmtFetch = $conn->prepare('SELECT * FROM init__location WHERE id = ?');
+                    $affectedTable = 'init__location';
+                }
+                $stmtFetch->execute([$id]);
+                $oldLocation = $stmtFetch->fetch(\PDO::FETCH_ASSOC);
                 if ($kind === 'machine') {
                     $stmt = $conn_digitex->prepare('DELETE FROM gmao__machine_location WHERE id = ?');
                 } else {
                     $stmt = $conn->prepare('DELETE FROM init__location WHERE id = ?');
                 }
                 $stmt->execute([$id]);
+                // Audit trail - suppression
+                if (isset($_SESSION['user']['matricule']) && $oldLocation) {
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', $affectedTable, $oldLocation, null);
+                }
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Emplacement supprimé avec succès.'];
             } catch (\PDOException $e) {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la suppression de l\'emplacement.'];

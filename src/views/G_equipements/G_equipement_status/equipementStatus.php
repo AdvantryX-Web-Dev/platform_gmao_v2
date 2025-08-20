@@ -52,10 +52,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                     if (is_array($equipements)) {
                                         foreach ($equipements as $m) {
-                                            if (!empty($m['location_name']) && $m['location_name'] == 'prodline' || $m['location_name'] == 'CH4') {
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'prodline' || $m['location_category'] == 'CH4') {
                                                 $countProduction++;
                                             }
-                                            if (!empty($m['location_name']) && $m['location_name'] == 'Magasin A') {
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'magasin') {
                                                 $countmagasin++;
                                             }
                                             if (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'fonctionnel')) {
@@ -202,9 +202,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                                     <td>
                                                         <?php
-                                                        if (empty($equipement['location_name'])) {
+                                                        if (empty($equipement['location_category'])) {
                                                             echo '<span class="badge badge-secondary">Non défini</span>';
-                                                        } elseif ($equipement['location_name'] == 'prodline') {
+                                                        } elseif ($equipement['location_category'] == 'prodline') {
                                                             echo '<span class="badge badge-success">En production</span>';
                                                         } else {
                                                             echo '<span class="badge badge-primary">' . htmlspecialchars($equipement['location_name']) . '</span>';
