@@ -76,7 +76,8 @@ use App\Controllers\Machine_boxController;
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Affectation machine – équipement:</h6>
                             <div class="d-flex justify-content-end">
-                                <a href="?route=equipement_machine/affectation_equipmentMachine" class="btn btn-primary">Ajouter une affectation</a>
+                                <a href="?route=equipement_machine/affectation_equipmentMachine" class="btn btn-primary mr-2">Ajouter une affectation</a>
+                                <a href="?route=equipement_machine/affectation_scan" class="btn btn-outline-primary"><i class="fas fa-qrcode"></i> Scanner</a>
                             </div>
                         </div>
                         <div class="card-body">

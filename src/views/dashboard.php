@@ -94,7 +94,7 @@ foreach ($monthlyStats as $stat) {
 
 // Récupérer les machines par statut
 $stmtMachineStatus = $connDigitex->prepare("
-    SELECT ms.status_name as status_name, COUNT(m.id) as count
+    SELECT MIN(ms.status_name) as status_name, COUNT(m.id) as count
     FROM init__machine m
     JOIN gmao__machines_status ms ON m.machines_status_id = ms.id
     GROUP BY m.machines_status_id

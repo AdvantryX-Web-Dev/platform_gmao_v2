@@ -1,4 +1,9 @@
 <?php
+
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+
 // Démarrer la session
 session_start();
 
@@ -22,6 +27,8 @@ use App\Controllers\Equipment_MachineController;
 use App\Controllers\AccessoryController;
 use App\Controllers\Mouvement_equipmentController;
 use App\Controllers\LocationController;
+use App\Controllers\ScanController;
+
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -39,6 +46,8 @@ $Equipment_MachineController = new Equipment_MachineController();
 $AccessoryController = new AccessoryController();
 $Mouvement_equipmentController = new Mouvement_equipmentController();
 $locationController = new LocationController();
+$scanController = new ScanController();
+
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -144,7 +153,7 @@ switch ($route) {
     case 'intervention_type/delete':
         $intervention_typeController->delete();
         break;
-         /** init location */
+    /** init location */
     case 'location/list':
         $locationController->list();
         break;
@@ -269,8 +278,14 @@ switch ($route) {
     case 'equipement_machine/affectation_equipmentMachine':
         $Equipment_MachineController->affectation_equipmentMachine();
         break;
+    case 'equipement_machine/affectation_scan':
+        require_once __DIR__ . '/../src/views/G_equipements/qr_scanner/affectation_scan.php';
+        break;
     case 'equipement_machine/affecter':
         $AccessoryController->affecter();
+        break;
+    case 'scan/decode':
+        $scanController->decode();
         break;
 
     case 'mouvement_equipements/entre_magasin':
