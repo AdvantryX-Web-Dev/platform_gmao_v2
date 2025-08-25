@@ -263,7 +263,7 @@ class MouvementMachine_model
             LEFT JOIN 
                 db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
             LEFT JOIN 
-                db_mahdco.gmao__machines_status ms ON m.machines_status_id = ms.id
+                db_mahdco.gmao__status ms ON m.machines_status_id = ms.id
            
             WHERE 
                 mm.id_machine = :machine_id

@@ -58,7 +58,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                         <?php
                                         $categories = Equipement_model::AllCategorie();
                                         foreach ($categories as $category) {
-                                            echo '<option value="' . $category['id'] . '" ' . (isset($equipement['equipment_category']) && $equipement['equipment_category'] == $category['id'] ? 'selected' : '') . '>' . $category['category_name'] . '</option>';
+                                            echo '<option value="' . $category['id'] . '" ' . (isset($equipement['equipment_category_id']) && $equipement['equipment_category_id'] == $category['id'] ? 'selected' : '') . '>' . $category['category_name'] . '</option>';
                                         }
                                         ?>
                                     </select>
@@ -70,6 +70,17 @@ if (session_status() === PHP_SESSION_NONE) {
                                         $locations = Equipement_model::AllLocations();
                                         foreach ($locations as $location) {
                                             echo '<option value="' . $location['id'] . '" ' . (isset($equipement['location_id']) && $equipement['location_id'] == $location['id'] ? 'selected' : '') . '>' . $location['location_name'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status_id" class="form-control" value="<?= htmlspecialchars($equipement['status_id'] ?? '') ?>" required>
+                                        <?php
+                                        $status = Equipement_model::AllStatus();
+                                        foreach ($status as $status) {
+                                            echo '<option value="' . $status['id'] . '" ' . (isset($equipement['status_id']) && $equipement['status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
                                         }
                                         ?>
                                     </select>

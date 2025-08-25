@@ -87,18 +87,18 @@ class Mouvement_equipmentController
                     $locationId = null;
                     if ($type_mouvement === 'entre_magasin') {
                         // Trouver l'ID pour "parc"
-                        $stmt = $conn->prepare("SELECT id FROM init__location WHERE location_category = 'magasin' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM gmao__location WHERE location_category = 'magasin' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     } else { //  inter_chaine ou parc_chaine
                         // Trouver l'ID pour "chaine"
-                        $stmt = $conn->prepare("SELECT id FROM init__location WHERE location_category = 'prodline' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM gmao__location WHERE location_category = 'prodline' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     }
 
                     // 4. Mettre à jour la equipments avec le nouvel emplacement et état
-                    $updateQuery = "UPDATE init__equipement SET ";
+                    $updateQuery = "UPDATE gmao__init_equipment SET ";
                     $params = [];
 
                     if ($locationId) {
@@ -114,7 +114,7 @@ class Mouvement_equipmentController
 
 
                     if (!empty($params)) {
-                        $updateQuery = "UPDATE init__equipement SET location_id = :location_id, etat_equipment_id = :status_id";
+                        $updateQuery = "UPDATE gmao__init_equipment SET location_id = :location_id, etat_equipment_id = :status_id";
                         $updateQuery .= " WHERE equipment_id = :equipment_id";
 
                         $params[':equipment_id'] = $equipmentId;
@@ -126,8 +126,8 @@ class Mouvement_equipmentController
                         $stmt->execute();
                     }
 
-                    // 5. Récupérer l'equipment_id depuis la table init__equipement
-                    // $stmt = $conn->prepare("SELECT equipment_id FROM init__equipement WHERE id = :equipment_id");
+                    // 5. Récupérer l'equipment_id depuis la table gmao__init_equipment
+                    // $stmt = $conn->prepare("SELECT equipment_id FROM gmao__init_equipment WHERE id = :equipment_id");
                     // $stmt->bindParam(':equipment_id', $equipmentId);
                     // $stmt->execute();
                     // $equipmentIdFromInit = $stmt->fetchColumn();

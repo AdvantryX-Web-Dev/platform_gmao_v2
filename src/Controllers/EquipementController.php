@@ -37,6 +37,7 @@ class EquipementController
                 $_POST['designation'],
                 $_POST['reference'],
                 $_POST['equipment_category'],
+                $_POST['status_id'],
                 $_POST['location_id']
             );
 
@@ -51,9 +52,10 @@ class EquipementController
                         'designation' => $_POST['designation'],
                         'reference' => $_POST['reference'],
                         'equipment_category' => $_POST['equipment_category'],
-                        'location_id' => $_POST['location_id']
+                        'location_id' => $_POST['location_id'],
+                        'status_id' => $_POST['status_id']
                     ];
-                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'init__equipement', null, $newValues);
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'gmao__init_equipment', null, $newValues);
                 }
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout du équipement.'];
@@ -96,6 +98,7 @@ class EquipementController
                 $_POST['designation'],
                 $_POST['reference'],
                 $_POST['equipment_category'],
+                $_POST['status_id'],
                 $_POST['location_id']
             );
             if (Equipement_model::UpdateEquipement($equipement)) {
@@ -108,9 +111,10 @@ class EquipementController
                         'designation' => $_POST['designation'],
                         'reference' => $_POST['reference'],
                         'equipment_category' => $_POST['equipment_category'],
-                        'location_id' => $_POST['location_id']
+                        'location_id' => $_POST['location_id'],
+                        'status_id' => $_POST['status_id']
                     ];
-                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'update', 'gmao__type_intervention', $oldIntervention_type, $newValues);
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'update', 'gmao__init_equipment', $oldIntervention_type, $newValues);
                 }
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la modification du équipement.'];

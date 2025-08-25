@@ -46,96 +46,61 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <h6 class="m-0 font-weight-bold text-primary">Liste des emplacements</h6>
                             <?php if ($isAdmin): ?>
                                 <div>
-                                    <a href="../../platform_gmao/public/index.php?route=location/create&kind=equipment" class="btn btn-success mr-2">
-                                        <i class="fas fa-plus"></i> Ajouter emplacement équipement
+                                    <a href="../../platform_gmao/public/index.php?route=location/create" class="btn btn-success mr-2">
+                                        <i class="fas fa-plus"></i> Ajouter emplacement
                                     </a>
-                                    <a href="../../platform_gmao/public/index.php?route=location/create&kind=machine" class="btn btn-primary">
-                                        <i class="fas fa-plus"></i> Ajouter emplacement machine
-                                    </a>
+                                   
                                 </div>
                             <?php endif; ?>
                         </div>
                         <div class="card-body">
-                            <ul class="nav nav-tabs" id="locationTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link active" id="equip-tab" data-toggle="tab" href="#equip" role="tab" aria-controls="equip" aria-selected="true">
-                                        Emplacements équipements
-                                    </a>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link" id="mach-tab" data-toggle="tab" href="#mach" role="tab" aria-controls="mach" aria-selected="false">
-                                        Emplacements machines
-                                    </a>
-                                </li>
-                            </ul>
-                            <div class="tab-content pt-3" id="locationTabsContent">
-                                <div class="tab-pane fade show active" id="equip" role="tabpanel" aria-labelledby="equip-tab">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered" id="dataTableEquip" width="100%" cellspacing="0">
-                                            <thead>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTableLocations" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <?php if ($isAdmin): ?>
+                                                <th style="width: 8%;">Actions</th>
+                                            <?php endif; ?>
+                                            <th>Nom</th>
+                                            <th>Emplacement</th>
+                                            <th>Type</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($Locations)): ?>
+                                            <?php foreach ($Locations as $loc): ?>
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
-                                                        <th style="width: 5%;">Actions</th>
+                                                        <td>
+                                                            <a href="../../platform_gmao/public/index.php?route=location/edit&id=<?= urlencode($loc['id']) ?>">
+                                                                <i class="fas fa-edit m-2 text-primary"></i>
+                                                            </a>
+                                                            <a href="../../platform_gmao/public/index.php?route=location/delete&id=<?= urlencode($loc['id']) ?>"
+                                                                onclick="return confirm('Supprimer cet emplacement ?');">
+                                                                <i class="fas fa-trash text-danger"></i>
+                                                            </a>
+                                                        </td>
                                                     <?php endif; ?>
-                                                    <th>Nom</th>
-                                                    <th>Emplacement</th>
+
+                                                    <td><?= htmlspecialchars($loc['location_name'] ?? '') ?></td>
+                                                    <td><?= htmlspecialchars($loc['location_category'] ?? '') ?></td>
+                                                    <td>
+                                                        <span class="badge badge-<?= $loc['location_type'] === 'machine' ? 'primary' : 'success' ?>">
+                                                            <?= htmlspecialchars($loc['location_type'] ?? '') ?>
+                                                        </span>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php if (!empty($equipmentLocations)): ?>
-                                                    <?php foreach ($equipmentLocations as $loc): ?>
-                                                        <tr>
-                                                            <?php if ($isAdmin): ?>
-                                                                <td>
-                                                                    <a href="../../platform_gmao/public/index.php?route=location/edit&id=<?= urlencode($loc['id']) ?>&kind=equipment"><i class="fas fa-edit m-2"></i></a>
-                                                                    <a href="../../platform_gmao/public/index.php?route=location/delete&id=<?= urlencode($loc['id']) ?>&kind=equipment" onclick="return confirm('Supprimer cet emplacement ?');"><i class="fas fa-trash text-danger"></i></a>
-                                                                </td>
-                                                            <?php endif; ?>
-                                                            
-                                                            <td><?= htmlspecialchars($loc['location_name'] ?? '') ?></td>
-                                                            <td><?= htmlspecialchars($loc['location_category'] ?? '') ?></td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <tr><td>Aucun emplacement trouvé.</td></tr>
-                                                <?php endif; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="mach" role="tabpanel" aria-labelledby="mach-tab">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered" id="dataTableMach" width="100%" cellspacing="0">
-                                            <thead>
-                                                <tr>
-                                                    <?php if ($isAdmin): ?>
-                                                        <th style="width: 5%;">Actions</th>       
-                                                    <?php endif; ?>
-                                                    <th>Nom</th>
-                                                    <th>Emplacement</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php if (!empty($machineLocations)): ?>
-                                                    <?php foreach ($machineLocations as $loc): ?>
-                                                        <tr>
-                                                            <?php if ($isAdmin): ?>
-                                                                <td style="width: 5%;">
-                                                                    <a href="../../platform_gmao/public/index.php?route=location/edit&id=<?= urlencode($loc['id']) ?>&kind=machine"><i class="fas fa-edit m-2"></i></a>
-                                                                    <a href="../../platform_gmao/public/index.php?route=location/delete&id=<?= urlencode($loc['id']) ?>&kind=machine" onclick="return confirm('Supprimer cet emplacement ?');"><i class="fas fa-trash text-danger"></i></a>
-                                                                </td>
-                                                            <?php endif; ?>
-                                                            <td><?= htmlspecialchars($loc['location_name'] ?? '') ?></td>
-                                                            <td><?= htmlspecialchars($loc['location_category'] ?? '') ?></td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <tr><td>Aucun emplacement trouvé.</td></tr>
-                                                <?php endif; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="<?= $isAdmin ? '4' : '3' ?>" class="text-center">
+                                                    Aucun emplacement trouvé.
+                                                </td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -154,7 +119,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
         <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
         <script>
             $(document).ready(function() {
-                $('#dataTableEquip').DataTable({
+                $('#dataTableLocations').DataTable({
                     language: {
                         search: "Rechercher:",
                         lengthMenu: "Afficher _MENU_ éléments par page",
@@ -169,26 +134,24 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             last: "Dernier"
                         }
                     },
-                    pageLength: 10
+                    pageLength: 10,
+                    order: [
+                        [1, 'asc']
+                    ], // Trier par défaut sur la colonne Type
+                    columnDefs: [{
+                            targets: 1, // Colonne Type
+                            width: "15%"
+                        },
+                        <?php if ($isAdmin): ?> {
+                                targets: 0, // Colonne Actions
+                                orderable: false,
+                                searchable: false
+                            }
+                        <?php endif; ?>
+                    ]
                 });
-                $('#dataTableMach').DataTable({
-                    language: {
-                        search: "Rechercher:",
-                        lengthMenu: "Afficher _MENU_ éléments par page",
-                        info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-                        infoEmpty: "Aucun élément à afficher",
-                        infoFiltered: "(filtré de _MAX_ éléments au total)",
-                        zeroRecords: "Aucun enregistrement correspondant trouvé",
-                        paginate: {
-                            first: "Premier",
-                            previous: "Précédent",
-                            next: "Suivant",
-                            last: "Dernier"
-                        }
-                    },
-                    pageLength: 10
-                });
-                // Faire disparaître les messages flash après 3 secondes
+
+                // Faire disparaître les messages flash après 4 secondes
                 setTimeout(function() {
                     $("#flash-message").fadeOut("slow");
                 }, 4000);

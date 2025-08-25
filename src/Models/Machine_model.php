@@ -236,7 +236,7 @@ class Machine_model
         $conn = $db->getConnection();
         try {
             $req = $conn->query("SELECT DISTINCT type FROM init__machine 
-            left join gmao__machine_location ml on ml.id=init__machine.machines_location_id
+            left join gmao__location ml on ml.id=init__machine.machines_location_id
              where ml.location_category='$location'
             ORDER BY type");
             return $req->fetchAll();
@@ -268,8 +268,8 @@ class Machine_model
                     pp.p_state
                 FROM 
                     init__machine m
-                    LEFT JOIN gmao__machines_status ms ON ms.id = m.machines_status_id 
-                    LEFT JOIN gmao__machine_location ml ON ml.id = m.machines_location_id 
+                    LEFT JOIN gmao__status ms ON ms.id = m.machines_status_id 
+                    LEFT JOIN gmao__location ml ON ml.id = m.machines_location_id 
                     LEFT JOIN prod__presence pp ON pp.machine_id = m.machine_id AND pp.cur_date = :today
                 ORDER BY 
                     m.updated_at DESC
@@ -283,7 +283,7 @@ class Machine_model
             // Récupérer les IDs des statuts
             $stmt = $conn->query("
                 SELECT id, status_name 
-                FROM gmao__machines_status
+                FROM gmao__status
             ");
             $statusMap = [];
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
@@ -347,7 +347,7 @@ class Machine_model
         }
     }
     /**
-     * Get all machine statuses from gmao__machines_status table
+     * Get all machine statuses from gmao__status table
      * 
      * @return array Array of machine statuses
      */
@@ -356,7 +356,7 @@ class Machine_model
         $db =  Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
-            $query = "SELECT * FROM gmao__machines_status ORDER BY id ASC";
+            $query = "SELECT * FROM gmao__status ORDER BY id ASC";
             $stmt = $conn->query($query);
             $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             return $result ?: [];
@@ -371,7 +371,7 @@ class Machine_model
      * Update machine status
      * 
      * @param string $machineId Machine ID
-     * @param int $statusId Status ID from gmao__machines_status table
+     * @param int $statusId Status ID from gmao__status table
      * @return bool True if update was successful, false otherwise
      */
     public static function updateMachineStatus($machineId, $statusId)

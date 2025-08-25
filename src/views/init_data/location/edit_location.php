@@ -2,7 +2,6 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$kind = $_GET['kind'] ?? 'equipment';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -27,7 +26,7 @@ $kind = $_GET['kind'] ?? 'equipment';
                 <div class="container-fluid">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Editer un emplacement (<?= htmlspecialchars($kind) ?>)</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Editer un emplacement </h6>
                         </div>
                         <div class="card-body">
                             <?php if (!empty($_SESSION['flash_message'])): ?>
@@ -43,17 +42,18 @@ $kind = $_GET['kind'] ?? 'equipment';
                                 </div>
                                 <div class="form-group">
                                     <label>Emplacement</label>
-                                    <?php if ($kind === 'equipment'): ?>
                                         <select name="location_category" class="form-control" required>
                                             <option value="magasin" <?= (isset($location['location_category']) && $location['location_category'] === 'magasin') ? 'selected' : '' ?>>magasin</option>
                                             <option value="prodline" <?= (isset($location['location_category']) && $location['location_category'] === 'prodline') ? 'selected' : '' ?>>prodline</option>
-                                        </select>
-                                    <?php else: ?>
-                                        <select name="location_category" class="form-control" required>
-                                            <option value="prodline" <?= (isset($location['location_category']) && $location['location_category'] === 'prodline') ? 'selected' : '' ?>>prodline</option>
                                             <option value="parc" <?= (isset($location['location_category']) && $location['location_category'] === 'parc') ? 'selected' : '' ?>>parc</option>
                                         </select>
-                                    <?php endif; ?>
+                                </div>
+                                <div class="form-group">
+                                    <label>Type</label>
+                                    <select name="location_type" class="form-control" required>
+                                        <option value="machine" <?= (isset($location['location_type']) && $location['location_type'] === 'machine') ? 'selected' : '' ?>>machine</option>
+                                        <option value="equipment" <?= (isset($location['location_type']) && $location['location_type'] === 'equipment') ? 'selected' : '' ?>>equipment</option>
+                                    </select>
                                 </div>
                                 <button type="submit" class="btn btn-success">Enregistrer</button>
                                 <a href="/platform_gmao/public/index.php?route=location/list" class="btn btn-secondary ml-2">Annuler</a>

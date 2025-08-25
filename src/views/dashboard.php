@@ -10,7 +10,7 @@ use App\Models\Database;
 $dbDigitex = Database::getInstance('db_digitex');
 $connDigitex = $dbDigitex->getConnection();
 
-$dbGMAO = Database::getInstance('MAHDCO_MAINT');
+$dbGMAO = Database::getInstance('db_digitex');
 $connGMAO = $dbGMAO->getConnection();
 
 // Récupérer le nombre total de machines
@@ -38,7 +38,7 @@ $totalCur = $stmtCur->fetchColumn();
 
 // Récupérer le nombre d'équipements
 $stmtEquip = $connGMAO->prepare("
-    SELECT COUNT(*) FROM init__equipement
+    SELECT COUNT(*) FROM gmao__init_equipment
 ");
 $stmtEquip->execute();
 $totalEquip = $stmtEquip->fetchColumn();
@@ -96,7 +96,7 @@ foreach ($monthlyStats as $stat) {
 $stmtMachineStatus = $connDigitex->prepare("
     SELECT MIN(ms.status_name) as status_name, COUNT(m.id) as count
     FROM init__machine m
-    JOIN gmao__machines_status ms ON m.machines_status_id = ms.id
+    JOIN gmao__status ms ON m.machines_status_id = ms.id
     GROUP BY m.machines_status_id
     ORDER BY count DESC
 ");

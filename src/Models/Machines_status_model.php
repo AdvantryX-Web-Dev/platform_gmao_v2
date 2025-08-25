@@ -37,7 +37,7 @@ class Machines_status_model
         $conn = $db->getConnection();
         $machines_status = array();
         try {
-            $req = $conn->query("SELECT * FROM gmao__machines_status order by updated_at desc");
+            $req = $conn->query("SELECT * FROM gmao__status order by updated_at desc");
             $machines_status = $req->fetchAll();
         } catch (PDOException $e) {
 
@@ -52,7 +52,7 @@ class Machines_status_model
         $conn = $db->getConnection();
         $machines_status = null;
         try {
-            $req = $conn->query("SELECT * FROM gmao__machines_status WHERE id='$id'");
+            $req = $conn->query("SELECT * FROM gmao__status WHERE id='$id'");
             $machines_status = $req->fetch();
         } catch (PDOException $e) {
 
@@ -65,7 +65,7 @@ class Machines_status_model
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("INSERT INTO gmao__machines_status (`id`, `status_name`) VALUES (?, ?)");
+            $stmt = $conn->prepare("INSERT INTO gmao__status (`id`, `status_name`) VALUES (?, ?)");
             $stmt->bindParam(1, $machines_status->id);
             $stmt->bindParam(2, $machines_status->status_name);
 
@@ -82,7 +82,7 @@ class Machines_status_model
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("UPDATE gmao__machines_status SET status_name = ? WHERE id = '$machines_status->id'");
+            $stmt = $conn->prepare("UPDATE gmao__status SET status_name = ? WHERE id = '$machines_status->id'");
             $stmt->bindParam(1, $machines_status->status_name);
 
             $stmt->execute();
@@ -105,11 +105,11 @@ class Machines_status_model
         $conn = $db->getConnection();
         try {
             if ($excludeId) {
-                $stmt = $conn->prepare("SELECT 1 FROM gmao__machines_status WHERE status_name = ? AND id <> ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__status WHERE status_name = ? AND id <> ? LIMIT 1");
                 $stmt->bindParam(1, $statusName);
                 $stmt->bindParam(2, $excludeId);
             } else {
-                $stmt = $conn->prepare("SELECT 1 FROM gmao__machines_status WHERE status_name = ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__status WHERE status_name = ? LIMIT 1");
                 $stmt->bindParam(1, $statusName);
             }
             $stmt->execute();
@@ -127,7 +127,7 @@ class Machines_status_model
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("DELETE FROM gmao__machines_status WHERE id = ?");
+            $stmt = $conn->prepare("DELETE FROM gmao__status WHERE id = ?");
             $stmt->bindParam(1, $id);
             $stmt->execute();
             return true;

@@ -39,7 +39,7 @@ class EquipementsCategory_model
         $db = new Database();
         $conn = $db->getConnection();
         $categories = array();
-        $req = $conn->query("SELECT * FROM init__categoris");
+        $req = $conn->query("SELECT * FROM gmao__init__category");
         $categories = $req->fetchAll();
         return $categories;
     }
@@ -50,7 +50,7 @@ class EquipementsCategory_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("INSERT INTO init__categoris (`id`,category_name ,`category_type`) VALUES (?,?, ?)");
+            $stmt = $conn->prepare("INSERT INTO gmao__init__category (`id`,category_name ,`category_type`) VALUES (?,?, ?)");
             $stmt->bindParam(1, $categorie->id);
             $stmt->bindParam(2,$categorie->category_name);
             $stmt->bindParam(3, $categorie->category_type);
@@ -67,7 +67,7 @@ class EquipementsCategory_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("UPDATE init__categoris SET category_name = ?, category_type = ? WHERE id = '$categorie->id'");
+            $stmt = $conn->prepare("UPDATE gmao__init__category SET category_name = ?, category_type = ? WHERE id = '$categorie->id'");
             $stmt->bindParam(1, $categorie->category_name);
             $stmt->bindParam(2, $categorie->category_type);
 
@@ -83,7 +83,7 @@ class EquipementsCategory_model
         $db = new Database();
         $conn = $db->getConnection();
         $categorie = array();
-        $req = $conn->query("SELECT * FROM init__categoris WHERE id = '$id'");
+        $req = $conn->query("SELECT * FROM gmao__init__category WHERE id = '$id'");
         $categorie = $req->fetch();
         return $categorie;
     }
@@ -93,7 +93,7 @@ class EquipementsCategory_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("DELETE FROM init__categoris WHERE id = ?");
+            $stmt = $conn->prepare("DELETE FROM gmao__init__category WHERE id = ?");
             $stmt->bindParam(1, $id);
             $stmt->execute();
             return true;
@@ -116,11 +116,11 @@ class EquipementsCategory_model
         $conn = $db->getConnection();
         try {
             if ($excludeId) {
-                $stmt = $conn->prepare("SELECT 1 FROM init__categoris WHERE category_name = ? AND id <> ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__init__category WHERE category_name = ? AND id <> ? LIMIT 1");
                 $stmt->bindParam(1, $categoryName);
                 $stmt->bindParam(2, $excludeId);
             } else {
-                $stmt = $conn->prepare("SELECT 1 FROM init__categoris WHERE category_name = ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__init__category WHERE category_name = ? LIMIT 1");
                 $stmt->bindParam(1, $categoryName);
             }
             $stmt->execute();
@@ -143,7 +143,7 @@ class EquipementsCategory_model
         $equipements = array();
 
         try {
-            $stmt = $conn->prepare("SELECT * FROM init__categoris WHERE LOWER(category_type) = LOWER(?) ORDER BY category_name");
+            $stmt = $conn->prepare("SELECT * FROM gmao__init__category WHERE LOWER(category_type) = LOWER(?) ORDER BY category_name");
             $stmt->bindParam(1, $type);
             $stmt->execute();
             $equipements = $stmt->fetchAll();

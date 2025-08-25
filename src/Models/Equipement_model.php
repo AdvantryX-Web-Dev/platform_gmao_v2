@@ -11,17 +11,19 @@ class Equipement_model
     private $equipment_id;
     private $designation;
     private $reference;
-    private $equipment_category;
+    private $equipment_category_id;
+    private $status_id;
     private $location_id;
 
 
-    public function __construct($id, $equipment_id, $designation, $reference, $equipment_category, $location_id)
+    public function __construct($id, $equipment_id, $designation, $reference, $equipment_category_id, $status_id, $location_id)
     {
         $this->id = $id;
         $this->equipment_id = $equipment_id;
         $this->designation = $designation;
         $this->reference = $reference;
-        $this->equipment_category = $equipment_category;
+        $this->equipment_category_id = $equipment_category_id;
+        $this->status_id = $status_id;
         $this->location_id = $location_id;
     }
 
@@ -46,9 +48,9 @@ class Equipement_model
         $equipements = array();
         try {
             $req = $conn->query("SELECT e.*, l.location_name AS location, c.category_name AS categorie
-                FROM init__equipement e
-                LEFT JOIN init__location l ON e.location_id = l.id
-                LEFT JOIN init__categoris c ON e.equipment_category = c.id
+                FROM gmao__init_equipment e
+                LEFT JOIN gmao__location l ON e.location_id = l.id
+                LEFT JOIN gmao__init__category c ON e.equipment_category_id = c.id
                 ORDER BY e.equipment_id");
             $equipements = $req->fetchAll();
         } catch (PDOException $e) {
@@ -61,7 +63,7 @@ class Equipement_model
         $db = new Database();
         $conn = $db->getConnection();
         $categories = array();
-        $req = $conn->query("SELECT * FROM init__categoris");
+        $req = $conn->query("SELECT * FROM gmao__init__category");
         $categories = $req->fetchAll();
         return $categories;
     }
@@ -70,11 +72,19 @@ class Equipement_model
         $db = new Database();
         $conn = $db->getConnection();
         $locations = array();
-        $req = $conn->query("SELECT * FROM init__location");
+        $req = $conn->query("SELECT * FROM gmao__location");
         $locations = $req->fetchAll();
         return $locations;
     }
-
+    public static function AllStatus()
+    {
+        $db = new Database();
+        $conn = $db->getConnection();
+        $status = array();
+        $req = $conn->query("SELECT * FROM gmao__status");
+        $status = $req->fetchAll();
+        return $status;
+    }
     public static function findById($id)
     {
 
@@ -83,7 +93,7 @@ class Equipement_model
         $equipement = null;
         try {
             $req = $conn->query("SELECT e.*
-              FROM init__equipement e
+              FROM gmao__init_equipment e
     
             WHERE id='$id'
             ");
@@ -99,14 +109,14 @@ class Equipement_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("INSERT INTO init__equipement (`id`,equipment_id ,`designation`, `reference`, `equipment_category`, `location_id`) VALUES (?,?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO gmao__init_equipment (`id`,equipment_id ,`designation`, `reference`, `equipment_category_id`, `location_id`, `status_id`) VALUES (?,?, ?, ?, ?, ?, ?)");
             $stmt->bindParam(1, $equipement->id);
             $stmt->bindParam(2, $equipement->equipment_id);
             $stmt->bindParam(3, $equipement->designation);
             $stmt->bindParam(4, $equipement->reference);
-            $stmt->bindParam(5, $equipement->equipment_category);
+            $stmt->bindParam(5, $equipement->equipment_category_id);
             $stmt->bindParam(6, $equipement->location_id);
-
+            $stmt->bindParam(7, $equipement->status_id);
 
             $stmt->execute();
             return true;
@@ -119,12 +129,12 @@ class Equipement_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("UPDATE init__equipement SET designation = ?, reference = ?, equipment_category = ?, location_id = ? WHERE id = '$equipement->id'");
+            $stmt = $conn->prepare("UPDATE gmao__init_equipment SET designation = ?, reference = ?, equipment_category_id = ?, location_id = ?, status_id = ? WHERE id = '$equipement->id'");
             $stmt->bindParam(1, $equipement->designation);
             $stmt->bindParam(2, $equipement->reference);
-            $stmt->bindParam(3, $equipement->equipment_category);
+            $stmt->bindParam(3, $equipement->equipment_category_id);
             $stmt->bindParam(4, $equipement->location_id);
-
+            $stmt->bindParam(5, $equipement->status_id);
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
@@ -140,7 +150,7 @@ class Equipement_model
         $db = new Database();
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("DELETE FROM init__equipement WHERE id = ?");
+            $stmt = $conn->prepare("DELETE FROM gmao__init_equipment WHERE id = ?");
             $stmt->bindParam(1, $id);
             $stmt->execute();
             return true;
@@ -162,11 +172,11 @@ class Equipement_model
         $conn = $db->getConnection();
         try {
             if ($excludeId) {
-                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE equipment_id = ? AND id <> ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__init_equipment WHERE equipment_id = ? AND id <> ? LIMIT 1");
                 $stmt->bindParam(1, $equipmentId);
                 $stmt->bindParam(2, $excludeId);
             } else {
-                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE equipment_id = ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__init_equipment WHERE equipment_id = ? LIMIT 1");
                 $stmt->bindParam(1, $equipmentId);
             }
             $stmt->execute();
@@ -188,11 +198,11 @@ class Equipement_model
         $conn = $db->getConnection();
         try {
             if ($excludeId) {
-                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE reference = ? AND id <> ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__init_equipment WHERE reference = ? AND id <> ? LIMIT 1");
                 $stmt->bindParam(1, $reference);
                 $stmt->bindParam(2, $excludeId);
             } else {
-                $stmt = $conn->prepare("SELECT 1 FROM init__equipement WHERE reference = ? LIMIT 1");
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__init_equipment WHERE reference = ? LIMIT 1");
                 $stmt->bindParam(1, $reference);
             }
             $stmt->execute();
@@ -215,7 +225,7 @@ class Equipement_model
         $equipements = array();
 
         try {
-            $stmt = $conn->prepare("SELECT * FROM init__equipement WHERE LOWER(equipment_category) = LOWER(?) ORDER BY designation");
+            $stmt = $conn->prepare("SELECT * FROM gmao__init_equipment WHERE LOWER(equipment_category) = LOWER(?) ORDER BY designation");
             $stmt->bindParam(1, $type);
             $stmt->execute();
             $equipements = $stmt->fetchAll();
@@ -245,9 +255,9 @@ class Equipement_model
                 FROM prod__accessories
                 GROUP BY accessory_ref
             ) latest ON pa.accessory_ref = latest.accessory_ref AND pa.id = latest.max_id
-            LEFT JOIN init__equipement ie ON pa.accessory_ref = ie.equipment_id
+            LEFT JOIN gmao__init_equipment ie ON pa.accessory_ref = ie.equipment_id
             LEFT JOIN db_mahdco.init__machine im ON pa.machine_id = im.machine_id
-            LEFT JOIN init__location il ON ie.location_id = il.id
+            LEFT JOIN gmao__location il ON ie.location_id = il.id
             left join gmao_etat_equipement ec on ie.etat_equipment_id = ec.id
             WHERE latest.max_id IS NOT NULL
         ");
@@ -274,9 +284,9 @@ class Equipement_model
             FROM prod__accessories
             GROUP BY accessory_ref
         ) latest ON pa.accessory_ref = latest.accessory_ref AND pa.id = latest.max_id
-        LEFT JOIN init__equipement ie ON pa.accessory_ref = ie.equipment_id
+        LEFT JOIN gmao__init_equipment ie ON pa.accessory_ref = ie.equipment_id
         LEFT JOIN db_mahdco.init__machine im ON pa.machine_id = im.machine_id
-        LEFT JOIN init__location il ON ie.location_id = il.id
+        LEFT JOIN gmao__location il ON ie.location_id = il.id
         left join db_mahdco.init__employee em on pa.maintainer = em.matricule
         WHERE latest.max_id IS NOT NULL
     ");
@@ -298,7 +308,7 @@ class Equipement_model
 
         $db = new Database();
         $conn = $db->getConnection();
-        $req = $conn->query("SELECT id FROM  init__location WHERE location_name = '$location'");
+        $req = $conn->query("SELECT id FROM  gmao__location WHERE location_name = '$location'");
         $location_id = $req->fetchAll();
 
         return $location_id;
@@ -311,7 +321,7 @@ class Equipement_model
         $conn = $db->getConnection();
         $location = self::locationID("$location");
         $location_id = $location[0]['id'];
-        $req = $conn->query("SELECT * FROM init__equipement WHERE location_id = '$location_id'");
+        $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id = '$location_id'");
         $equipements = $req->fetchAll();
         return $equipements;
     }
@@ -329,7 +339,7 @@ class Equipement_model
             FROM prod__accessories
             GROUP BY accessory_ref
         ) latest ON pa.id = latest.max_id
-        LEFT JOIN init__equipement ie ON pa.accessory_ref = ie.equipment_id
+        LEFT JOIN gmao__init_equipment ie ON pa.accessory_ref = ie.equipment_id
         WHERE pa.machine_id LIKE ? AND pa.is_removed = 0
     ");
         $stmt->execute(["%$machine_id%"]);

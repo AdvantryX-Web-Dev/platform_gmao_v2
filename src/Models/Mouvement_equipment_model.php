@@ -74,7 +74,7 @@ class Mouvement_equipment_model
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
         FROM MAHDCO_MAINT.gmao__mouvement_equipment mm 
         INNER JOIN MAHDCO_MAINT.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        INNER JOIN MAHDCO_MAINT.init__equipement e ON mm.equipment_id = e.id
+        INNER JOIN MAHDCO_MAINT.gmao__init_equipment e ON mm.equipment_id = e.id
         INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.id
         LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
         LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
@@ -118,7 +118,7 @@ class Mouvement_equipment_model
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
         FROM MAHDCO_MAINT.gmao__mouvement_equipment mm 
         INNER JOIN MAHDCO_MAINT.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        INNER JOIN MAHDCO_MAINT.init__equipement e ON mm.equipment_id = e.id
+        INNER JOIN MAHDCO_MAINT.gmao__init_equipment e ON mm.equipment_id = e.id
         INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.id
         LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
         LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
@@ -165,7 +165,7 @@ class Mouvement_equipment_model
             FROM 
                 gmao__mouvement_equipment mm
             INNER JOIN 
-              init__equipement e ON mm.equipment_id = e.id
+              gmao__init_equipment e ON mm.equipment_id = e.id
             INNER JOIN 
                 gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
             LEFT JOIN 
@@ -175,7 +175,7 @@ class Mouvement_equipment_model
             LEFT JOIN 
               gmao_etat_equipement ee ON e.etat_equipment_id  = ee.id
             LEFT JOIN 
-               init__location l ON e.location_id = l.id
+               gmao__location l ON e.location_id = l.id
             WHERE 
                 mm.equipment_id = :equipment_id
             ORDER BY 

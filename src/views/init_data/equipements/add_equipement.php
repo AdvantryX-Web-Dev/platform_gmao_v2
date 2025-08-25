@@ -82,6 +82,17 @@ use App\Models\Equipement_model;
                                         ?>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status_id" class="form-control" required>
+                                        <?php
+                                        $status = Equipement_model::AllStatus();
+                                        foreach ($status as $status) {
+                                            echo '<option value="' . $status['id'] . '">' . $status['status_name'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
                                
 
 

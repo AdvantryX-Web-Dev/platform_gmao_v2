@@ -40,7 +40,7 @@ class EquipementsCategoryController
                         'category_name' => $_POST['category_name'],
                         'category_type' => $_POST['category_type']
                     ];
-                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'init__categoris', null, $newValues);
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'gmao__init__category', null, $newValues);
                 }
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout du catégorie.'];
@@ -113,7 +113,7 @@ class EquipementsCategoryController
 
                 // Audit trail
                 if (isset($_SESSION['user']['matricule']) && $oldIntervention_type) {
-                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'init__categoris', $oldIntervention_type, null);
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'gmao__init__category', $oldIntervention_type, null);
                 }
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la suppression de la catégorie.'];
@@ -142,7 +142,7 @@ class EquipementsCategoryController
 
         // Récupérer les filtres
         $action = $_GET['action'] ?? null;
-        $table = 'init__categoris'; // On filtre spécifiquement pour la table des employés/mainteneurs
+        $table = 'gmao__init__category'; // On filtre spécifiquement pour la table des employés/mainteneurs
 
         // Récupérer l'historique des audits
         $auditTrails = AuditTrail_model::getFilteredAuditTrails($action, $table, 100);
