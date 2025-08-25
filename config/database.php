@@ -4,10 +4,10 @@ return [
     'default' => 'MAHDCO_MAINT', // Base de données par défaut
     'connections' => [
         'db_digitex' => [
-            'host' => 'mysql',
+            'host' => '127.0.0.1',
             'dbname' => 'db_mahdco',
             'username' => 'root',
-            'password' => 'root',
+            'password' => 'Testing321',
             'charset' => 'utf8mb4',
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -16,10 +16,10 @@ return [
             ]
         ],
         'MAHDCO_MAINT' => [
-            'host' => 'mysql',
+            'host' => '127.0.0.1',
             'dbname' => 'MAHDCO_MAINT',
             'username' => 'root',
-            'password' => 'root',
+            'password' => 'Testing321',
             'charset' => 'utf8mb4',
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
