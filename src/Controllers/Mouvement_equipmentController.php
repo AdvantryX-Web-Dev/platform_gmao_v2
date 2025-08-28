@@ -35,7 +35,6 @@ class Mouvement_equipmentController
             $type_mouvement = $_POST['type_mouvement'] ?? 'entre_magasin'; // Valeur par défaut
             $equipmentId = $_POST['equipment_id'] ?? null;
             $etat_equipement = $_POST['etat_equipement'] ?? null;
-
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['entre_magasin', 'sortie_magasin'])) {
                 $type_mouvement = 'entre_magasin'; // Valeur par défaut si invalide
@@ -55,10 +54,9 @@ class Mouvement_equipmentController
             }
 
             // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
-            $db = Database::getInstance('MAHDCO_MAINT');
-            $conn = $db->getConnection();
-            $dbdigitex = Database::getInstance('db_digitex');
-            $connDigitex = $dbdigitex->getConnection();
+            $db = new  Database();
+            $conn = $db->getConnection();   
+            
             try {
 
                 // Transaction pour assurer l'intégrité des données
@@ -108,13 +106,13 @@ class Mouvement_equipmentController
 
                     if ($etat_equipement) {
 
-                        $updateQuery .= "etat_equipment_id = :status_id";
+                        $updateQuery .= "status_id = :status_id";
                         $params[':status_id'] = $etat_equipement;
                     }
 
 
                     if (!empty($params)) {
-                        $updateQuery = "UPDATE gmao__init_equipment SET location_id = :location_id, etat_equipment_id = :status_id";
+                        $updateQuery = "UPDATE gmao__init_equipment SET location_id = :location_id, status_id = :status_id";
                         $updateQuery .= " WHERE equipment_id = :equipment_id";
 
                         $params[':equipment_id'] = $equipmentId;
@@ -126,19 +124,11 @@ class Mouvement_equipmentController
                         $stmt->execute();
                     }
 
-                    // 5. Récupérer l'equipment_id depuis la table gmao__init_equipment
-                    // $stmt = $conn->prepare("SELECT equipment_id FROM gmao__init_equipment WHERE id = :equipment_id");
-                    // $stmt->bindParam(':equipment_id', $equipmentId);
-                    // $stmt->execute();
-                    // $equipmentIdFromInit = $stmt->fetchColumn();
-                    // echo '<pre>';
-                    // print_r($equipmentId);
-
-                    // echo '</pre>';die;
+                   
                     if ($equipmentId) {
 
-                        // 6. Mettre à jour la table prod__accessories - marquer l'équipement comme retiré
-                        $stmt = $conn->prepare("UPDATE prod__accessories 
+                        // 6. Mettre à jour la table gmao__prod_implementation_equipment - marquer l'équipement comme retiré
+                        $stmt = $conn->prepare("UPDATE gmao__prod_implementation_equipment 
                             SET is_removed = 1, removed_at = CURRENT_TIMESTAMP 
                             WHERE accessory_ref = :equipment_id");
                         $stmt->bindParam(':equipment_id', $equipmentId);
@@ -179,7 +169,6 @@ class Mouvement_equipmentController
 
     public function getEquipements($location)
     {
-
         $equipements = Equipement_model::getEquipements($location);
 
         return $equipements;
@@ -198,7 +187,7 @@ class Mouvement_equipmentController
 
     public function getRaisons()
     {
-        $db = new \App\Models\Database();
+        $db = new Database();
         $conn = $db->getConnection();
         $query = "SELECT * FROM gmao__raison_mouv_mach ORDER BY raison_mouv_mach";
         $stmt = $conn->query($query);

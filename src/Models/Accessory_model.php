@@ -98,10 +98,10 @@ class Accessory_model
      */
     public static function add(Accessory_model $accessory)
     {
-        $db = Database::getInstance('MAHDCO_MAINT');
+        $db = new Database();
         $conn = $db->getConnection();
 
-        $query = "INSERT INTO prod__accessories (accessory_ref, machine_id, maintainer, mvt_state, allocation_time, allocation_date) 
+        $query = "INSERT INTO gmao__prod_implementation_equipment (accessory_ref, machine_id, maintainer, mvt_state, allocation_time, allocation_date) 
                  VALUES (:accessory_ref, :machine_id, :maintainer, :mvt_state, :allocation_time, :allocation_date)";
         $stmt = $conn->prepare($query);
 
@@ -125,18 +125,18 @@ class Accessory_model
 
     public static function isAlreadyAllocated($accessory_ref, $machine_id = null)
     {
-        $db = Database::getInstance('MAHDCO_MAINT');
+        $db = new Database();
         $conn = $db->getConnection();
 
         if ($machine_id) {
             // Vérifie si l'équipement est déjà affecté à cette machine spécifique
-            $query = "SELECT COUNT(*) FROM prod__accessories WHERE accessory_ref = :accessory_ref AND machine_id = :machine_id";
+            $query = "SELECT COUNT(*) FROM gmao__prod_implementation_equipment WHERE accessory_ref = :accessory_ref AND machine_id = :machine_id AND is_removed = 0";
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':accessory_ref', $accessory_ref);
             $stmt->bindParam(':machine_id', $machine_id);
         } else {
             // Vérifie si l'équipement est déjà affecté à n'importe quelle machine
-            $query = "SELECT COUNT(*) FROM prod__accessories WHERE accessory_ref = :accessory_ref";
+            $query = "SELECT COUNT(*) FROM gmao__prod_implementation_equipment WHERE accessory_ref = :accessory_ref AND is_removed = 0";
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':accessory_ref', $accessory_ref);
         }

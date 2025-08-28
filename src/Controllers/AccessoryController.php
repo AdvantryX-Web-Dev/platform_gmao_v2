@@ -64,7 +64,7 @@ class AccessoryController
                         'allocation_time' => $allocation_time,
                         'allocation_date' => $allocation_date
                     ];
-                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'prod__accessories', null, $newValues);
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'gmao__prod_implementation_equipment', null, $newValues);
                 }
 
                 $_SESSION['equipement_success'] = 'Équipement affecté avec succès !';

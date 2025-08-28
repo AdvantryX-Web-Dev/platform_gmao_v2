@@ -245,20 +245,20 @@ class Equipement_model
                    ie.id AS id,
                    ie.equipment_id AS equipment_id,
                    ie.reference AS reference,
-                   ec.etat AS etat_equipement,
+                   ec.status_name AS etat_equipement,
                    im.machine_id AS machine_id,
                    il.location_name AS location_name,
                    il.location_category AS location_category
-            FROM prod__accessories pa
+            FROM gmao__prod_implementation_equipment pa
             LEFT JOIN (
                 SELECT accessory_ref, MAX(id) AS max_id
-                FROM prod__accessories
+                FROM gmao__prod_implementation_equipment
                 GROUP BY accessory_ref
             ) latest ON pa.accessory_ref = latest.accessory_ref AND pa.id = latest.max_id
             LEFT JOIN gmao__init_equipment ie ON pa.accessory_ref = ie.equipment_id
-            LEFT JOIN db_mahdco.init__machine im ON pa.machine_id = im.machine_id
+            LEFT JOIN init__machine im ON pa.machine_id = im.machine_id
             LEFT JOIN gmao__location il ON ie.location_id = il.id
-            left join gmao_etat_equipement ec on ie.etat_equipment_id = ec.id
+            left join gmao__status ec on ie.status_id = ec.id
             WHERE latest.max_id IS NOT NULL
         ");
 
@@ -278,16 +278,16 @@ class Equipement_model
                concat(em.first_name, ' ', em.last_name) as Responsable
                
               
-        FROM prod__accessories pa
+        FROM gmao__prod_implementation_equipment pa
         LEFT JOIN (
             SELECT accessory_ref, MAX(id) AS max_id
-            FROM prod__accessories
+            FROM gmao__prod_implementation_equipment
             GROUP BY accessory_ref
         ) latest ON pa.accessory_ref = latest.accessory_ref AND pa.id = latest.max_id
         LEFT JOIN gmao__init_equipment ie ON pa.accessory_ref = ie.equipment_id
-        LEFT JOIN db_mahdco.init__machine im ON pa.machine_id = im.machine_id
+        LEFT JOIN init__machine im ON pa.machine_id = im.machine_id
         LEFT JOIN gmao__location il ON ie.location_id = il.id
-        left join db_mahdco.init__employee em on pa.maintainer = em.matricule
+        left join init__employee em on pa.maintainer = em.matricule
         WHERE latest.max_id IS NOT NULL
     ");
         $equipements = $req->fetchAll();
@@ -298,7 +298,7 @@ class Equipement_model
     {
         $db = new Database();
         $conn = $db->getConnection();
-        $req = $conn->query("SELECT * FROM gmao_etat_equipement");
+        $req = $conn->query("SELECT * FROM gmao__status");
         $etat_equipement = $req->fetchAll();
         return $etat_equipement;
     }
@@ -308,24 +308,48 @@ class Equipement_model
 
         $db = new Database();
         $conn = $db->getConnection();
-        $req = $conn->query("SELECT id FROM  gmao__location WHERE location_name = '$location'");
+        $req = $conn->query("SELECT id FROM  gmao__location WHERE location_category = '$location'");
         $location_id = $req->fetchAll();
 
         return $location_id;
     }
 
+    // public static function getEquipements($location)
+    // {
+  
+    //     $db = new Database();
+    //     $conn = $db->getConnection();
+    //     $location = self::locationID("$location");
+    //     $location_id = $location[0]['id'];
+    //     $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id = '$location_id'");
+    //     $equipements = $req->fetchAll();
+    //     print_r("equipements ids".$equipements);
+      
+    //     return $equipements;
+    // }
     public static function getEquipements($location)
     {
-
         $db = new Database();
         $conn = $db->getConnection();
-        $location = self::locationID("$location");
-        $location_id = $location[0]['id'];
-        $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id = '$location_id'");
+    
+        // Récupérer tous les IDs de location
+        $locations = self::locationID("$location");
+    
+        // Extraire tous les IDs dans un tableau
+        $location_ids = array_column($locations, 'id');
+    
+        // Transformer le tableau en chaîne pour SQL IN
+        $ids_str = implode(',', $location_ids);
+    
+        // Requête pour tous les IDs
+        $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id IN ($ids_str)");
+        
         $equipements = $req->fetchAll();
+        print_r($equipements);
+    
         return $equipements;
     }
-
+    
     public static function equipmentByMachine_id($machine_id)
     {
         $db = new Database();
@@ -333,10 +357,10 @@ class Equipement_model
 
         $stmt = $conn->prepare("
         SELECT pa.*, ie.designation, ie.reference
-        FROM prod__accessories pa
+        FROM gmao__prod_implementation_equipment pa
         INNER JOIN (
             SELECT accessory_ref, MAX(id) AS max_id
-            FROM prod__accessories
+            FROM gmao__prod_implementation_equipment
             GROUP BY accessory_ref
         ) latest ON pa.id = latest.max_id
         LEFT JOIN gmao__init_equipment ie ON pa.accessory_ref = ie.equipment_id

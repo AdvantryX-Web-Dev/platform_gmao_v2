@@ -146,6 +146,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                         <div class="modal-body">
                             <input type="hidden" name="type_mouvement" value="entre_magasin">
                             <div class="form-group">
+                                
                                 <label for="equipment">Equipement ID :</label>
                                 <select class="form-control" id="equipment" name="equipment" required>
                                     <option value="">--Sélectionnez un équipement--</option>
@@ -264,7 +265,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             $etat_equipement = $controller->getEquipementStatus();
                                         }
                                         foreach ($etat_equipement as $etat) {
-                                            echo "<option value=\"{$etat['id']}\">{$etat['etat']}</option>";
+                                            echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
                                         }
                                         ?>
                                     </select>
@@ -322,7 +323,6 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
             setTimeout(function() {
                 $("#flash-message").fadeOut("slow");
             }, 4000);
-            console.log("avon changement");
 
             // Mettre à jour l'ID du mouvement dans le modal de réception
             $('.reception-btn').click(function() {

@@ -55,7 +55,7 @@ class Mouvement_equipment_model
 
     public static function findEntreMagasin()
     {
-        $dbGmao = Database::getInstance('MAHDCO_MAINT');
+        $dbGmao = new Database();
         $conn = $dbGmao->getConnection();
 
         // Utiliser une requête qui spécifie explicitement les bases de données
@@ -72,12 +72,12 @@ class Mouvement_equipment_model
                 e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
                 CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM MAHDCO_MAINT.gmao__mouvement_equipment mm 
-        INNER JOIN MAHDCO_MAINT.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        INNER JOIN MAHDCO_MAINT.gmao__init_equipment e ON mm.equipment_id = e.id
-        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.id
-        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
-        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
+        FROM gmao__mouvement_equipment mm 
+        INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        INNER JOIN gmao__init_equipment e ON mm.equipment_id = e.id
+        INNER JOIN init__machine m ON mm.id_machine = m.id
+        LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
+        LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
         WHERE mm.type_Mouv = 'entre_magasin'
         ORDER BY mm.date_mouvement DESC
         ";
@@ -99,7 +99,7 @@ class Mouvement_equipment_model
 
     public static function findSortieMagasin()
     {
-        $dbGmao = Database::getInstance('MAHDCO_MAINT');
+        $dbGmao = new Database();
         $conn = $dbGmao->getConnection();
 
         // Utiliser une requête qui spécifie explicitement les bases de données
@@ -116,12 +116,12 @@ class Mouvement_equipment_model
                 e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
                 CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM MAHDCO_MAINT.gmao__mouvement_equipment mm 
-        INNER JOIN MAHDCO_MAINT.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        INNER JOIN MAHDCO_MAINT.gmao__init_equipment e ON mm.equipment_id = e.id
-        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.id
-        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
-        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
+        FROM gmao__mouvement_equipment mm 
+        INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        INNER JOIN gmao__init_equipment e ON mm.equipment_id = e.id
+        INNER JOIN init__machine m ON mm.id_machine = m.id
+        LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
+        LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
         WHERE mm.type_Mouv = 'sortie_magasin'
         ORDER BY mm.date_mouvement DESC
         ";
@@ -169,11 +169,11 @@ class Mouvement_equipment_model
             INNER JOIN 
                 gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
             LEFT JOIN 
-                db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
+                init__employee e1 ON mm.idEmp_moved = e1.id
             LEFT JOIN 
-                db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
+                init__employee e2 ON mm.idEmp_accepted = e2.id
             LEFT JOIN 
-              gmao_etat_equipement ee ON e.etat_equipment_id  = ee.id
+              gmao__status ee ON e.etat_equipment_id  = ee.id
             LEFT JOIN 
                gmao__location l ON e.location_id = l.id
             WHERE 

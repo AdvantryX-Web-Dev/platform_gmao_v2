@@ -25,8 +25,7 @@
                              <?php
                                 foreach ($all_machines as $machine) {
                                     echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
-                                        htmlspecialchars($machine['machine_id']) . ' - ' .
-                                        htmlspecialchars($machine['designation']) . '</option>';
+                                        htmlspecialchars($machine['machine_id']) .  '</option>';
                                 }
                                 ?>
                          </select>

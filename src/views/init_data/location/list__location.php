@@ -63,7 +63,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             <?php endif; ?>
                                             <th>Nom</th>
                                             <th>Emplacement</th>
-                                            <th>Type</th>
+                                           <!-- <th>Type</th> -->
 
                                         </tr>
                                     </thead>
@@ -85,11 +85,12 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
                                                     <td><?= htmlspecialchars($loc['location_name'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($loc['location_category'] ?? '') ?></td>
-                                                    <td>
+                                                    <!-- <td>
                                                         <span class="badge badge-<?= $loc['location_type'] === 'machine' ? 'primary' : 'success' ?>">
                                                             <?= htmlspecialchars($loc['location_type'] ?? '') ?>
                                                         </span>
                                                     </td>
+                                                    -->
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else: ?>

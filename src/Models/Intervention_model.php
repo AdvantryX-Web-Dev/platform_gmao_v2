@@ -72,7 +72,7 @@ class Intervention_model
             LEFT JOIN 
                 gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
-                db_mahdco.init__machine m ON a.machine_id = m.id
+                init__machine m ON a.machine_id = m.id
             $whereClause
             ORDER BY 
                 a.created_at DESC
@@ -146,7 +146,7 @@ class Intervention_model
             LEFT JOIN 
                 gmao__type_intervention t ON a.intervention_type_id = t.id
             LEFT JOIN 
-                db_mahdco.init__machine m ON a.machine_id = m.id
+                init__machine m ON a.machine_id = m.id
            
              $whereClause
 
@@ -225,8 +225,8 @@ class Intervention_model
     public static function findByMachine($id_machine, $type)
     {
 
-        // Connexion à MAHDCO_MAINT pour les tables gmao_*
-        $dbGmao = Database::getInstance('MAHDCO_MAINT');
+        // Connexion à  pour les tables gmao_*
+        $dbGmao = new Database();
         $connGmao = $dbGmao->getConnection();
 
         // Préparation de la requête avec la syntaxe correcte pour les références cross-database
@@ -240,9 +240,9 @@ class Intervention_model
             
             FROM gmao__intervention_action a
             LEFT JOIN gmao__type_intervention t ON a.intervention_type_id = t.id
-            LEFT JOIN db_mahdco.init__machine m ON a.machine_id = m.id
-            LEFT JOIN db_mahdco.init__prod_line p ON a.production_line_id = p.id
-            LEFT JOIN db_mahdco.init__employee e ON a.maintenance_by = e.id
+            LEFT JOIN init__machine m ON a.machine_id = m.id
+            LEFT JOIN init__prod_line p ON a.production_line_id = p.id
+            LEFT JOIN init__employee e ON a.maintenance_by = e.id
             LEFT JOIN gmao__planning pl ON a.planning_id = pl.id
             
             WHERE a.machine_id = ? AND t.type = ?
@@ -265,7 +265,7 @@ class Intervention_model
 
     public static function maint_dispo()
     {
-        $db = Database::getInstance('db_digitex');
+        $db = new Database();
         $conn = $db->getConnection();
         $req = $conn->query("SELECT last_name, first_name, matricule
         FROM init__employee
@@ -359,15 +359,7 @@ class Intervention_model
             return;
         }
 
-        // // Validate required fields
-        // $requiredFields = ['machine_id', 'production_line_id', 'intervention_date', 'maintenance_by'];
-        // foreach ($requiredFields as $field) {
-        //     if (empty($_POST[$field])) {
-        //         $_SESSION['error'] = "Le champ '$field' est requis";
-        //         header('Location: ../../platform_gmao/public/index.php?route=intervention_preventive');
-        //         return;
-        //     }
-        // }
+        
 
 
         if (empty($_POST['planning_id']) && empty($_POST['intervention_type_id'])) {

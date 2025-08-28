@@ -173,17 +173,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                                                 <td>' . date('d/m/Y', strtotime($lastDate)) . '</td>
                                                
                                             </tr>';
-                                            // $nbInterAndpannes = $interventionController->getNbInterPannMach($machine['machine_id']);
-
-                                            // $machineData = array();
-                                            // foreach ($nbInterAndpannes as $resultat) {
-
-                                            //     $machineData[] = array(
-                                            //         'codePanne' => $resultat['codePanne'],
-                                            //         'nbInter' => $resultat['nbInter'],
-                                            //     );
-                                            // }
-                                            // $machinesData[$machine['machine_id']] = $machineData;
+                                            
                                         }
                                         ?>
                                     </tbody>
@@ -193,19 +183,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                     </div>
 
                 </div>
-                <!-- <div class="container-fluid " id="statsCard"
-                    style="display: none; margin: 20px auto;">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="m-0">
-                            <i class="fas fa-chart-bar"></i> Statistiques de la Machine
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <canvas id="myChart" width="800" height="400"></canvas>
-                        </div>
-                    </div>
-                </div> -->
+               
 
                 <?php include(__DIR__ . "/../../views/modals/AjoutDemInterCu.php") ?>
 

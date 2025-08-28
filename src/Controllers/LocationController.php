@@ -25,7 +25,7 @@ class LocationController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $locationName = trim($_POST['location_name'] ?? '');
             $location_category = trim($_POST['location_category'] ?? '');
-            $location_type = trim($_POST['location_type'] ?? '');
+           // $location_type = trim($_POST['location_type'] ?? '');
             if ($locationName === '') {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom d\'emplacement requis.'];
                 header('Location: /platform_gmao/public/index.php?route=location/create');
@@ -36,15 +36,15 @@ class LocationController
                 $conn = $db->getConnection();
                 $db_digitex =  Database::getInstance('db_digitex');
                 $conn_digitex = $db_digitex->getConnection();
-                    $stmt = $conn_digitex->prepare('INSERT INTO gmao__location (location_name, location_category, location_type) VALUES (?, ?, ?)');
+                    $stmt = $conn_digitex->prepare('INSERT INTO gmao__location (location_name, location_category) VALUES (?, ?)');
               
-                $stmt->execute([$locationName, $location_category, $location_type]);
+                $stmt->execute([$locationName, $location_category]);
                 // Audit trail - création
                 if (isset($_SESSION['user']['matricule'])) {
                     $newValues = [
                         'location_name' => $locationName,
                         'location_category' => $location_category,
-                        'location_type' => $location_type
+                        //'location_type' => $location_type
                     ];
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'gmao__location', null, $newValues);
                 }
@@ -63,7 +63,7 @@ class LocationController
         if (session_status() === PHP_SESSION_NONE) session_start();
         $id = $_GET['id'] ?? null;
         $location_category = trim($_POST['location_category'] ?? '');
-        $location_type = trim($_POST['location_type'] ?? '');
+        // $location_type = trim($_POST['location_type'] ?? '');
         if (!$id) {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID d\'emplacement non spécifié.'];
             header('Location: ../../platform_gmao/public/index.php?route=location/list');
@@ -95,15 +95,15 @@ class LocationController
                 $conn = $db->getConnection();
                 $db_digitex =  Database::getInstance('db_digitex');
                 $conn_digitex = $db_digitex->getConnection();
-                $stmt = $conn_digitex->prepare('UPDATE gmao__location SET location_name = ?, location_category = ?, location_type = ? WHERE id = ?');
-                $stmt->execute([$locationName, $location_category, $location_type, $id]);
+                $stmt = $conn_digitex->prepare('UPDATE gmao__location SET location_name = ?, location_category = ? WHERE id = ?');
+                $stmt->execute([$locationName, $location_category, $id]);
                 // Audit trail - modification
                 if (isset($_SESSION['user']['matricule']) && $location) {
                     $newValues = [
                         'id' => $id,
                         'location_name' => $locationName,
                         'location_category' => $location_category,
-                        'location_type' => $location_type
+                        //'location_type' => $location_type
                     ];
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'update', 'gmao__location', $location, $newValues);
                 }

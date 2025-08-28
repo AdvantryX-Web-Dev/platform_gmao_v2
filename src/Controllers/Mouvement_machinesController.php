@@ -11,10 +11,7 @@ use PDOException;
 
 class Mouvement_machinesController
 {
-    // public function mouvement_machines()
-    // {
-    //     include(__DIR__ . '/../views/G_machines/mouvement_machines/inter_machine.php');
-    // }
+    
     public function chaine_parc()
     {
         $mouvements = MouvementMachine_model::findChaineParc();
@@ -53,10 +50,7 @@ class Mouvement_machinesController
         return MouvementMachine_model::findByType($type);
     }
 
-    // public function getMouvementsByMachine($id_machine)
-    // {
-    //     return MouvementMachine_model::findByMachine($id_machine);
-    // }
+    
 
     public function getMaintainers()
     {
@@ -81,7 +75,7 @@ class Mouvement_machinesController
             $machine = $_POST['machine'] ?? '';
             $maintenancier = $_POST['maintenancier'] ?? '';
             $raison = $_POST['raisonMouvement'] ?? '';
-            $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine'; // Valeur par défaut
+            $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine'; 
 
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
@@ -179,10 +173,9 @@ class Mouvement_machinesController
             }
 
             // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
-            $db = Database::getInstance('MAHDCO_MAINT');
+            $db =  new Database();
             $conn = $db->getConnection();
-            $dbdigitex = Database::getInstance('db_digitex');
-            $connDigitex = $dbdigitex->getConnection();
+           
             try {
                 // Transaction pour assurer l'intégrité des données
                 $conn->beginTransaction();
@@ -210,12 +203,12 @@ class Mouvement_machinesController
                     $locationId = null;
                     if ($type_mouvement === 'chaine_parc') {
                         // Trouver l'ID pour "parc"
-                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_category = 'parc' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM gmao__location WHERE location_category = 'parc' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     } else { //  inter_chaine ou parc_chaine
                         // Trouver l'ID pour "chaine"
-                        $stmt = $connDigitex->prepare("SELECT id FROM gmao__machine_location WHERE location_category = 'prodline' LIMIT 1");
+                        $stmt = $conn->prepare("SELECT id FROM gmao__location WHERE location_category = 'prodline' LIMIT 1");
                         $stmt->execute();
                         $locationId = $stmt->fetchColumn();
                     }
@@ -239,7 +232,7 @@ class Mouvement_machinesController
                         $updateQuery .= " WHERE machine_id = :machine_id";
                         $params[':machine_id'] = $machineId;
 
-                        $stmt = $connDigitex->prepare($updateQuery);
+                        $stmt = $conn->prepare($updateQuery);
                         foreach ($params as $key => $value) {
                             $stmt->bindValue($key, $value);
                         }
@@ -319,7 +312,7 @@ class Mouvement_machinesController
             }
 
             // Mettre à jour le mouvement avec le statut rejeté
-            $db = Database::getInstance('MAHDCO_MAINT');
+            $db = new Database();
             $conn = $db->getConnection();
 
             try {
@@ -372,12 +365,12 @@ class Mouvement_machinesController
         if (isset($_GET['type'])) {
             $type = $_GET['type'];
             $location = $_GET['location'];
-            $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+            $db = new Database(); // Spécifier explicitement la base de données db_digitex
             $conn = $db->getConnection();
 
             $query = "SELECT m.id as id, m.machine_id as machine_id, m.reference as reference, m.designation as designation 
                       FROM init__machine m
-                      left join gmao__machine_location ml on ml.id=m.machines_location_id
+                      left join gmao__location ml on ml.id=m.machines_location_id
                       WHERE type = :type 
                       and ml.location_category='$location'
                       ORDER BY machine_id";
@@ -390,7 +383,7 @@ class Mouvement_machinesController
             echo json_encode($machines);
         } else {
             // Retourner toutes les machines si aucun type n'est spécifié
-            $db = new \App\Models\Database();
+            $db = new Database();
             $conn = $db->getConnection();
 
             $query = "SELECT machine_id, reference, designation, type 

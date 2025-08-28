@@ -40,13 +40,7 @@ class InterventionController
         return $machines;
     }
 
-    /**
-     * Display the number of intervention by machine
-     */
-    // public function getNbInterPannMach($id_machine)
-    // {
-    //     return Intervention_model::nbInterPanneMachine($id_machine);
-    // }
+ 
 
 
     public function ajouterDemande()
@@ -69,19 +63,17 @@ class InterventionController
                 $intervention_date_sql = date('Y-m-d', strtotime($intervention_date));
 
                 // Connexion aux deux bases de données
-                $dbGMAO = \App\Models\Database::getInstance('MAHDCO_MAINT');
-                $connGMAO = $dbGMAO->getConnection();
+                $db = new Database();
+                $conn = $db->getConnection();
 
-                $dbDigitex = \App\Models\Database::getInstance('db_digitex');
-                $connDigitex = $dbDigitex->getConnection();
+             
 
                 try {
-                    // Démarrer des transactions sur les deux connexions
-                    $connGMAO->beginTransaction();
-                    $connDigitex->beginTransaction();
+                    // Démarrer la transaction
+                    $conn->beginTransaction();
 
                     // Convertir le matricule du maintenancier en ID
-                    $stmt = $connDigitex->prepare("SELECT id FROM init__employee WHERE matricule = :matricule");
+                    $stmt = $conn->prepare("SELECT id FROM init__employee WHERE matricule = :matricule");
                     $stmt->bindParam(':matricule', $maintainer_matricule, \PDO::PARAM_STR);
                     $stmt->execute();
                     $maintainer_id = $stmt->fetchColumn();
@@ -91,7 +83,7 @@ class InterventionController
                     }
 
                     // 1. Insérer dans gmao__intervention_action avec des paramètres nommés
-                    $stmt = $connGMAO->prepare("
+                    $stmt = $conn->prepare("
                         INSERT INTO gmao__intervention_action 
                         (machine_id, intervention_date, maintenance_by, intervention_type_id, created_at) 
                         VALUES (:machine_id, :intervention_date, :maintenance_by, :intervention_type_id, NOW())
@@ -103,10 +95,10 @@ class InterventionController
                     $stmt->bindParam(':intervention_type_id', $intervention_type_id, \PDO::PARAM_INT);
 
                     $stmt->execute();
-                    $intervention_id = $connGMAO->lastInsertId();
+                    $intervention_id = $conn->lastInsertId();
 
                     // 2. Mettre à jour le statut de la machine dans la base de données digitex
-                    $stmt = $connDigitex->prepare("
+                    $stmt = $conn->prepare("
                         UPDATE init__machine 
                         SET machines_status_id = :status_id, updated_at = NOW() 
                         WHERE id = :machine_id
@@ -115,25 +107,22 @@ class InterventionController
                     $stmt->bindParam(':status_id', $machine_status, \PDO::PARAM_INT);
                     $stmt->bindParam(':machine_id', $machine_id, \PDO::PARAM_INT);
                     $stmt->execute();
-
+                   
                     // Commit les deux transactions si tout s'est bien passé
-                    $connGMAO->commit();
-                    $connDigitex->commit();
-
+                    $conn->commit();
+                 
                     header('Location: index.php?route=intervention_curative&status=succ');
                     exit;
                 } catch (\PDOException $e) {
+                    print_r($e);
+                  //  die();
                     // Rollback en cas d'erreur sur les deux connexions
-                    if ($connGMAO->inTransaction()) {
-                        $connGMAO->rollBack();
-                    }
-
-                    if ($connDigitex->inTransaction()) {
-                        $connDigitex->rollBack();
+                    if ($conn->inTransaction()) {
+                        $conn->rollBack();
                     }
 
                     // Log l'erreur
-                    error_log("PDOException dans ajouterDemande: " . $e->getMessage());
+                  //  error_log("PDOException dans ajouterDemande: " . $e->getMessage());
 
                     // Rediriger avec le message d'erreur
                     header('Location: index.php?route=intervention_curative&status=error');
@@ -184,7 +173,7 @@ class InterventionController
      */
     public function getAleasProduction($nomCh = null, $date_debut = null, $date_fin = null)
     {
-        $db = Database::getInstance('db_digitex');
+        $db = new Database();
         $conn = $db->getConnection();
 
         $query = "
@@ -262,7 +251,7 @@ class InterventionController
      */
     public function getAleasByMachine($machine_id)
     {
-        $db = Database::getInstance('db_digitex');
+        $db = new Database();
         $conn = $db->getConnection();
 
         $query = "

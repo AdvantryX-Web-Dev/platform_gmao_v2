@@ -79,25 +79,49 @@ class Machine_model
 
         return $machines;
     }
+    // public static function ProdMachine()
+    // {
+    //     $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+    //     $conn = $db->getConnection();
+    //     $machines = array();
+    //     //m.machines_location_id=1 = prodline
+    //     try {
+    //         $req = $conn->query("SELECT * FROM init__machine m  where m.machines_location_id=1 
+    //         order by m.machine_id desc");
+    //         $machines = $req->fetchAll();
+    //     } catch (PDOException $e) {
+
+    //         return false;
+    //     } //
+
+
+    //     return $machines;
+    // }
     public static function ProdMachine()
     {
-        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+        $db = Database::getInstance('db_digitex'); 
         $conn = $db->getConnection();
         $machines = array();
-        //m.machines_location_id=1 = prodline
+    
         try {
-            $req = $conn->query("SELECT * FROM init__machine m  where m.machines_location_id=1 
-            order by m.machine_id desc");
-            $machines = $req->fetchAll();
+            $sql = "
+                SELECT m.* 
+                FROM init__machine m
+                LEFT JOIN gmao__location l ON m.machines_location_id = l.id
+                WHERE l.location_category = 'prodline'
+                ORDER BY m.machine_id DESC
+            ";
+    
+            $req = $conn->query($sql);
+            $machines = $req->fetchAll(PDO::FETCH_ASSOC);
+    
         } catch (PDOException $e) {
-
             return false;
-        } //
-
-
+        }
+    
         return $machines;
     }
-
+    
     public static function findById($id_machine)
     {
         $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
@@ -249,7 +273,8 @@ class Machine_model
 
     public static function MachinesStateTable()
     {
-        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+    
+        $db = new Database(); // Spécifier explicitement la base de données db_digitex
 
         $conn = $db->getConnection();
         try {
@@ -274,12 +299,13 @@ class Machine_model
                 ORDER BY 
                     m.updated_at DESC
             ";
-
+           
             $stmt = $conn->prepare($query);
+            
             $stmt->bindParam(':today', $today);
             $stmt->execute();
             $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
+           
             // Récupérer les IDs des statuts
             $stmt = $conn->query("
                 SELECT id, status_name 
@@ -322,7 +348,7 @@ class Machine_model
                     } else {
                         // Sinon, mettre par défaut à "fonctionnelle"
                         $machine['etat_machine'] = 'fonctionnelle';
-                        $newStatusId = $statusMap['fonctionnelle'];
+                        $newStatusId = isset($statusMap['fonctionnelle']) ? $statusMap['fonctionnelle'] : null;
                     }
                 }
 
@@ -338,7 +364,7 @@ class Machine_model
                     $updateStmt->execute();
                 }
             }
-
+           
             return $machines;
         } catch (PDOException $e) {
             error_log('Error in MachinesStateTable: ' . $e->getMessage());

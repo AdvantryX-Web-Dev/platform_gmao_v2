@@ -49,18 +49,18 @@ if (session_status() === PHP_SESSION_NONE) {
                                     $countNonFonctionnel = 0;
                                     $countnondefini = 0;
                                     $countTotal = is_array($equipements) ? count($equipements) : 0;
-
+                                   
                                     if (is_array($equipements)) {
                                         foreach ($equipements as $m) {
-                                            if (!empty($m['location_category']) && $m['location_category'] == 'prodline' || $m['location_category'] == 'CH4') {
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'prodline' ) {
                                                 $countProduction++;
                                             }
                                             if (!empty($m['location_category']) && $m['location_category'] == 'magasin') {
                                                 $countmagasin++;
                                             }
-                                            if (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'fonctionnel')) {
+                                            if (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'fonctionnelle')) {
                                                 $countFonctionnel++;
-                                            } elseif (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'non fonctionnel')) {
+                                            } elseif (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'non fonctionnelle')) {
                                                 $countNonFonctionnel++;
                                             }
                                             if (empty($m['etat_equipement'])) {
@@ -216,10 +216,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         $status = $equipement['etat_equipement'] ?? 'Non défini';
                                                         if (empty($equipement['etat_equipement'])) {
                                                             echo '<span class="badge badge-secondary ">' . 'non défini' . '</span>';
-                                                        } elseif ($status == 'fonctionnel') {
+                                                        } elseif ($status == 'fonctionnelle') {
                                                             echo '<span class="badge badge-success ">' . htmlspecialchars($status) . '</span>';
                                                         } else {
-                                                            echo '<span class="badge badge-danger ">' . 'non fonctionnel' . '</span>';
+                                                            echo '<span class="badge badge-danger ">' . 'non fonctionnelle' . '</span>';
                                                         }
                                                         ?>
                                                     </td>

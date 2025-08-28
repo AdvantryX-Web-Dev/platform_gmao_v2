@@ -48,8 +48,7 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                                 foreach ($interventionTypes as $type) {
 
                                     echo '<option value="' . htmlspecialchars($type['id']) . '">' .
-                                        htmlspecialchars($type['designation']) . ' - ' .
-                                        htmlspecialchars($type['id']) . '</option>';
+                                        htmlspecialchars($type['designation']) .  '</option>';
                                 }
                             }
                             ?>
@@ -64,8 +63,7 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                             if (isset($all_machines) && is_array($all_machines)) {
                                 foreach ($all_machines as $machine) {
                                     echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
-                                        htmlspecialchars($machine['machine_id']) . ' - ' .
-                                        htmlspecialchars($machine['designation']) . '</option>';
+                                        htmlspecialchars($machine['machine_id']) . '</option>';
                                 }
                             }
                             ?>

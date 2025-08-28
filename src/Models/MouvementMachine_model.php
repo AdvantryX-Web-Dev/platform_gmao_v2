@@ -69,7 +69,7 @@ class MouvementMachine_model
 
     public static function findInterChaine()
     {
-        $dbGmao = Database::getInstance('MAHDCO_MAINT');
+        $dbGmao = Database::getInstance('db_digitex');
         $conn = $dbGmao->getConnection();
 
         // Utiliser une requête qui spécifie explicitement les bases de données
@@ -79,8 +79,8 @@ class MouvementMachine_model
                 e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
                 CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM MAHDCO_MAINT.gmao__mouvement_machine mm 
-        INNER JOIN MAHDCO_MAINT.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        FROM db_digitex.gmao__mouvement_machine mm 
+        INNER JOIN db_digitex.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
         INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
         LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
         LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
@@ -126,7 +126,7 @@ class MouvementMachine_model
     }
     public static function findParcChaine()
     {
-        $dbGmao = Database::getInstance('MAHDCO_MAINT');
+        $dbGmao = Database::getInstance('db_digitex');
         $conn = $dbGmao->getConnection();
 
         // Utiliser une requête qui spécifie explicitement les bases de données
@@ -136,8 +136,8 @@ class MouvementMachine_model
                 e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
                 CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM MAHDCO_MAINT.gmao__mouvement_machine mm 
-        INNER JOIN MAHDCO_MAINT.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        FROM db_digitex.gmao__mouvement_machine mm 
+        INNER JOIN db_digitex.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
         INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
         LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
         LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
@@ -200,9 +200,9 @@ class MouvementMachine_model
     }
     public static function findChaineParc()
     {
-        // Obtenir une connexion à la base de données MAHDCO_MAINT 
+        // Obtenir une connexion à la base de données db_digitex 
         // (Les deux connexions pointeront vers le même serveur MySQL)
-        $dbGmao = Database::getInstance('MAHDCO_MAINT');
+        $dbGmao = Database::getInstance('db_digitex');
         $conn = $dbGmao->getConnection();
 
         // Utiliser une requête qui spécifie explicitement les bases de données
@@ -212,8 +212,8 @@ class MouvementMachine_model
                 e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
                 CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
                 CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM MAHDCO_MAINT.gmao__mouvement_machine mm 
-        INNER JOIN MAHDCO_MAINT.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
+        FROM db_digitex.gmao__mouvement_machine mm 
+        INNER JOIN db_digitex.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
         INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
         LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
         LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id

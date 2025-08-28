@@ -49,13 +49,13 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                         </select>
                                     </div>
-                                    <div class="form-group">
+                                    <!-- <div class="form-group">
                                         <label>Type</label>
                                         <select name="location_type" class="form-control" required>
                                             <option value="machine">machine</option>
                                             <option value="equipment">equipment</option>
                                         </select>
-                                    </div>
+                                    </div> -->
                                 <button type="submit" class="btn btn-success">Ajouter</button>
                                 <a href="/platform_gmao/public/index.php?route=location/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
