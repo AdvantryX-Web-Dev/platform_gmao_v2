@@ -45,14 +45,16 @@ class MachineController
                 $_POST['type'],
                 $_POST['brand'],
                 $_POST['billing_num'],
-                $_POST['bill_date']
+                $_POST['bill_date'],
+                $_POST['location_id'],
+                $_POST['status_id']
             );
             if (Machine_model::AjouterMachine($machine)) {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Machine ajoutée avec succès !'];
 
                 // Audit trail
                 if (isset($_SESSION['user']['matricule'])) {
-                    
+
                     $newValues = [
                         'machine_id' => $machine_id,
                         'designation' => $_POST['designation'],
@@ -60,11 +62,12 @@ class MachineController
                         'type' => $_POST['type'],
                         'brand' => $_POST['brand'],
                         'billing_num' => $_POST['billing_num'],
-                        'bill_date' => $_POST['bill_date']
+                        'bill_date' => $_POST['bill_date'],
+                        'machines_location_id' => $_POST['location_id'],
+                        'machines_status_id' => $_POST['status_id']
                     ];
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'add', 'init__machine', null, $newValues);
                 }
-              
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de l\'ajout de la machine.'];
             }
@@ -110,7 +113,9 @@ class MachineController
                 $_POST['type'],
                 $_POST['brand'],
                 $_POST['billing_num'],
-                $_POST['bill_date']
+                $_POST['bill_date'],
+                $_POST['location_id'],
+                $_POST['status_id']
             );
             if (Machine_model::ModifierMachine($machine)) {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Machine modifiée avec succès !'];
@@ -124,7 +129,9 @@ class MachineController
                         'type' => $_POST['type'],
                         'brand' => $_POST['brand'],
                         'billing_num' => $_POST['billing_num'],
-                        'bill_date' => $_POST['bill_date']
+                        'bill_date' => $_POST['bill_date'],
+                        'machines_location_id' => $_POST['location_id'],
+                        'machines_status_id' => $_POST['status_id']
                     ];
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'update', 'init__machine', $oldMachine, $newValues);
                 }

@@ -63,7 +63,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
                     <?php
                     if (!empty($_GET['status'])) {
                         switch ($_GET['status']) {

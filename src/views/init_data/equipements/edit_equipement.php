@@ -39,9 +39,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <?php unset($_SESSION['flash_message']); ?>
                             <?php endif; ?>
                             <form method="post" action="/platform_gmao/public/index.php?route=equipement/edit&id=<?= urlencode($equipement['id']) ?>">
-                                
+
                                 <div class="form-group">
-                                    <label>equipement ID</label>
+                                    <label>Equipement ID</label>
                                     <input type="text" name="equipment_id" class="form-control" value="<?= htmlspecialchars($equipement['equipment_id'] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
@@ -64,23 +64,27 @@ if (session_status() === PHP_SESSION_NONE) {
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Location</label>
+                                    <label>Localisation</label>
                                     <select name="location_id" class="form-control" value="<?= htmlspecialchars($equipement['location_id'] ?? '') ?>" required>
                                         <?php
                                         $locations = Equipement_model::AllLocations();
                                         foreach ($locations as $location) {
-                                            echo '<option value="' . $location['id'] . '" ' . (isset($equipement['location_id']) && $equipement['location_id'] == $location['id'] ? 'selected' : '') . '>' . $location['location_name'] . '</option>';
+                                            if ($location['location_category'] === 'prodline' || $location['location_category'] === 'magasin') {
+                                                echo '<option value="' . $location['id'] . '" ' . (isset($equipement['location_id']) && $equipement['location_id'] == $location['id'] ? 'selected' : '') . '>' . $location['location_name'] . '</option>';
+                                            }
                                         }
                                         ?>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Status</label>
+                                    <label>Statut</label>
                                     <select name="status_id" class="form-control" value="<?= htmlspecialchars($equipement['status_id'] ?? '') ?>" required>
                                         <?php
                                         $status = Equipement_model::AllStatus();
                                         foreach ($status as $status) {
-                                            echo '<option value="' . $status['id'] . '" ' . (isset($equipement['status_id']) && $equipement['status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
+                                            if ($status['status_name'] === 'fonctionnelle' || $status['status_name'] === 'non fonctionnelle') {
+                                                echo '<option value="' . $status['id'] . '" ' . (isset($equipement['status_id']) && $equipement['status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
+                                            }
                                         }
                                         ?>
                                     </select>
@@ -104,9 +108,11 @@ if (session_status() === PHP_SESSION_NONE) {
         <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
         <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
         <script>
-            setTimeout(function(){
+            setTimeout(function() {
                 var el = document.getElementById('flash-message');
-                if (el) { el.style.display = 'none'; }
+                if (el) {
+                    el.style.display = 'none';
+                }
             }, 4000);
         </script>
     </div>

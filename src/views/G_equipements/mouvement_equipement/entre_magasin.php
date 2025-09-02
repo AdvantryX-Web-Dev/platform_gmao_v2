@@ -32,7 +32,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
             <div id="content">
                 <?php include(__DIR__ . "/../../../views/layout/navbar.php"); ?>
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
 
                     <?php if (!empty($_SESSION['flash_message'])): ?>
                         <div id="flash-message" class="alert alert-<?= $_SESSION['flash_message']['type'] === 'success' ? 'success' : 'danger' ?> mb-4">
@@ -70,7 +70,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                         <tr>
                                             <th>Equipement ID</th>
                                             <th>Référence</th>
-                                            <th>Machine ID</th>
+                                            <!-- <th>Machine ID</th> -->
                                             <th>Raisons</th>
                                             <th>Date mouvement</th>
                                             <th>Initiateur</th>
@@ -85,7 +85,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                     <td><?= htmlspecialchars($mouvement['equipment_id']  ?? '') ?></td>
 
                                                     <td><?= htmlspecialchars($mouvement['equipment_reference'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['machine_id'] . '-' . $mouvement['machine_reference'] ?? '') ?></td>
+                                                    <!-- <td><?= htmlspecialchars($mouvement['machine_id'] . '-' . $mouvement['machine_reference'] ?? '') ?></td> -->
                                                     <td><?= htmlspecialchars($mouvement['raison_mouv'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($mouvement['date_mouvement'] ?? '') ?></td>
                                                     <td>
@@ -146,7 +146,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                         <div class="modal-body">
                             <input type="hidden" name="type_mouvement" value="entre_magasin">
                             <div class="form-group">
-                                
+
                                 <label for="equipment">Equipement ID :</label>
                                 <select class="form-control" id="equipment" name="equipment" required>
                                     <option value="">--Sélectionnez un équipement--</option>
@@ -161,7 +161,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     ?>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <label for="machine">Machine :</label>
                                 <select class="form-control" id="machine" name="machine" required>
                                     <option value="">--Sélectionnez une machine--</option>
@@ -173,7 +173,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     }
                                     ?>
                                 </select>
-                            </div>
+                            </div> -->
                             <div class="form-group">
                                 <label for="maintenancier">Maintenancier :</label>
                                 <select class="form-control" id="maintenancier" name="maintenancier" required>
@@ -265,7 +265,10 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             $etat_equipement = $controller->getEquipementStatus();
                                         }
                                         foreach ($etat_equipement as $etat) {
-                                            echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                            if ($etat['status_name'] === 'fonctionnelle' || $etat['status_name'] === 'non fonctionnelle') {
+
+                                                echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                            }
                                         }
                                         ?>
                                     </select>

@@ -32,7 +32,7 @@ if (!$isAdmin) {
             <div id="content">
                 <?php include(__DIR__ . "/../../../views/layout/navbar.php"); ?>
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
 
                     <h1 class="h3 mb-4 text-gray-800">Historique des modifications - Catégories d'équipements</h1>
                     

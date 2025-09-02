@@ -59,6 +59,14 @@ class Machines_box_model
         $resultats = $req->fetchAll();
         return $resultats;
     }
-
+    public static function findAllChaines()
+    {
+        $dbDigitex = Database::getInstance('db_digitex');
+        $connDigitex = $dbDigitex->getConnection();
+        $req = $connDigitex->query("SELECT * FROM init__prod_line ORDER BY prod_line");
+        $req->execute();
+        $resultats = $req->fetchAll();
+        return $resultats;
+    }
    
 }

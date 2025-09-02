@@ -70,14 +70,14 @@ use App\Controllers\Machine_boxController;
                         unset($_SESSION['equipement_error']);
                     }
                     ?>
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Affectation machine – équipement:</h6>
                             <div class="d-flex justify-content-end">
-                                <a href="?route=equipement_machine/affectation_equipmentMachine" class="btn btn-primary mr-2">Ajouter une affectation</a>
-                                <a href="?route=equipement_machine/affectation_scan" class="btn btn-outline-primary"><i class="fas fa-qrcode"></i> Scanner</a>
+                                <!-- <a href="?route=equipement_machine/affectation_equipmentMachine" class="btn btn-primary mr-2">Ajouter une affectation</a> -->
+                                <a href="?route=equipement_machine/affectation_scan" class="btn btn-primary"><i class="fas fa-qrcode"></i> Ajouter une affectation</a>
                             </div>
                         </div>
                         <div class="card-body">
@@ -111,7 +111,7 @@ use App\Controllers\Machine_boxController;
                                         ?>
 
                                     </tbody>
-                                  
+
 
                                 </table>
                             </div>

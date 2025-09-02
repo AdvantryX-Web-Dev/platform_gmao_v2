@@ -14,10 +14,12 @@ class Machine_model
     private $type;
     private $brand;
     private $billing_num;
+    private $machines_location_id;
+    private $machines_status_id;
     private $bill_date;
 
 
-    public function __construct($machine_id, $designation, $reference, $type, $brand, $billing_num, $bill_date)
+    public function __construct($machine_id, $designation, $reference, $type, $brand, $billing_num, $machines_location_id, $machines_status_id, $bill_date)
     {
         $this->machine_id = $machine_id;
         $this->designation = $designation;
@@ -25,6 +27,8 @@ class Machine_model
         $this->type = $type;
         $this->brand = $brand;
         $this->billing_num = $billing_num;
+        $this->machines_location_id = $machines_location_id;
+        $this->machines_status_id = $machines_status_id;
         $this->bill_date = $bill_date;
     }
 
@@ -64,7 +68,7 @@ class Machine_model
 
     public static function findAll()
     {
-        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         $machines = array();
         try {
@@ -79,30 +83,13 @@ class Machine_model
 
         return $machines;
     }
-    // public static function ProdMachine()
-    // {
-    //     $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
-    //     $conn = $db->getConnection();
-    //     $machines = array();
-    //     //m.machines_location_id=1 = prodline
-    //     try {
-    //         $req = $conn->query("SELECT * FROM init__machine m  where m.machines_location_id=1 
-    //         order by m.machine_id desc");
-    //         $machines = $req->fetchAll();
-    //     } catch (PDOException $e) {
 
-    //         return false;
-    //     } //
-
-
-    //     return $machines;
-    // }
     public static function ProdMachine()
     {
-        $db = Database::getInstance('db_digitex'); 
+        $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         $machines = array();
-    
+
         try {
             $sql = "
                 SELECT m.* 
@@ -111,17 +98,16 @@ class Machine_model
                 WHERE l.location_category = 'prodline'
                 ORDER BY m.machine_id DESC
             ";
-    
+
             $req = $conn->query($sql);
             $machines = $req->fetchAll(PDO::FETCH_ASSOC);
-    
         } catch (PDOException $e) {
             return false;
         }
-    
+
         return $machines;
     }
-    
+
     public static function findById($id_machine)
     {
         $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
@@ -142,14 +128,16 @@ class Machine_model
         $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("UPDATE init__machine SET reference = ?, designation = ?, brand = ?, type = ?, billing_num = ?, bill_date = ?, cur_date=NOW() WHERE machine_id = ?");
+            $stmt = $conn->prepare("UPDATE init__machine SET reference = ?, designation = ?, brand = ?, type = ?, billing_num = ?, bill_date = ?, machines_location_id = ?, machines_status_id = ?, cur_date=NOW() WHERE machine_id = ?");
             $stmt->bindParam(1, $machine->reference);
             $stmt->bindParam(2, $machine->designation);
             $stmt->bindParam(3, $machine->brand);
             $stmt->bindParam(4, $machine->type);
             $stmt->bindParam(5, $machine->billing_num);
-            $stmt->bindParam(6, $machine->bill_date);
-            $stmt->bindParam(7, $machine->machine_id);
+            $stmt->bindParam(6, $machine->machines_location_id);
+            $stmt->bindParam(7, $machine->machines_status_id);
+            $stmt->bindParam(8, $machine->bill_date);
+            $stmt->bindParam(9, $machine->machine_id);
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
@@ -163,14 +151,16 @@ class Machine_model
         $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("INSERT INTO init__machine (`machine_id`, `reference`, `brand`, `type`, `designation`, `billing_num`, `bill_date`, `cur_date`) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+            $stmt = $conn->prepare("INSERT INTO init__machine (`machine_id`, `reference`, `brand`, `type`, `designation`, `billing_num`, `bill_date`, `machines_location_id`, `machines_status_id`, `cur_date`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
             $stmt->bindParam(1, $machine->machine_id);
             $stmt->bindParam(2, $machine->reference);
             $stmt->bindParam(3, $machine->brand);
             $stmt->bindParam(4, $machine->type);
             $stmt->bindParam(5, $machine->designation);
             $stmt->bindParam(6, $machine->billing_num);
-            $stmt->bindParam(7, $machine->bill_date);
+            $stmt->bindParam(7, $machine->machines_location_id);
+            $stmt->bindParam(8, $machine->machines_status_id);
+            $stmt->bindParam(9, $machine->bill_date);
 
             $stmt->execute();
             return true;
@@ -179,7 +169,6 @@ class Machine_model
             return false;
         }
     }
-
     /**
      * Vérifie l'existence d'une machine par son ID
      */
@@ -273,7 +262,7 @@ class Machine_model
 
     public static function MachinesStateTable()
     {
-    
+
         $db = new Database(); // Spécifier explicitement la base de données db_digitex
 
         $conn = $db->getConnection();
@@ -299,13 +288,13 @@ class Machine_model
                 ORDER BY 
                     m.updated_at DESC
             ";
-           
+
             $stmt = $conn->prepare($query);
-            
+
             $stmt->bindParam(':today', $today);
             $stmt->execute();
             $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-           
+
             // Récupérer les IDs des statuts
             $stmt = $conn->query("
                 SELECT id, status_name 
@@ -364,7 +353,7 @@ class Machine_model
                     $updateStmt->execute();
                 }
             }
-           
+
             return $machines;
         } catch (PDOException $e) {
             error_log('Error in MachinesStateTable: ' . $e->getMessage());

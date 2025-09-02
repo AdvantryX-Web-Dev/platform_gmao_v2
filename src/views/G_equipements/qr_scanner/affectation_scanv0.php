@@ -45,7 +45,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
             <div id="content">
                 <?php include(__DIR__ . "/../../layout/navbar.php"); ?>
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
 
                     <div class="card shadow mb-4 scan-card">
                         <div class="card-header py-3 d-flex align-items-center justify-content-between">

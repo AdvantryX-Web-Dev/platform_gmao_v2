@@ -5,17 +5,18 @@ namespace App\Controllers;
 use App\Models\Location_model;
 use App\Models\AuditTrail_model;
 use App\Models\Database;
+
 class LocationController
 {
     public function list()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        
+
         // Charger les emplacements via le modèle dédié
         $Locations = Location_model::getAllLocations();
-   
-       
-        
+
+
+
         include(__DIR__ . '/../views/init_data/location/list__location.php');
     }
 
@@ -25,7 +26,12 @@ class LocationController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $locationName = trim($_POST['location_name'] ?? '');
             $location_category = trim($_POST['location_category'] ?? '');
-           // $location_type = trim($_POST['location_type'] ?? '');
+            // $location_type = trim($_POST['location_type'] ?? '');
+            if (Location_model::existsByLocationName($locationName)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom d\'emplacement déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=location/create');
+                exit;
+            }
             if ($locationName === '') {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom d\'emplacement requis.'];
                 header('Location: /platform_gmao/public/index.php?route=location/create');
@@ -36,8 +42,8 @@ class LocationController
                 $conn = $db->getConnection();
                 $db_digitex =  Database::getInstance('db_digitex');
                 $conn_digitex = $db_digitex->getConnection();
-                    $stmt = $conn_digitex->prepare('INSERT INTO gmao__location (location_name, location_category) VALUES (?, ?)');
-              
+                $stmt = $conn_digitex->prepare('INSERT INTO gmao__location (location_name, location_category) VALUES (?, ?)');
+
                 $stmt->execute([$locationName, $location_category]);
                 // Audit trail - création
                 if (isset($_SESSION['user']['matricule'])) {
@@ -76,7 +82,7 @@ class LocationController
             $db_digitex =  Database::getInstance('db_digitex');
             $conn_digitex = $db_digitex->getConnection();
             $stmt = $conn_digitex->prepare('SELECT * FROM gmao__location WHERE id = ?');
-          
+
             $stmt->execute([$id]);
             $location = $stmt->fetch(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
@@ -85,9 +91,14 @@ class LocationController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $locationName = trim($_POST['location_name'] ?? '');
             $location_category = trim($_POST['location_category'] ?? '');
+            if (Location_model::existsByLocationName($locationName, $id)) {
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom d\'emplacement déjà existant.'];
+                header('Location: /platform_gmao/public/index.php?route=location/edit&id=' . urlencode($id));
+                exit;
+            }
             if ($locationName === '') {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Nom d\'emplacement requis.'];
-                header('Location: ../../platform_gmao/public/index.php?route=location/edit&id=' . urlencode($id) );
+                header('Location: ../../platform_gmao/public/index.php?route=location/edit&id=' . urlencode($id));
                 exit;
             }
             try {

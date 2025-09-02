@@ -55,8 +55,8 @@ class Mouvement_equipmentController
 
             // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
             $db = new  Database();
-            $conn = $db->getConnection();   
-            
+            $conn = $db->getConnection();
+
             try {
 
                 // Transaction pour assurer l'intégrité des données
@@ -124,7 +124,7 @@ class Mouvement_equipmentController
                         $stmt->execute();
                     }
 
-                   
+
                     if ($equipmentId) {
 
                         // 6. Mettre à jour la table gmao__prod_implementation_equipment - marquer l'équipement comme retiré
@@ -194,10 +194,11 @@ class Mouvement_equipmentController
         return $stmt->fetchAll();
     }
 
+
     public function saveMouvement()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $machine = $_POST['machine'] ?? '';
+            $machine = isset($_POST['machine']) && $_POST['machine'] !== '' ? (int)$_POST['machine'] : null;
             $equipment = $_POST['equipment'] ?? '';
             $maintenancier = $_POST['maintenancier'] ?? '';
             $raison = $_POST['raisonMouvement'] ?? '';
@@ -226,6 +227,11 @@ class Mouvement_equipmentController
             // Enregistrer le mouvement dans la base de données
             $db = new Database();
             $conn = $db->getConnection();
+            print_r('<pre>');
+            print_r($_POST);
+            print_r('<pre>');
+            print_r("eeee", $machine);
+            print_r('</pre>');
 
             try {
                 $stmt = $conn->prepare("INSERT INTO gmao__mouvement_equipment
@@ -246,12 +252,14 @@ class Mouvement_equipmentController
                         'text' => 'Le mouvement a été enregistré avec succès.'
                     ];
                 } else {
+
                     $_SESSION['flash_message'] = [
                         'type' => 'error',
                         'text' => 'Une erreur est survenue lors de l\'enregistrement du mouvement.'
                     ];
                 }
             } catch (PDOException $e) {
+                die($e->getMessage());
                 $_SESSION['flash_message'] = [
                     'type' => 'error',
                     'text' => 'Erreur de base de données: ' . $e->getMessage()

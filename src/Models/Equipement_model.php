@@ -241,28 +241,46 @@ class Equipement_model
         $conn = $db->getConnection();
 
         $req = $conn->query("
-            SELECT pa.*, 
-                   ie.id AS id,
-                   ie.equipment_id AS equipment_id,
-                   ie.reference AS reference,
-                   ec.status_name AS etat_equipement,
-                   im.machine_id AS machine_id,
-                   il.location_name AS location_name,
-                   il.location_category AS location_category
-            FROM gmao__prod_implementation_equipment pa
+        
+            SELECT 
+                gie.*, 
+                ec.status_name AS etat_equipement,
+                ie.*, 
+                im.machine_id AS machine_id,
+                il.location_name AS location_name,
+                il.location_category AS location_category
+            FROM gmao__init_equipment gie
+            
             LEFT JOIN (
                 SELECT accessory_ref, MAX(id) AS max_id
                 FROM gmao__prod_implementation_equipment
                 GROUP BY accessory_ref
-            ) latest ON pa.accessory_ref = latest.accessory_ref AND pa.id = latest.max_id
-            LEFT JOIN gmao__init_equipment ie ON pa.accessory_ref = ie.equipment_id
-            LEFT JOIN init__machine im ON pa.machine_id = im.machine_id
-            LEFT JOIN gmao__location il ON ie.location_id = il.id
-            left join gmao__status ec on ie.status_id = ec.id
-            WHERE latest.max_id IS NOT NULL
+            ) latest 
+                ON gie.equipment_id = latest.accessory_ref
+            
+            LEFT JOIN gmao__prod_implementation_equipment ie 
+                ON ie.id = latest.max_id
+            
+            -- Machine liée à l’implémentation
+            LEFT JOIN init__machine im 
+                ON ie.machine_id = im.machine_id
+            
+            -- Localisation de l’équipement
+            LEFT JOIN gmao__location il 
+                ON gie.location_id = il.id
+            
+            -- Statut de l’équipement
+            LEFT JOIN gmao__status ec 
+                ON gie.status_id = ec.id
         ");
 
+
+
+
         $equipements = $req->fetchAll();
+        print_r('<pre>');
+        print_r($equipements);
+        print_r('</pre>');
         return $equipements;
     }
     public static function affectationEquipementsMachines()
@@ -288,7 +306,7 @@ class Equipement_model
         LEFT JOIN init__machine im ON pa.machine_id = im.machine_id
         LEFT JOIN gmao__location il ON ie.location_id = il.id
         left join init__employee em on pa.maintainer = em.matricule
-        WHERE latest.max_id IS NOT NULL
+        WHERE latest.max_id IS NOT NULL AND pa.is_removed = 0
     ");
         $equipements = $req->fetchAll();
         return $equipements;
@@ -316,7 +334,7 @@ class Equipement_model
 
     // public static function getEquipements($location)
     // {
-  
+
     //     $db = new Database();
     //     $conn = $db->getConnection();
     //     $location = self::locationID("$location");
@@ -324,32 +342,32 @@ class Equipement_model
     //     $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id = '$location_id'");
     //     $equipements = $req->fetchAll();
     //     print_r("equipements ids".$equipements);
-      
+
     //     return $equipements;
     // }
     public static function getEquipements($location)
     {
         $db = new Database();
         $conn = $db->getConnection();
-    
+
         // Récupérer tous les IDs de location
         $locations = self::locationID("$location");
-    
+
         // Extraire tous les IDs dans un tableau
         $location_ids = array_column($locations, 'id');
-    
+
         // Transformer le tableau en chaîne pour SQL IN
         $ids_str = implode(',', $location_ids);
-    
+
         // Requête pour tous les IDs
         $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id IN ($ids_str)");
-        
+
         $equipements = $req->fetchAll();
         print_r($equipements);
-    
+
         return $equipements;
     }
-    
+
     public static function equipmentByMachine_id($machine_id)
     {
         $db = new Database();

@@ -22,8 +22,26 @@ class Location_model
             return [];
         }
     }
-
-   
+    public static function existsByLocationName($locationName, $excludeLocationId = null)
+    {
+        if ($locationName === null || $locationName === '') {
+            return false;
+        }
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        try {
+            if ($excludeLocationId) {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__location WHERE location_name = ? AND id <> ? LIMIT 1");
+                $stmt->bindParam(1, $locationName);
+                $stmt->bindParam(2, $excludeLocationId);
+            } else {
+                $stmt = $conn->prepare("SELECT 1 FROM gmao__location WHERE location_name = ? LIMIT 1");
+                $stmt->bindParam(1, $locationName);
+            }
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
 }
-
-

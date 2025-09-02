@@ -40,7 +40,8 @@ class Intervention_type_model
         $conn = $db->getConnection();
         $categories = array();
         try {
-            $req = $conn->query("SELECT * FROM gmao__type_intervention");
+            $req = $conn->query("
+            SELECT * FROM gmao__type_intervention order by created_at desc");
             $categories = $req->fetchAll();
         } catch (PDOException $e) {
 

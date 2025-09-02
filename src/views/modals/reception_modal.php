@@ -43,7 +43,17 @@
                                 <?php
                                 $etat_machine = $controller->getMachineStatus();
                                 foreach ($etat_machine as $etat) {
-                                    echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                    if ($type_mouvement === 'parc_chaine' || $type_mouvement === 'inter_chaine') {
+                                        if ($etat['status_name'] == 'active' || $etat['status_name'] == 'inactive' || $etat['status_name'] == 'en panne') {
+
+                                            echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                        }
+                                    } else {
+                                        if ($etat['status_name'] == 'fonctionnelle' || $etat['status_name'] == 'ferraille' || $etat['status_name'] == 'non fonctionnelle') {
+
+                                            echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                        }
+                                    }
                                 }
                                 ?>
                             </select>
@@ -64,5 +74,3 @@
         </div>
     </div>
 </div>
-
-

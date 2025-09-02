@@ -37,7 +37,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             <?php endif; ?>
                             <form method="post" action="/platform_gmao/public/index.php?route=intervention_type/edit&id=<?= urlencode($intervention_type['id']) ?>">
                                 <div class="form-group">
-                                    <label>Designation</label>
+                                    <label>Désignation</label>
                                     <input type="text" name="designation" class="form-control" value="<?= htmlspecialchars($intervention_type['designation'] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
@@ -72,7 +72,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <script>
             setTimeout(function() {
                 var el = document.getElementById('flash-message');
-                if (el) { el.style.display = 'none'; }
+                if (el) {
+                    el.style.display = 'none';
+                }
             }, 4000);
         </script>
     </div>

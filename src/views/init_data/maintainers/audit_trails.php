@@ -28,7 +28,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
             <div id="content">
                 <?php include(__DIR__ . "/../../../views/layout/navbar.php"); ?>
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
                     
                     <?php if (!empty($_SESSION['flash_message'])): ?>
                         <div id="flash-message" class="alert alert-<?= $_SESSION['flash_message']['type'] === 'success' ? 'success' : 'danger' ?> mb-4">

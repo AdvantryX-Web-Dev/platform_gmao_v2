@@ -1,4 +1,7 @@
 <?php
+
+use App\Models\Equipement_model;
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -64,6 +67,33 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <label>Date Facture</label>
                                     <input type="date" name="bill_date" class="form-control" value="<?= htmlspecialchars($machine['bill_date'] ?? '') ?>">
                                 </div>
+                                <div class="form-group">
+                                    <label>Location</label>
+                                    <select name="location_id" class="form-control" value="<?= htmlspecialchars($equipement['location_id'] ?? '') ?>" required>
+                                        <?php
+                                        $locations = Equipement_model::AllLocations();
+                                        foreach ($locations as $location) {
+                                            if ($location['location_category'] === 'prodline' || $location['location_category'] === 'parc') {
+                                                echo '<option value="' . $location['id'] . '" ' . (isset($machine['machines_location_id']) && $machine['machines_location_id'] == $location['id'] ? 'selected' : '') . '>' . $location['location_name'] . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+
+                                    <select name="status_id" class="form-control" value="<?= htmlspecialchars($equipement['status_id'] ?? '') ?>" required>
+                                        <?php
+                                        $status = Equipement_model::AllStatus();
+                                        foreach ($status as $status) {
+                                            if ($status['status_name'] !== 'fonctionnelle' && $status['status_name'] !== 'non fonctionnelle') {
+                                                echo '<option value="' . $status['id'] . '" ' . (isset($machine['machines_status_id']) && $machine['machines_status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
                                 <button type="submit" class="btn btn-success">Enregistrer</button>
                                 <a href="../../platform_gmao/public/index.php?route=machines" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
@@ -86,7 +116,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <script>
             setTimeout(function() {
                 var el = document.getElementById('flash-message');
-                if (el) { el.style.display = 'none'; }
+                if (el) {
+                    el.style.display = 'none';
+                }
             }, 4000);
         </script>
     </div>

@@ -71,7 +71,7 @@ $aleas = $interventionController->getAleasProduction($nomCh, $date_debut, $date_
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
 
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">

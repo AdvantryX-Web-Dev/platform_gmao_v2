@@ -143,7 +143,10 @@ if (!empty($machine_id)) {
                                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                         <thead>
                                             <tr>
-                                                <th>Date</th>
+                                                <th>
+                                                    Date
+                                                    <i class="fas fa-sort" id="dateSort" style="cursor: pointer; margin-left: 5px;"></i>
+                                                </th>
                                                 <th>Type de mouvement</th>
                                                 <th>Raison</th>
                                                 <th>Initié par</th>
@@ -182,7 +185,7 @@ if (!empty($machine_id)) {
                                                             $typeText = $mouvement['type_Mouv'];
                                                     }
                                                     ?>
-                                                    <td><?= date('d/m/Y', strtotime($mouvement['date_mouvement'])) ?></td>
+                                                    <td><?= date('d/m/Y H:i', strtotime($mouvement['created_at'] ?? $mouvement['date_mouvement'])) ?></td>
                                                     <td>
 
                                                         <span class="badge <?= $typeClass ?>"><?= $typeText ?></span>
@@ -241,8 +244,25 @@ if (!empty($machine_id)) {
                 },
                 pageLength: 10,
                 order: [
-                    [0, 'asc']
-                ]
+                    [0, 'desc']
+                ],
+                columnDefs: [{
+                    targets: 0,
+                    type: 'date-eu'
+                }]
+            });
+
+            // Tri optimisé par date
+            let ascending = false;
+            $('#dateSort').click(function() {
+                ascending = !ascending;
+                const order = ascending ? 'asc' : 'desc';
+                const icon = ascending ? 'fa-sort-up' : 'fa-sort-down';
+
+                $(this).removeClass('fa-sort fa-sort-up fa-sort-down').addClass(icon);
+                table.order([
+                    [0, order]
+                ]).draw();
             });
         });
     </script>

@@ -1,4 +1,7 @@
 <?php
+
+use App\Models\Equipement_model;
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -64,6 +67,34 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <label>Date Facture</label>
                                     <input type="date" name="bill_date" class="form-control">
                                 </div>
+                                <div class="form-group">
+                                    <label>Location</label>
+                                    <select name="location_id" class="form-control" required>
+                                        <?php
+                                        $locations = Equipement_model::AllLocations();
+                                        foreach ($locations as $location) {
+                                            if ($location['location_category'] === 'prodline' || $location['location_category'] === 'parc') {
+                                                echo '<option value="' . $location['id'] . '">' . $location['location_name'] . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Statut</label>
+                                    <select name="status_id" class="form-control" required>
+                                        <?php
+
+                                        $statuses =  Equipement_model::AllStatus();
+                                        foreach ($statuses as $status) {
+                                            if ($status['status_name'] !== 'fonctionnelle' && $status['status_name'] !== 'non fonctionnelle') {
+                                                echo '<option value="' . $status['id'] . '">' . $status['status_name'] . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
                                 <button type="submit" class="btn btn-success">Ajouter</button>
                                 <a href="../../platform_gmao/public/index.php?route=machines" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
@@ -85,7 +116,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <script>
             setTimeout(function() {
                 var el = document.getElementById('flash-message');
-                if (el) { el.style.display = 'none'; }
+                if (el) {
+                    el.style.display = 'none';
+                }
             }, 4000);
         </script>
     </div>

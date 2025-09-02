@@ -32,7 +32,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
             <div id="content">
                 <?php include(__DIR__ . "/../../../views/layout/navbar.php"); ?>
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
 
                     <?php if (!empty($_SESSION['flash_message'])): ?>
                         <div id="flash-message" class="alert alert-<?= $_SESSION['flash_message']['type'] === 'success' ? 'success' : 'danger' ?> mb-4">
@@ -43,7 +43,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Liste des mainteneurs :</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Liste des maintenanciers :</h6>
                             <?php if ($isAdmin): ?>
                                 <div>
                                     <!-- <a href="../../platform_gmao/public/index.php?route=audit_trails_history" class="btn btn-info mr-2">
@@ -66,7 +66,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             <th>Matricule</th>
                                             <th>Nom</th>
                                             <th>Prénom</th>
-                                            <th>cart RFID</th>
+                                            <!-- <th>cart RFID</th> -->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -82,7 +82,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                     <td><?= htmlspecialchars($maintainer['matricule'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($maintainer['first_name'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($maintainer['last_name'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($maintainer['card_rfid'] ?? '') ?></td>
+                                                    <!-- <td><?= htmlspecialchars($maintainer['card_rfid'] ?? '') ?></td> -->
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else: ?>

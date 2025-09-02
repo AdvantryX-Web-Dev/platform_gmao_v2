@@ -58,12 +58,13 @@ class Mouvement_equipment_model
         $dbGmao = new Database();
         $conn = $dbGmao->getConnection();
 
+        
         // Utiliser une requête qui spécifie explicitement les bases de données
         $query = "
                 SELECT
                 mm.*, 
-                m.machine_id as machine_id,
-                m.reference as machine_reference,
+              --  m.machine_id as machine_id,
+              --  m.reference as machine_reference,
                 e.equipment_id as equipment_id,
                 e.reference as equipment_reference ,
                 e.designation ,
@@ -75,7 +76,7 @@ class Mouvement_equipment_model
         FROM gmao__mouvement_equipment mm 
         INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
         INNER JOIN gmao__init_equipment e ON mm.equipment_id = e.id
-        INNER JOIN init__machine m ON mm.id_machine = m.id
+       -- INNER JOIN init__machine m ON mm.id_machine = m.id
         LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
         LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
         WHERE mm.type_Mouv = 'entre_magasin'
@@ -106,8 +107,8 @@ class Mouvement_equipment_model
         $query = "
                 SELECT
                 mm.*, 
-                m.machine_id as machine_id,
-                m.reference as machine_reference,
+               -- m.machine_id as machine_id,
+               -- m.reference as machine_reference,
                 e.equipment_id as equipment_id,
                 e.reference as equipment_reference ,
                 e.designation ,
@@ -119,7 +120,7 @@ class Mouvement_equipment_model
         FROM gmao__mouvement_equipment mm 
         INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
         INNER JOIN gmao__init_equipment e ON mm.equipment_id = e.id
-        INNER JOIN init__machine m ON mm.id_machine = m.id
+        -- INNER JOIN init__machine m ON mm.id_machine = m.id
         LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
         LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
         WHERE mm.type_Mouv = 'sortie_magasin'

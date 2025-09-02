@@ -26,7 +26,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <div class="container-fluid">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Editer un mainteneur</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Editer un maintenancier</h6>
                         </div>
                         <div class="card-body">
                             <?php if (!empty($_SESSION['flash_message'])): ?>
@@ -83,7 +83,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <script>
             setTimeout(function() {
                 var el = document.getElementById('flash-message');
-                if (el) { el.style.display = 'none'; }
+                if (el) {
+                    el.style.display = 'none';
+                }
             }, 4000);
         </script>
     </div>

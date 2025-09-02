@@ -233,6 +233,12 @@ switch ($route) {
     case 'machinesbox':
         require_once __DIR__ . '/../src/views/G_machines/Machine_box.php';
         break;
+    case 'box_machine/affectation_scan':
+        require_once __DIR__ . '/../src/views/G_machines/qr_scanner/affectation_scan.php';
+        break;
+    case 'box_machine/affecter':
+        $machineBoxController->affecter();
+        break;
     case 'machine/mouvement':
         require_once __DIR__ . '/../src/views/G_machines/MouvMachines.php';
         break;

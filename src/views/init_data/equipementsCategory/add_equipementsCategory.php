@@ -31,7 +31,7 @@ if (!$isAdmin) {
             <div id="content">
                 <?php include(__DIR__ . "/../../../views/layout/navbar.php"); ?>
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Ajouter une catégorie</h6>

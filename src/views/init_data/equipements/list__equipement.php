@@ -32,7 +32,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
             <div id="content">
                 <?php include(__DIR__ . "/../../../views/layout/navbar.php"); ?>
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
 
                     <?php if (!empty($_SESSION['flash_message'])): ?>
                         <div id="flash-message" class="alert alert-<?= $_SESSION['flash_message']['type'] === 'success' ? 'success' : 'danger' ?> mb-4">
@@ -63,10 +63,9 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             <?php endif; ?>
                                             <th>Equipement</th>
                                             <th>Référence</th>
-                                            <th>Designation</th>
+                                            <th>Désignation</th>
 
                                             <th>Catégorie</th>
-                                            <th>Lieu</th>
 
                                         </tr>
                                     </thead>
@@ -86,7 +85,6 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                     <td><?= htmlspecialchars($equipement['designation'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($equipement['categorie'] ?? '') ?></td>
 
-                                                    <td><?= htmlspecialchars($equipement['location'] ?? '') ?></td>
 
                                                 </tr>
                                             <?php endforeach; ?>

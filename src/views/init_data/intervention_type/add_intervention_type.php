@@ -45,7 +45,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             <?php endif; ?>
                             <form method="post" action="">
                                 <div class="form-group">
-                                    <label>Designation</label>
+                                    <label>Désignation</label>
                                     <input type="text" name="designation" class="form-control" required>
                                 </div>
                                 <div class="form-group">

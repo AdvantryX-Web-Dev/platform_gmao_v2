@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 use App\Models\Categories_model;
 use App\Models\Equipement_model;
 
@@ -44,12 +45,12 @@ use App\Models\Equipement_model;
                             <?php endif; ?>
                             <?php if (!empty($_SESSION['equipement_error'])): ?>
                                 <div class="alert alert-danger"><?= $_SESSION['equipement_error'];
-                                                                    unset($_SESSION['equipement_error']); ?></div>
-                               
+                                                                unset($_SESSION['equipement_error']); ?></div>
+
                             <?php endif; ?>
                             <form method="post" action="">
                                 <div class="form-group">
-                                    <label>equipement ID</label>
+                                    <label>Equipement ID</label>
                                     <input type="text" name="equipment_id" class="form-control" required>
                                 </div>
                                 <div class="form-group">
@@ -57,7 +58,7 @@ use App\Models\Equipement_model;
                                     <input type="text" name="reference" class="form-control" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Designation</label>
+                                    <label>Désignation</label>
                                     <input type="text" name="designation" class="form-control" required>
                                 </div>
                                 <div class="form-group">
@@ -72,34 +73,35 @@ use App\Models\Equipement_model;
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Location</label>
+                                    <label>Localisation</label>
                                     <select name="location_id" class="form-control" required>
                                         <?php
                                         $locations = Equipement_model::AllLocations();
                                         foreach ($locations as $location) {
-                                            echo '<option value="' . $location['id'] . '">' . $location['location_name'] . '</option>';
+                                            if ($location['location_category'] === 'prodline' || $location['location_category'] === 'magasin') {
+                                                echo '<option value="' . $location['id'] . '">' . $location['location_name'] . '</option>';
+                                            }
                                         }
                                         ?>
                                     </select>
                                 </div>
+
                                 <div class="form-group">
-                                    <label>Status</label>
+                                    <label>Statut</label>
                                     <select name="status_id" class="form-control" required>
                                         <?php
-                                        $status = Equipement_model::AllStatus();
-                                        foreach ($status as $status) {
-                                            echo '<option value="' . $status['id'] . '">' . $status['status_name'] . '</option>';
+                                        $statuses = Equipement_model::AllStatus();
+                                        foreach ($statuses as $status) {
+                                            if ($status['status_name'] === 'fonctionnelle' || $status['status_name'] === 'non fonctionnelle') {
+                                                echo '<option value="' . $status['id'] . '">' . $status['status_name'] . '</option>';
+                                            }
                                         }
                                         ?>
                                     </select>
                                 </div>
-                               
-
-
-
 
                                 <button type="submit" class="btn btn-success">Ajouter</button>
-                                <a href="/platform_gmao/public/index.php?route=intervention_type/list" class="btn btn-secondary ml-2">Annuler</a>
+                                <a href="/platform_gmao/public/index.php?route=equipement/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>
                     </div>

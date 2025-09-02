@@ -57,7 +57,7 @@ if (empty($aleas)) {
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarTo"><i class="fas fa-bars"></i></button>
+
 
                     <!-- Informations Machine Card -->
                     <div class="card shadow mb-4">
