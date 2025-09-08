@@ -227,11 +227,7 @@ class Mouvement_equipmentController
             // Enregistrer le mouvement dans la base de données
             $db = new Database();
             $conn = $db->getConnection();
-            print_r('<pre>');
-            print_r($_POST);
-            print_r('<pre>');
-            print_r("eeee", $machine);
-            print_r('</pre>');
+           
 
             try {
                 $stmt = $conn->prepare("INSERT INTO gmao__mouvement_equipment

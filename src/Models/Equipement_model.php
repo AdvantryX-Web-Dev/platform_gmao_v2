@@ -278,9 +278,7 @@ class Equipement_model
 
 
         $equipements = $req->fetchAll();
-        print_r('<pre>');
-        print_r($equipements);
-        print_r('</pre>');
+     
         return $equipements;
     }
     public static function affectationEquipementsMachines()
@@ -332,19 +330,7 @@ class Equipement_model
         return $location_id;
     }
 
-    // public static function getEquipements($location)
-    // {
-
-    //     $db = new Database();
-    //     $conn = $db->getConnection();
-    //     $location = self::locationID("$location");
-    //     $location_id = $location[0]['id'];
-    //     $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id = '$location_id'");
-    //     $equipements = $req->fetchAll();
-    //     print_r("equipements ids".$equipements);
-
-    //     return $equipements;
-    // }
+    
     public static function getEquipements($location)
     {
         $db = new Database();
@@ -363,7 +349,6 @@ class Equipement_model
         $req = $conn->query("SELECT * FROM gmao__init_equipment WHERE location_id IN ($ids_str)");
 
         $equipements = $req->fetchAll();
-        print_r($equipements);
 
         return $equipements;
     }

@@ -27,9 +27,6 @@ class Machine_boxController
 
         try {
 
-            print_r('<pre>');
-            print_r($_POST);
-            print_r('<pre>');
 
             // Récupérer les données du formulaire
             $box_id = $_POST['box_id'] ?? '';
@@ -85,8 +82,7 @@ class Machine_boxController
             }
         } catch (\Exception $e) {
 
-            print_r($e->getMessage());
-            die();
+           
             error_log("Erreur dans affecter(): " . $e->getMessage());
             $_SESSION['flash_error'] = 'Une erreur est survenue lors de l\'affectation.';
         }

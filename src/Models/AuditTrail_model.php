@@ -45,10 +45,7 @@ class AuditTrail_model
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
-            echo "<pre>";
-            print_r("erreur audit :" . $e->getMessage());
-            echo "</pre>";
-            die();
+           
             // En cas d'erreur, on continue quand même (l'audit est secondaire)
             error_log("Erreur d'audit: " . $e->getMessage());
             return false;

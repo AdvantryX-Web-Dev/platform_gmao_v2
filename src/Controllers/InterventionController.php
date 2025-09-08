@@ -114,7 +114,6 @@ class InterventionController
                     header('Location: index.php?route=intervention_curative&status=succ');
                     exit;
                 } catch (\PDOException $e) {
-                    print_r($e);
                   //  die();
                     // Rollback en cas d'erreur sur les deux connexions
                     if ($conn->inTransaction()) {

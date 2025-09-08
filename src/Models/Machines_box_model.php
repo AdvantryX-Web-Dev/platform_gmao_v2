@@ -45,12 +45,17 @@ class Machines_box_model
         $dbDigitex = Database::getInstance('db_digitex');
         $connDigitex = $dbDigitex->getConnection();
 
-        // Utilisation des qualificateurs de base de données dans la requête SQL
-        $query = "SELECT  p.*, isb.position, m.designation
-        FROM prod__implantation p 
-        INNER JOIN init__smartbox isb ON (p.smartbox = isb.smartbox)
-        INNER JOIN init__machine m ON (p.machine_id = m.machine_id)
-        -- where YEAR(p.cur_date) = YEAR(CURDATE())
+        $query = "
+        SELECT p.*, isb.position, m.designation
+        FROM prod__implantation p
+        INNER JOIN (
+            SELECT machine_id, MAX(id) AS max_id
+            FROM prod__implantation
+            GROUP BY machine_id
+        ) last ON last.machine_id = p.machine_id AND last.max_id = p.id
+        INNER JOIN init__smartbox isb ON p.smartbox = isb.smartbox
+        INNER JOIN init__machine m ON p.machine_id = m.machine_id
+        ORDER BY p.id DESC
         ";
 
         // Exécution sur la connexion GMAO car c'est la table principale de la requête
@@ -59,6 +64,8 @@ class Machines_box_model
         $resultats = $req->fetchAll();
         return $resultats;
     }
+
+
     public static function findAllChaines()
     {
         $dbDigitex = Database::getInstance('db_digitex');
