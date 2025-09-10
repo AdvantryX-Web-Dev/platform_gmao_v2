@@ -68,7 +68,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <input type="date" name="bill_date" class="form-control" value="<?= htmlspecialchars($machine['bill_date'] ?? '') ?>">
                                 </div>
                                 <div class="form-group">
-                                    <label>Location</label>
+                                    <label>Localisation</label>
                                     <select name="location_id" class="form-control" value="<?= htmlspecialchars($equipement['location_id'] ?? '') ?>" required>
                                         <?php
                                         $locations = Equipement_model::AllLocations();

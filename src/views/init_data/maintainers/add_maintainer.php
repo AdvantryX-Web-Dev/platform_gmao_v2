@@ -63,7 +63,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <div class="form-group">
                                     <label>Qualification</label>
                                     <select name="qualification" class="form-control" required>
-                                        <option value="MAINTAINER">MAINTAINER</option>
+                                        <option value="MAINTAINER">Maintenancier</option>
 
                                     </select>
                                 </div>

@@ -50,7 +50,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                         <i class="fas fa-history"></i> Historique des modifications
                                     </a> -->
                                     <a href="../../platform_gmao/public/index.php?route=maintainer/create" class="btn btn-success">
-                                        <i class="fas fa-plus"></i> Ajouter un mainteneur
+                                        <i class="fas fa-plus"></i> Ajouter un maintenancier
                                     </a>
                                 </div>
                             <?php endif; ?>

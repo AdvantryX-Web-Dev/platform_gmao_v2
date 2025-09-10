@@ -94,7 +94,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Dans le production</div>
+                                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Dans la production</div>
                                                         <div class="status-count text-gray-800" id="count-production"><?php echo $countProduction; ?></div>
                                                     </div>
                                                     <div class="col-auto">
