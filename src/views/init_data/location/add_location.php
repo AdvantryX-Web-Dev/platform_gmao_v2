@@ -37,11 +37,11 @@ if (session_status() === PHP_SESSION_NONE) {
                             <?php endif; ?>
                             <form method="post" action="">
                                 <div class="form-group">
-                                    <label>Nom d'emplacement</label>
+                                    <label>Emplacement</label>
                                     <input type="text" name="location_name" class="form-control" required>
                                 </div>
                                     <div class="form-group">
-                                        <label>Emplacement</label>
+                                        <label>Type</label>
                                         <select name="location_category" class="form-control" required>
                                             <option value="magasin">magasin</option>
                                             <option value="prodline">prodline</option>

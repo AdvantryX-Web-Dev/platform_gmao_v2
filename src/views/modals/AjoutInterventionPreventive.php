@@ -62,8 +62,10 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                             <?php
                             if (isset($all_machines) && is_array($all_machines)) {
                                 foreach ($all_machines as $machine) {
-                                    echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
-                                        htmlspecialchars($machine['machine_id']) . '</option>';
+                                   // echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
+                                    echo '<option value="' . htmlspecialchars($machine['id']) . '" data-reference="' . htmlspecialchars($machine['reference']) . '">' .
+
+                                        htmlspecialchars($machine['reference'] . ' - ' . $machine['machine_id']) . '</option>';
                                 }
                             }
                             ?>

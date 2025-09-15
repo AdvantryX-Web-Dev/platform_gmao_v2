@@ -250,16 +250,15 @@ class InterventionPlanningController
         $currentDate = date('Y-m-d');
 
         try {
-            $stmt = $conn->prepare("SELECT p.*, m.machine_id FROM gmao__planning p 
-                    JOIN db_mahdco.init__machine m ON p.machine_id = m.id 
-                    WHERE p.planned_date >= ? 
-                    AND p.id NOT IN (
+            $stmt = $conn->prepare("SELECT p.*, m.machine_id ,m.reference FROM gmao__planning p 
+                    JOIN init__machine m ON p.machine_id = m.id 
+                    WHERE  p.id NOT IN (
                         SELECT planning_id FROM gmao__intervention_action 
                         WHERE planning_id =p.id
                     )
                     ORDER BY p.planned_date ASC");
 
-            $stmt->execute([$currentDate]);
+            $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error getting active plannings: " . $e->getMessage());

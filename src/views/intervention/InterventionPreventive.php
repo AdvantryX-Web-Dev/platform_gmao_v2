@@ -33,6 +33,7 @@ $chaines = Implantation_Prod_model::findAllChaines();
     <script src="/platform_gmao/public/js/chart.js"></script>
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/InterventionChefMain.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .date-filter-section {
             background-color: #f8f9fa;
@@ -204,8 +205,9 @@ $chaines = Implantation_Prod_model::findAllChaines();
                                             $id_machine = $machine['id'];
 
 
+                                            $machineReference = isset($machine['reference']) ? $machine['reference'] : '__';
                                             echo '<tr class="machine-row" >
-                                            <td  machine-id="' . $machine['machine_id'] . '" style="color: #0056b3; cursor: pointer;"> ' . $machine['machine_id'] . '</td>
+                                            <td  machine-id="' . $machine['machine_id'] .'-'. $machineReference. '" style="color: #0056b3; cursor: pointer;"> ' . $machine['machine_id'] . '</td>
                                             <td>' . $machine['designation'] . '</td>
                                             <td>' . $machine['smartbox'] . '</td>
                                             <td><a href="?route=historique_intervs_mach&type=preventive&machine=' . $machine['machine_id'] . '&id_machine=' . $id_machine . '">' . $machine['nb_interventions'] . '</a></td>
@@ -241,6 +243,7 @@ $chaines = Implantation_Prod_model::findAllChaines();
         <script src="/platform_gmao/public/js/bootstrap.bundle.min.js"></script>
         <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
         <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             $(document).ready(function() {
                 $('#dataTable').DataTable({
@@ -267,6 +270,40 @@ $chaines = Implantation_Prod_model::findAllChaines();
                 });
 
 
+            });
+        </script>
+        <script>
+            $(document).ready(function () {
+                function initMachineSelect($parentModal, selector) {
+                    var $sel = $parentModal.find(selector);
+                    if ($.fn.select2 && $sel.length) {
+                        $sel.select2({
+                            placeholder: '-- Sélectionner une machine --',
+                            width: '100%',
+                            language: 'fr',
+                            allowClear: true,
+                            minimumInputLength: 0,
+                            dropdownParent: $parentModal,
+                            matcher: function (params, data) {
+                                if ($.trim(params.term) === '') { return data; }
+                                if (!data.element) { return null; }
+                                var ref = data.element.getAttribute('data-reference') || '';
+                                var term = params.term.toString().toLowerCase();
+                                if (ref.toString().toLowerCase().indexOf(term) > -1) { return data; }
+                                return null;
+                            }
+                        });
+                    }
+                }
+
+                var $planningModal = $('#planningModal');
+                var $preventiveModal = $('#ajoutInterventionPreventiveModal');
+                initMachineSelect($planningModal, '#machine_id');
+                initMachineSelect($preventiveModal, '#machine_id');
+
+                // Re-initialize on modal show in case of dynamic content
+                $planningModal.on('shown.bs.modal', function () { initMachineSelect($planningModal, '#machine_id'); });
+                $preventiveModal.on('shown.bs.modal', function () { initMachineSelect($preventiveModal, '#machine_id'); });
             });
         </script>
     </div>

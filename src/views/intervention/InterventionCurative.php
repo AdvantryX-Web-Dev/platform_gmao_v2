@@ -45,6 +45,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
     <script src="/platform_gmao/public/js/chart.js"></script>
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/InterventionChefMain.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 </head>
 
@@ -164,9 +165,10 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                                             $lastDate = $machine['last_date'];
                                             $id_machine = $machine['id'];
 
+                                            $machineReference = isset($machine['reference']) ? $machine['reference'] : '__';
                                             echo
                                             '<tr class="machine-row" >
-                                                <td  machine-id="' . $machine['machine_id'] . '" style="color: #0056b3; cursor: pointer;"> ' . $machine['machine_id'] . '</td>
+                                                <td  machine-id="' . $machine['machine_id'] . '-' . $machineReference . '" style="color: #0056b3; cursor: pointer;"> ' . $machine['machine_id'] . '</td>
                                                 <td>' . $machine['designation'] . '</td>
                                                 <td>' . $machine['smartbox'] . '</td>
                                                 <td><a href="?route=historique_intervs_mach&type=curative&machine=' . $machine['machine_id'] . '&id_machine=' . $id_machine . '">' . $machine['nb_interventions'] . '</a></td>
@@ -205,6 +207,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
         <script src="/platform_gmao/public/js/bootstrap.bundle.min.js"></script>
         <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
         <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             $(document).ready(function() {
                 $('#dataTable').DataTable({
@@ -212,6 +215,27 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                         url: '//cdn.datatables.net/plug-ins/1.11.6/i18n/fr_fr.json'
                     }
                 });
+
+                // Initialiser Select2 pour la sélection de machine dans le modal
+                var $machine = $('#ajouterDemandeInterventionModal #machine');
+                if ($.fn.select2 && $machine.length) {
+                    $machine.select2({
+                        placeholder: '-- Sélectionner une machine --',
+                        width: '100%',
+                        language: 'fr',
+                        allowClear: true,
+                        minimumInputLength: 1,
+                        dropdownParent: $('#ajouterDemandeInterventionModal'),
+                        matcher: function (params, data) {
+                            if ($.trim(params.term) === '') { return data; }
+                            if (!data.element) { return null; }
+                            var ref = data.element.getAttribute('data-reference') || '';
+                            var term = params.term.toString().toLowerCase();
+                            if (ref.toString().toLowerCase().indexOf(term) > -1) { return data; }
+                            return null;
+                        }
+                    });
+                }
             });
             // Soumission automatique du filtre dès qu'une date change
             $('#date_debut, #date_fin').on('change', function() {

@@ -62,6 +62,7 @@ class Intervention_model
                 m.id as idmachine,
                 m.machine_id,
                 m.designation,
+                m.reference,
                 (
                     SELECT smartbox 
                     FROM prod__implantation imp 
@@ -136,6 +137,7 @@ class Intervention_model
                 m.machine_id,
                 m.id as idmachine,
                 m.designation,
+                m.reference,
                 (
                     SELECT smartbox 
                     FROM prod__implantation imp 

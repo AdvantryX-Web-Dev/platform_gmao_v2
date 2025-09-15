@@ -61,8 +61,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             <?php if ($isAdmin): ?>
                                                 <th style="width: 8%;">Actions</th>
                                             <?php endif; ?>
-                                            <th>Nom</th>
                                             <th>Emplacement</th>
+                                            <th>Type</th>
                                            <!-- <th>Type</th> -->
 
                                         </tr>

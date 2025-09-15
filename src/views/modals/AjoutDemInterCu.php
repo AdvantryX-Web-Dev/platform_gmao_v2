@@ -24,8 +24,8 @@
                              <option value="">-- Sélectionner une machine --</option>
                              <?php
                                 foreach ($all_machines as $machine) {
-                                    echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
-                                        htmlspecialchars($machine['machine_id']) .  '</option>';
+                                    echo '<option value="' . htmlspecialchars($machine['id']) . '" data-reference="' . htmlspecialchars($machine['reference']) . '">' .
+                                        htmlspecialchars($machine['reference'] . ' - ' . $machine['machine_id']) .  '</option>';
                                 }
                                 ?>
                          </select>

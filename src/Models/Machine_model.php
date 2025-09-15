@@ -53,9 +53,9 @@ class Machine_model
 
         try {
             $req = $conn->query("
-                SELECT DISTINCT m.machine_id ,m.id
+                SELECT DISTINCT m.machine_id ,m.id, m.reference
                 FROM init__machine m
-                order by m.machine_id desc
+                order by m.reference desc
             ");
             $machines = $req->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

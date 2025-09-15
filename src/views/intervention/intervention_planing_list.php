@@ -15,6 +15,8 @@ if (session_status() === PHP_SESSION_NONE) {
     <link rel="stylesheet" href="/platform_gmao/public/css/sb-admin-2.min.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/datatables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
         .today-row {
             background-color: #fff7e0 !important;
@@ -130,7 +132,11 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     $today->setTime(0, 0, 0);
 
                                                     // Determine status and status class
-                                                    if ($planned_date < $today) {
+                                                    $intervention_date_raw = $planning['intervention_date'] ?? null;
+                                                    if (!empty($intervention_date_raw)) {
+                                                        $status = 'Validé';
+                                                        $statusClass = 'success';
+                                                    } elseif ($planned_date < $today) {
                                                         $status = 'En retard';
                                                         $statusClass = 'danger';
                                                     } elseif ($planned_date->format('Y-m-d') === $today->format('Y-m-d')) {
@@ -142,7 +148,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     }
 
                                                     ?>
-                                                    <tr class="<?= $planned_date->format('Y-m-d') === $today->format('Y-m-d') ? 'today-row' : '' ?>">
+                                                    <tr class="<?= (empty($intervention_date_raw) && $planned_date->format('Y-m-d') === $today->format('Y-m-d')) ? 'today-row' : '' ?>">
                                                         <td><?= htmlspecialchars($planning['machine_id']) ?></td>
                                                         <td><?= htmlspecialchars($planning['intervention_type'] ?? 'Non défini') ?></td>
                                                         <td>
@@ -189,6 +195,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
             <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
             <script src="/platform_gmao/public/js/sideBare.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
             <script>
                 $(document).ready(function() {
@@ -219,6 +226,40 @@ if (session_status() === PHP_SESSION_NONE) {
                     }, 4000);
                 });
             </script>
+             <script>
+            $(document).ready(function () {
+                function initMachineSelect($parentModal, selector) {
+                    var $sel = $parentModal.find(selector);
+                    if ($.fn.select2 && $sel.length) {
+                        $sel.select2({
+                            placeholder: '-- Sélectionner une machine --',
+                            width: '100%',
+                            language: 'fr',
+                            allowClear: true,
+                            minimumInputLength: 0,
+                            dropdownParent: $parentModal,
+                            matcher: function (params, data) {
+                                if ($.trim(params.term) === '') { return data; }
+                                if (!data.element) { return null; }
+                                var ref = data.element.getAttribute('data-reference') || '';
+                                var term = params.term.toString().toLowerCase();
+                                if (ref.toString().toLowerCase().indexOf(term) > -1) { return data; }
+                                return null;
+                            }
+                        });
+                    }
+                }
+
+                var $planningModal = $('#planningModal');
+                var $preventiveModal = $('#ajoutInterventionPreventiveModal');
+                initMachineSelect($planningModal, '#machine_id');
+                initMachineSelect($preventiveModal, '#machine_id');
+
+                // Re-initialize on modal show in case of dynamic content
+                $planningModal.on('shown.bs.modal', function () { initMachineSelect($planningModal, '#machine_id'); });
+                $preventiveModal.on('shown.bs.modal', function () { initMachineSelect($preventiveModal, '#machine_id'); });
+            });
+        </script>
         </div>
 </body>
 
