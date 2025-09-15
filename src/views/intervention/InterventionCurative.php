@@ -209,52 +209,36 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
         <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
-            $(document).ready(function() {
-                $('#dataTable').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.11.6/i18n/fr_fr.json'
+            $(document).ready(function () {
+                function initMachineSelect($parentModal, selector) {
+                    var $sel = $parentModal.find(selector);
+                    if ($.fn.select2 && $sel.length) {
+                        $sel.select2({
+                            placeholder: '-- Sélectionner une machine --',
+                            width: '100%',
+                            language: 'fr',
+                            allowClear: true,
+                            minimumInputLength: 0,
+                            dropdownParent: $parentModal,
+                            matcher: function (params, data) {
+                                if ($.trim(params.term) === '') { return data; }
+                                if (!data.element) { return null; }
+                                var ref = data.element.getAttribute('data-reference') || '';
+                                var term = params.term.toString().toLowerCase();
+                                if (ref.toString().toLowerCase().indexOf(term) > -1) { return data; }
+                                return null;
+                            }
+                        });
                     }
-                });
+                }
 
-                // Initialiser Select2 pour la sélection de machine dans le modal
-                var $machine = $('#ajouterDemandeInterventionModal #machine');
-                if ($.fn.select2 && $machine.length) {
-                    $machine.select2({
-                        placeholder: '-- Sélectionner une machine --',
-                        width: '100%',
-                        language: 'fr',
-                        allowClear: true,
-                        minimumInputLength: 1,
-                        dropdownParent: $('#ajouterDemandeInterventionModal'),
-                        matcher: function (params, data) {
-                            if ($.trim(params.term) === '') { return data; }
-                            if (!data.element) { return null; }
-                            var ref = data.element.getAttribute('data-reference') || '';
-                            var term = params.term.toString().toLowerCase();
-                            if (ref.toString().toLowerCase().indexOf(term) > -1) { return data; }
-                            return null;
-                        }
-                    });
-                }
-            });
-            // Soumission automatique du filtre dès qu'une date change
-            $('#date_debut, #date_fin').on('change', function() {
-                var dateDebut = $('#date_debut').val();
-                var dateFin = $('#date_fin').val();
-                // Validation simple
-                if (dateDebut && dateFin && dateDebut <= dateFin) {
-                    $('#date_fin').removeClass('is-invalid');
-                    $('#date_fin').next('.invalid-feedback').remove();
-                    $('#dateFilterForm')[0].submit();
-                } else if (dateDebut && dateFin && dateDebut > dateFin) {
-                    $('#date_fin').addClass('is-invalid');
-                    if (!$('#date_fin').next('.invalid-feedback').length) {
-                        $('#date_fin').after('<div class="invalid-feedback">La date de fin doit être postérieure à la date de début</div>');
-                    }
-                }
+                var $curativeModal = $('#ajouterDemandeInterventionModal');
+                initMachineSelect($curativeModal, '#machine');
+
+                // Re-initialize on modal show in case of dynamic content
+                $curativeModal.on('shown.bs.modal', function () { initMachineSelect($curativeModal, '#machine'); });
             });
         </script>
-
     </div>
 
 </body>
