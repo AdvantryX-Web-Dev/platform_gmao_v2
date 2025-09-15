@@ -87,7 +87,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                         <?php
                                         $status = Equipement_model::AllStatus();
                                         foreach ($status as $status) {
-                                            if ($status['status_name'] !== 'fonctionnelle' && $status['status_name'] !== 'non fonctionnelle') {
+                                            if ( $status['status_name'] !== 'non fonctionnelle') {
                                                 echo '<option value="' . $status['id'] . '" ' . (isset($machine['machines_status_id']) && $machine['machines_status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
                                             }
                                         }

@@ -64,7 +64,7 @@
                         </div>
                         <div class="text-right mt-2">
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-check"></i> Confirmer avec ce maintenancier
+                                <i class="fas fa-check"></i> Confirmer 
                             </button>
                         </div>
                     </div>
