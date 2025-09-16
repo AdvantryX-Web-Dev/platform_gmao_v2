@@ -149,8 +149,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                                     ?>
                                                     <tr class="<?= (empty($intervention_date_raw) && $planned_date->format('Y-m-d') === $today->format('Y-m-d')) ? 'today-row' : '' ?>">
-                                                        <td><?= htmlspecialchars($planning['machine_id']) ?></td>
-                                                        <td><?= htmlspecialchars($planning['intervention_type'] ?? 'Non défini') ?></td>
+                                                    <td><?= htmlspecialchars($planning['machine_id'] . ':' . $planning['reference'] ) ?></td>
+                                                    <td><?= htmlspecialchars($planning['intervention_type'] ?? 'Non défini') ?></td>
                                                         <td>
                                                             <span class="badge badge-<?= $statusClass ?>"><?= $status ?></span>
                                                         </td>

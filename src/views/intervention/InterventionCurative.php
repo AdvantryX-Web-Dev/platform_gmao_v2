@@ -165,10 +165,11 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                                             $lastDate = $machine['last_date'];
                                             $id_machine = $machine['id'];
 
-                                            $machineReference = isset($machine['reference']) ? $machine['reference'] : '__';
+                                            $machineReference = isset($machine['reference']) ? $machine['reference'] : 'sans reference';
+      
                                             echo
                                             '<tr class="machine-row" >
-                                                <td  machine-id="' . $machine['machine_id'] . '-' . $machineReference . '" style="color: #0056b3; cursor: pointer;"> ' . $machine['machine_id'] . '</td>
+                                                <td> ' . $machine['machine_id'] . ' : ' . $machineReference . '</td>
                                                 <td>' . $machine['designation'] . '</td>
                                                 <td>' . $machine['smartbox'] . '</td>
                                                 <td><a href="?route=historique_intervs_mach&type=curative&machine=' . $machine['machine_id'] . '&id_machine=' . $id_machine . '">' . $machine['nb_interventions'] . '</a></td>

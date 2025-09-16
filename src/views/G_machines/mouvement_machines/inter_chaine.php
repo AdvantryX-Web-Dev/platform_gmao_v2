@@ -410,7 +410,7 @@ if (!isset($mouvements)) {
                             success: function(data) {
                                 var options = '<option value="">--Sélectionnez une machine--</option>';
                                 $.each(data, function(index, machine) {
-                                    options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' </option>';
+                                    options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference +' </option>';
                                 });
                                 $('#machine').html(options);
                             },

@@ -46,7 +46,7 @@ class Machines_box_model
         $connDigitex = $dbDigitex->getConnection();
 
         $query = "
-        SELECT p.*, isb.position, m.designation
+        SELECT p.*, isb.position, m.designation, m.reference
         FROM prod__implantation p
         INNER JOIN (
             SELECT machine_id, MAX(id) AS max_id

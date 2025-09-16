@@ -82,7 +82,7 @@ use App\Controllers\Machine_boxController;
                                         foreach ($machs_box as $mach_box) {
 
                                             echo '<tr><td > ' . $mach_box['prod_line'] . '</td>
-                                            <td > ' . $mach_box['machine_id'] . '</td>
+                                            <td > ' . $mach_box['machine_id'] . ': ' . $mach_box['reference'] . '</td>
                                             <td > ' . $mach_box['designation'] . '</td> <td> ' . $mach_box['smartbox'] . '</td><td > ' . $mach_box['position'] . '</td><td> D: ' . $mach_box['cur_date'] . '<br> H: ' . $mach_box['cur_time'] .
                                                 '</td></tr>';
                                         }

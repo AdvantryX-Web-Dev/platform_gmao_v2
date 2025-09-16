@@ -114,6 +114,7 @@ class InterventionPlanningController
             $query = "
                 SELECT 
                     m.machine_id as machine_id,
+                    m.reference,
                     p.planned_date, 
                     ti.designation as intervention_type,
                     p.comments, 

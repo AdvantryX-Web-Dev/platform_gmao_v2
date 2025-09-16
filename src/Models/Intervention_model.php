@@ -93,6 +93,8 @@ class Intervention_model
             if (!isset($machinesData[$machine_id])) {
                 $machinesData[$machine_id] = [
                     'id' => $intervention['idmachine'],
+                    'reference' => $intervention['reference'],
+
                     'machine_id' => $machine_id,
                     'designation' => $intervention['designation'],
                     'smartbox' => $intervention['smartbox'],
@@ -137,7 +139,7 @@ class Intervention_model
                 m.machine_id,
                 m.id as idmachine,
                 m.designation,
-                m.reference,
+                m.reference as reference,
                 (
                     SELECT smartbox 
                     FROM prod__implantation imp 
@@ -169,6 +171,8 @@ class Intervention_model
                 $machinesData[$machine_id] = [
                     'id' => $intervention['idmachine'],
                     'machine_id' => $machine_id,
+                    'reference' => $intervention['reference'],
+
                     'designation' => $intervention['designation'],
                     'smartbox' => $intervention['smartbox'],
                     'nb_interventions' => 0,
@@ -198,32 +202,7 @@ class Intervention_model
         return $resultats;
     }
 
-    //historique des interventions par machine
-    public static function findByMachinev0($id_machine, $type)
-    {
-
-        $db = new Database();
-        $conn = $db->getConnection();
-        $req = $conn->query("SELECT a.*, t.type as intervention_type,
-                            m.machine_id as machine,
-                            p.prod_line as prodline,
-                            t.designation as intervention_type_designation,
-                            e.last_name as maintainer_last_name,
-                            e.first_name as maintainer_first_name,
-                            pl.planned_date as planning_date
-
-                            FROM `gmao__intervention_action` a
-                            LEFT JOIN `gmao__type_intervention` t ON a.intervention_type_id = t.id
-                            LEFT JOIN `init__machine` m ON a.machine_id = m.id
-                            LEFT JOIN `init__prod_line` p ON a.production_line_id = p.id
-                            LEFT JOIN `init__employee` e ON a.maintenance_id
-
-                            LEFT JOIN `gmao__planning` pl ON a.planning_id = pl.id
-                            WHERE a.machine_id = '" . $id_machine . "' and t.type = '" . $type . "'
-                            ORDER BY a.created_at DESC");
-        $inters = $req->fetchAll();
-        return $inters;
-    }
+   
     public static function findByMachine($id_machine, $type)
     {
 
