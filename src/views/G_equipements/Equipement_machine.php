@@ -87,7 +87,6 @@ use App\Controllers\Machine_boxController;
                                         <tr>
                                             <th>Equipement</th>
                                             <th>Machine</th>
-                                            <th>Référence </th>
                                             <th>Responsable </th>
                                             <th>Date </th>
                                         </tr>
@@ -100,9 +99,8 @@ use App\Controllers\Machine_boxController;
                                         foreach ($machs_equip as $mach_equip) {
 
                                             echo '<tr>
-                                            <td > ' . $mach_equip['accessory_ref']  . '</td>
-                                            <td > ' . $mach_equip['machine_id'] . '</td>
-                                            <td > ' . $mach_equip['reference'] . '</td>
+                                            <td > ' . $mach_equip['equipment_id']  . ' : ' . $mach_equip['reference'] . '</td>
+                                            <td > ' . $mach_equip['machine_id'] . '  :  ' . $mach_equip['machine_reference'] . '</td>
                                             <td > ' . $mach_equip['Responsable'] . '</td>
                                             <td > ' . $mach_equip['allocation_date'] . '<br> H: ' . $mach_equip['allocation_time'] . '</td>
 

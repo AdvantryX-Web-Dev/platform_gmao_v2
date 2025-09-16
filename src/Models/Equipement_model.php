@@ -278,7 +278,7 @@ class Equipement_model
 
 
         $equipements = $req->fetchAll();
-     
+
         return $equipements;
     }
     public static function affectationEquipementsMachines()
@@ -290,6 +290,8 @@ class Equipement_model
                ie.equipment_id AS equipment_id,
                ie.reference AS reference,
                im.machine_id AS machine_id,
+               im.reference AS machine_reference,
+
                il.location_name AS location_name,
                concat(em.first_name, ' ', em.last_name) as Responsable
                
@@ -330,7 +332,7 @@ class Equipement_model
         return $location_id;
     }
 
-    
+
     public static function getEquipements($location)
     {
         $db = new Database();
@@ -374,5 +376,28 @@ class Equipement_model
 
         $machine_equipement = $stmt->fetchAll();
         return $machine_equipement;
+    }
+
+    /**
+     * Récupère un équipement par son equipment_id avec détails de statut et localisation
+     */
+    public static function findByEquipmentIdWithDetails($equipmentId)
+    {
+        if ($equipmentId === null || $equipmentId === '') {
+            return null;
+        }
+        $db = new Database();
+        $conn = $db->getConnection();
+        try {
+            $stmt = $conn->prepare("SELECT e.*, il.location_name, ec.status_name, il.location_category FROM gmao__init_equipment e 
+            LEFT JOIN gmao__location il ON e.location_id = il.id 
+            LEFT JOIN gmao__status ec ON e.status_id = ec.id 
+            WHERE e.equipment_id = ? LIMIT 1");
+            $stmt->bindParam(1, $equipmentId);
+            $stmt->execute();
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            return null;
+        }
     }
 }

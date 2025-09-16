@@ -98,9 +98,11 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                             </div>
                         </div>
                         <div class="card-body">
+
                             <?php if (!empty($_SESSION['flash_success'])): ?>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <?php echo htmlspecialchars($_SESSION['flash_success']); unset($_SESSION['flash_success']); ?>
+                                    <?php echo htmlspecialchars($_SESSION['flash_success']);
+                                    unset($_SESSION['flash_success']); ?>
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -108,7 +110,8 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                             <?php endif; ?>
                             <?php if (!empty($_SESSION['flash_error'])): ?>
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <?php echo htmlspecialchars($_SESSION['flash_error']); unset($_SESSION['flash_error']); ?>
+                                    <?php echo htmlspecialchars($_SESSION['flash_error']);
+                                    unset($_SESSION['flash_error']); ?>
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -202,7 +205,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
     <script src="/platform_gmao/public/js/sideBare.js"></script>
 
     <script>
-        (function () {
+        (function() {
             const equipmentInput = document.getElementById('equipment_id');
             const machineInput = document.getElementById('machine_id');
             const submitBtn = document.getElementById('submitBtn');
@@ -244,7 +247,10 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                     const img = new Image();
                     const url = URL.createObjectURL(file);
                     img.onload = () => {
-                        let { width, height } = img;
+                        let {
+                            width,
+                            height
+                        } = img;
                         const ratio = Math.min(maxW / width, maxH / height, 1);
                         width = Math.round(width * ratio);
                         height = Math.round(height * ratio);
@@ -255,7 +261,9 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                         ctx.drawImage(img, 0, 0, width, height);
                         canvas.toBlob((blob) => {
                             if (!blob) return reject(new Error('Compression échouée'));
-                            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+                            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                                type: 'image/jpeg'
+                            }));
                         }, 'image/jpeg', quality);
                     };
                     img.onerror = () => reject(new Error('Lecture image échouée'));
@@ -290,7 +298,9 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                 const file = e.target.files && e.target.files[0];
                 if (!file) return;
                 let payload = file;
-                try { payload = await compressImage(file); } catch (e) { }
+                try {
+                    payload = await compressImage(file);
+                } catch (e) {}
                 const result = await uploadAndDecode(payload, 'equipment');
                 if (result && result.text) {
                     equipmentInput.value = result.text;
@@ -302,7 +312,9 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                 const file = e.target.files && e.target.files[0];
                 if (!file) return;
                 let payload = file;
-                try { payload = await compressImage(file); } catch (e) { }
+                try {
+                    payload = await compressImage(file);
+                } catch (e) {}
                 const result = await uploadAndDecode(payload, 'machine');
                 if (result && result.text) {
                     machineInput.value = result.text;

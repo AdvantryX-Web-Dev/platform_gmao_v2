@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Accessory_model;
 use App\Models\AuditTrail_model;
+use App\Models\Equipement_model;
 
 class AccessoryController
 {
@@ -24,20 +25,39 @@ class AccessoryController
             $machine_id = $_POST['machine_id'] ?? '';
             $maintainer = $_POST['maintainer'] ?? '';
             $mvt_state = $_POST['mvt_state'] ?? 'SS';
-            $allocation_time = $_POST['allocation_time'] ?? null;
+            $allocation_time = $_POST['allocation_time'] ?? date('H:i:s');
             $allocation_date = $_POST['allocation_date'] ?? date('Y-m-d');
 
             // Vérifier que les données obligatoires sont présentes
             if (empty($equipment_id) || empty($machine_id) || empty($maintainer) || empty($allocation_date)) {
-                $_SESSION['equipement_error'] = 'Veuillez remplir tous les champs obligatoires.';
+                $_SESSION['flash_error'] = 'Veuillez remplir tous les champs obligatoires.';
                 header('Location: /platform_gmao/public/index.php?route=equipement_machine/affectation_equipmentMachine');
+                exit;
+            }
+
+            // Vérifier que l'équipement existe dans la liste des équipements
+            if (!Equipement_model::existsByEquipmentId($equipment_id)) {
+                $_SESSION['flash_error'] = "Cet équipement n'existe pas. Veuillez l'enregistrer avant l'affectation.";
+                header('Location: /platform_gmao/public/index.php?route=equipement_machine/affectation_scan');
+                exit;
+            }
+
+            // Charger les détails de l'équipement pour contrôle statut et localisation
+            $equipement = Equipement_model::findByEquipmentIdWithDetails($equipment_id);
+            $locationName = strtolower(trim($equipement['location_category'] ?? ''));
+            $statusName = strtolower(trim($equipement['status_name'] ?? ''));
+
+            // Bloquer si en production (emplacement = magasin) ou statut non fonctionnel
+            if ($locationName === 'magasin' || $statusName === 'non fonctionnelle') {
+                $_SESSION['flash_error'] = "Affectation bloquée: l'équipement est en magasin ou son statut est non fonctionnel.";
+                header('Location: /platform_gmao/public/index.php?route=equipement_machine/affectation_scan');
                 exit;
             }
 
             // Vérifier si l'équipement est déjà affecté à une machine
             if (Accessory_model::isAlreadyAllocated($equipment_id)) {
-                $_SESSION['equipement_error'] = 'Cet équipement est déjà affecté à une machine.';
-                header('Location: /platform_gmao/public/index.php?route=equipement_machine/affectation_equipmentMachine');
+                $_SESSION['flash_error'] = 'Cet équipement est déjà affecté à une machine.';
+                header('Location: /platform_gmao/public/index.php?route=equipement_machine/affectation_scan');
                 exit;
             }
 
@@ -69,7 +89,7 @@ class AccessoryController
 
                 $_SESSION['equipement_success'] = 'Équipement affecté avec succès !';
             } else {
-                $_SESSION['equipement_error'] = 'Une erreur est survenue lors de l\'affectation.';
+                $_SESSION['flash_error'] = 'Une erreur est survenue lors de l\'affectation.';
             }
 
             // Rediriger vers le formulaire d'affectation
