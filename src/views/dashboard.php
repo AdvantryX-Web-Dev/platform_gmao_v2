@@ -574,7 +574,7 @@ $urgentInterventions = $stmtUrgentInterv->fetchAll(\PDO::FETCH_ASSOC);;
                         <div class="col-xl-3 col-lg-3">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary"> Statutdes équipements</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary"> Statut des équipements</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="chart-pie pt-4 pb-2">
