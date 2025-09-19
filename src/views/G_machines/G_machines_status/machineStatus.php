@@ -208,14 +208,14 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     <td><?= isset($machine['type']) ? htmlspecialchars($machine['type']) : 'Non défini' ?></td>
                                                     <td>
                                                         <?php
-                                                        if (empty($machine['location'])) {
+                                                        if (empty($machine['location_category'])) {
                                                             echo '<span class="badge badge-secondary">Non défini</span>';
-                                                        } elseif ($machine['location'] == 'parc') {
+                                                        } elseif ($machine['location_category'] == 'parc') {
                                                             echo '<span class="badge badge-primary">Parc</span>';
-                                                        } elseif ($machine['location'] == 'prodline') {
+                                                        } elseif ($machine['location_category'] == 'prodline') {
                                                             echo '<span class="badge badge-success">En production</span>';
                                                         } else {
-                                                            echo htmlspecialchars($machine['location']);
+                                                            echo htmlspecialchars($machine['location_category']);
                                                         }
                                                         ?>
                                                     </td>

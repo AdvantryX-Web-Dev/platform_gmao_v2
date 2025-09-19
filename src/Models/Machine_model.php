@@ -284,7 +284,14 @@ class Machine_model
                     init__machine m
                     LEFT JOIN gmao__status ms ON ms.id = m.machines_status_id 
                     LEFT JOIN gmao__location ml ON ml.id = m.machines_location_id 
-                    LEFT JOIN prod__presence pp ON pp.machine_id = m.machine_id AND pp.cur_date = :today
+                    LEFT JOIN (
+                        SELECT machine_id, MAX(id) AS max_id
+                        FROM prod__presence
+                        WHERE cur_date = :today
+                        GROUP BY machine_id
+                    ) lpp ON lpp.machine_id = m.machine_id
+                    LEFT JOIN prod__presence pp 
+                        ON pp.id = lpp.max_id
                 ORDER BY 
                     m.updated_at DESC
             ";
@@ -308,7 +315,7 @@ class Machine_model
             // Parcourir les machines et ajuster leur état selon l'emplacement et l'activité
             foreach ($machines as &$machine) {
                 $machineId = $machine['machine_id'];
-                $location = $machine['location'];
+                $location = $machine['location_category'];
                 $currentStatus = $machine['etat_machine'];
                 $newStatusId = null;
 

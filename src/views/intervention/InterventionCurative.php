@@ -99,7 +99,7 @@ $nomCh = $findChaineById ? $findChaineById[0]['prod_line'] : $selectedChaine;
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 font-weight-bold text-primary">Liste des interventions curatives sur les Machines
+                                <h6 class="m-0 font-weight-bold text-primary">Liste des interventions curatives
                                 </h6>
 
                                 <div class="d-flex">

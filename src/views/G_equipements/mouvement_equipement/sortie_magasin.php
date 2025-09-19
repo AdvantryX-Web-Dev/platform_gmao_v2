@@ -43,7 +43,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Mouvement des équipements – Sortie du magasin :</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Mouvement équipements : Sortie magasin</h6>
                             <div class="d-flex">
                                 <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#mouvementModal">
                                     <i class="fas fa-plus"></i> mouvement

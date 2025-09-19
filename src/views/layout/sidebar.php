@@ -57,9 +57,9 @@
             <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machinesbox">Machine-Box</a>
                 <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvMachine" aria-expanded="false" aria-controls="collapseMouvMachine">Mouvement machine </a>
                 <div id="collapseMouvMachine" class="collapse ml-3" aria-labelledby="headingMouvMachine" data-parent="#collapseGestionMachine">
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/chaine_parc">Entrer en Parc</a>
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine">Sortie de Parc</a>
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/inter_chaine">Inter Chaine</a>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/chaine_parc">Entrée parc</a>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine">Sortie Parc</a>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/inter_chaine">Inter - Chaine</a>
 
 
                 </div>
@@ -81,8 +81,8 @@
             <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement_machine">Equipement-Machine</a>
                 <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvEquipement" aria-expanded="false" aria-controls="collapseMouvEquipement">Mouvement équipement </a>
                 <div id="collapseMouvEquipement" class="collapse ml-3" aria-labelledby="headingMouvEquipement" data-parent="#collapseGestionEquipement">
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/entre_magasin">Entrer en Magasin</a>
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/sortie_magasin">Sortie de Magasin</a>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/entre_magasin">Entrée magasin</a>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/sortie_magasin">Sortie magasin</a>
 
 
                 </div>

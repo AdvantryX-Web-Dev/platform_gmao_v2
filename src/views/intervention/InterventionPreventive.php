@@ -131,7 +131,7 @@ $chaines = Implantation_Prod_model::findAllChaines();
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 font-weight-bold text-primary"> Liste des interventions préventives sur les Machines de chaine
+                                <h6 class="m-0 font-weight-bold text-primary"> Liste des interventions préventives
                                     :
                                 </h6>
                                 <div class="d-flex align-items-center">
