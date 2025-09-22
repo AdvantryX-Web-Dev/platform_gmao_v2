@@ -28,6 +28,7 @@ use App\Controllers\AccessoryController;
 use App\Controllers\Mouvement_equipmentController;
 use App\Controllers\LocationController;
 use App\Controllers\ScanController;
+use App\Controllers\InventaireController;
 
 // Créer les instances des contrôleurs
 $authController = new AuthController();
@@ -47,6 +48,7 @@ $AccessoryController = new AccessoryController();
 $Mouvement_equipmentController = new Mouvement_equipmentController();
 $locationController = new LocationController();
 $scanController = new ScanController();
+$inventaireController = new InventaireController();
 
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
@@ -89,7 +91,19 @@ switch ($route) {
         }
         break;
 
+    /** Inventaire des machines */
+   
+    case 'importInventaire':
+        $inventaireController->importInventaire();
+        break;
+        case 'listInventaire':
+            $inventaireController->listInventaire();
+            break;
+        case 'maintenancier_machine':
+            $inventaireController->maintenancier_machine();
+            break;
     /** Gestion initiale des machines */
+
     case 'machines':
         $machineController->list();
         break;

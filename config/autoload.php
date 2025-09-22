@@ -7,6 +7,12 @@ if (session_status() === PHP_SESSION_NONE) {
 // Load helpers
 require_once __DIR__ . '/helpers.php';
 
+// Load Composer autoload if available (for external libs like PhpSpreadsheet)
+$composerAutoload = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require_once $composerAutoload;
+}
+
 /**
  * Fonction d'autoload pour charger automatiquement les classes
  */

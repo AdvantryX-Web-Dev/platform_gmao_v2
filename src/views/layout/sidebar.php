@@ -1,4 +1,10 @@
+
+<?php
+// Vérifie si l'utilisateur est un administrateur
+$isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+?>
 <!-- Sidebar -->
+
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" style="width: 260px !important; ">
 
     <!-- Sidebar - Brand -->
@@ -20,6 +26,24 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider">
+    <!-- 0. Inventaire -->
+    <?php if ($isAdmin): ?>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMaintenance" aria-expanded="true" aria-controls="collapseMaintenance"
+                style="width: 260px !important;">
+                <i class="fas fa-fw fa-wrench"></i>
+                <span>Inventaire</span>
+            </a>
+            <div id="collapseMaintenance" class="collapse" aria-labelledby="headingMaintenance" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=importInventaire">Import</a>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=maintenancier_machine">Maintenancier - machine</a>
+
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=listInventaire">Liste</a>
+                </div>
+            </div>
+        </li>
+    <?php endif; ?>
 
     <!-- 1. Données de base -->
     <li class="nav-item">
@@ -47,14 +71,14 @@
     <!-- 2. Gestion de machine -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionMachine" aria-expanded="true" aria-controls="collapseGestionMachine"
-        style="width: 260px !important;">
+            style="width: 260px !important;">
             <i class="fas fa-fw fa-cogs"></i>
             <span>Gestion des machines</span>
         </a>
         <div id="collapseGestionMachine" class="collapse" aria-labelledby="headingGestionMachine" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-            <a class="collapse-item" href="../../platform_gmao/public/index.php?route=Gestion_machines/status">Etat des machines</a>
-            <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machinesbox">Machine-Box</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=Gestion_machines/status">Etat des machines</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machinesbox">Machine-Box</a>
                 <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvMachine" aria-expanded="false" aria-controls="collapseMouvMachine">Mouvement machine </a>
                 <div id="collapseMouvMachine" class="collapse ml-3" aria-labelledby="headingMouvMachine" data-parent="#collapseGestionMachine">
                     <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/chaine_parc">Entrée parc</a>
@@ -68,17 +92,17 @@
     </li>
 
     <!-- 3. Gestion d'équipement -->
-  
+
     <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionEquipement" aria-expanded="true" aria-controls="collapseGestionEquipement"
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionEquipement" aria-expanded="true" aria-controls="collapseGestionEquipement"
             style="width: 260px !important;">
             <i class="fas fa-fw fa-tools"></i>
             <span>Gestion des équipements</span>
         </a>
         <div id="collapseGestionEquipement" class="collapse" aria-labelledby="headingGestionEquipement" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">  
-            <a class="collapse-item" href="../../platform_gmao/public/index.php?route=Gestion_equipements/status">Etat des équipements</a>
-            <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement_machine">Equipement-Machine</a>
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=Gestion_equipements/status">Etat des équipements</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement_machine">Equipement-Machine</a>
                 <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvEquipement" aria-expanded="false" aria-controls="collapseMouvEquipement">Mouvement équipement </a>
                 <div id="collapseMouvEquipement" class="collapse ml-3" aria-labelledby="headingMouvEquipement" data-parent="#collapseGestionEquipement">
                     <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/entre_magasin">Entrée magasin</a>
@@ -93,7 +117,7 @@
     <!-- 4. Maintenance intervention -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMaintenance" aria-expanded="true" aria-controls="collapseMaintenance"
-        style="width: 260px !important;">
+            style="width: 260px !important;">
             <i class="fas fa-fw fa-wrench"></i>
             <span>Interventions de maintenance</span>
         </a>
