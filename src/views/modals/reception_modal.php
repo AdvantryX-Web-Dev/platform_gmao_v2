@@ -22,20 +22,28 @@
 
                     <div class="form-group">
                         <label for="recepteur"> Sélectionner un maintenancier :</label>
-                        <select class="form-control" id="recepteur" name="recepteur">
-                            <option value="">--Sélectionner un maintenancier--</option>
-                            <?php
-                            $controller = new \App\Controllers\Mouvement_machinesController();
-                            $maintainers = $controller->getMaintainers();
-                            if (!empty($maintainers)) {
-                                foreach ($maintainers as $maintainer) {
-                                    echo "<option value=\"{$maintainer['id']}\">{$maintainer['first_name']} {$maintainer['last_name']}</option>";
+                        <?php if ($isAdmin): ?>
+                            <select class="form-control" id="recepteur" name="recepteur">
+                                <option value="">--Sélectionner un maintenancier--</option>
+                                <?php
+                                $controller = new \App\Controllers\Mouvement_machinesController();
+                                $maintainers = $controller->getMaintainers();
+                                if (!empty($maintainers)) {
+                                    foreach ($maintainers as $maintainer) {
+                                        echo "<option value=\"{$maintainer['id']}\">{$maintainer['first_name']} {$maintainer['last_name']}</option>";
+                                    }
+                                } else {
+                                    echo "<option value=\"\" disabled>Aucun maintenancier trouvé</option>";
                                 }
-                            } else {
-                                echo "<option value=\"\" disabled>Aucun maintenancier trouvé</option>";
-                            }
-                            ?>
-                        </select>
+                                ?>
+                            </select>
+                        <?php else: ?>
+                            <input type="hidden" name="recepteur" value="<?= htmlspecialchars($connectedMaintainerId) ?>">
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMaintainerName) ?>" readonly>
+
+                        <?php endif; ?>
+
+
                         <div class="form-group">
                             <label for="etat_machine">Etat de la Machine :</label>
                             <select class="form-control" id="etat_machine" name="etat_machine" required>
@@ -44,12 +52,12 @@
                                 $etat_machine = $controller->getMachineStatus();
                                 foreach ($etat_machine as $etat) {
                                     if ($type_mouvement === 'parc_chaine' || $type_mouvement === 'inter_chaine') {
-                                        if ($etat['status_name'] == 'active' || $etat['status_name'] == 'inactive' || $etat['status_name'] == 'en panne') {
+                                        if ($etat['status_name'] == 'active' || $etat['status_name'] == 'inactive') {
 
                                             echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
                                         }
                                     } else {
-                                        if ($etat['status_name'] == 'fonctionnelle' || $etat['status_name'] == 'ferraille' || $etat['status_name'] == 'non fonctionnelle') {
+                                        if ($etat['status_name'] == 'inactive' || $etat['status_name'] == 'ferraille' ||  $etat['status_name'] == 'en panne' || $etat['status_name'] == 'active') {
 
                                             echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
                                         }
@@ -64,7 +72,7 @@
                         </div>
                         <div class="text-right mt-2">
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-check"></i> Confirmer 
+                                <i class="fas fa-check"></i> Confirmer
                             </button>
                         </div>
                     </div>

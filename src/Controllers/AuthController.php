@@ -45,14 +45,14 @@ class AuthController
 
         // Vérifier si le formulaire a été soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = $_POST['email'] ?? '';
+            $matricule = $_POST['matricule'] ?? '';
             $password = $_POST['password'] ?? '';
 
             // Validation des champs
             $errors = [];
 
-            if (empty($email)) {
-                $errors[] = "L'adresse e-mail est requise.";
+            if (empty($matricule)) {
+                $errors[] = "Le matricule est requis.";
             }
 
             if (empty($password)) {
@@ -61,8 +61,8 @@ class AuthController
 
             // S'il n'y a pas d'erreurs, tenter la connexion
             if (empty($errors)) {
-                // Rechercher l'utilisateur par email dans la table gmao_compte
-                $user = $this->authModel->findByEmailInCompte($email);
+                // Rechercher l'utilisateur par matricule dans la table gmao__compte
+                $user = $this->authModel->findByMatriculeInCompte($matricule);
 
                 if ($user) {
 
@@ -73,20 +73,19 @@ class AuthController
 
 
                         if ($employe) {
-
                             // Connexion réussie
                             $_SESSION['is_logged_in'] = true;
                             $_SESSION['user'] = [
+                                'id' => $employe['id'] ?? null,
                                 'matricule' => $user['matricule'],
-                                'email' => $user['email'],
-                                'firstname' => $employe['prenom'] ?? '',
-                                'lastname' => $employe['nom'] ?? '',
+                                'email' => $user['email'] ?? null,
+                                'firstname' => $employe['first_name'] ?? '',
+                                'lastname' => $employe['last_name'] ?? '',
                                 'role' => $employe['qualification'] ?? 'user'
                             ];
-
-                            $_SESSION['email'] = $user['email'];
                             $_SESSION['qualification'] = $employe['qualification'] ?? 'user';
-
+                          
+                          
                             // Rediriger selon le rôle de l'utilisateur
                             switch (strtolower($employe['qualification'])) {
                                 case 'maintenancier ||chefmaintenancier ||magasinier ||responsableparcmachine ||responsableservachat':
@@ -107,11 +106,11 @@ class AuthController
                         }
                     } else {
                         // Mot de passe incorrect
-                        $errors[] = "Adresse e-mail ou mot de passe incorrect.";
+                        $errors[] = "Matricule ou mot de passe incorrect.";
                     }
                 } else {
                     // Utilisateur non trouvé
-                    $errors[] = "Adresse e-mail ou mot de passe incorrect.";
+                    $errors[] = "Matricule ou mot de passe incorrect.";
                 }
             }
 
@@ -119,7 +118,7 @@ class AuthController
             if (!empty($errors)) {
                 $_SESSION['login_errors'] = $errors;
                 $_SESSION['login_old_values'] = [
-                    'email' => $email
+                    'matricule' => $matricule
                 ];
 
                 header("Location: index.php?route=login");
@@ -145,7 +144,6 @@ class AuthController
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['Ajouter'])) {
             // Récupérer les données du formulaire
             $matricule = $_POST['matricule'] ?? '';
-            $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
             
             // Validation des champs
@@ -155,11 +153,7 @@ class AuthController
                 $errors[] = "Le matricule est requis.";
             }
             
-            if (empty($email)) {
-                $errors[] = "L'adresse e-mail est requise.";
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "L'adresse e-mail n'est pas valide.";
-            }
+            // Email n'est plus requis pour l'inscription si on s'authentifie par matricule
             
             if (empty($password)) {
                 $errors[] = "Le mot de passe est requis.";
@@ -169,10 +163,10 @@ class AuthController
             
             
             
-            // Vérifier si l'email existe déjà dans la table gmao_compte
-            $emailExists = $this->authModel->emailExistsInCompte($email);
-            if ($emailExists) {
-                $errors[] = "Cette adresse email est déjà utilisée.";
+            // Vérifier si le matricule est déjà utilisé dans gmao__compte
+            $compteExistsByMat = $this->authModel->matriculeExistsInCompte($matricule);
+            if ($compteExistsByMat) {
+                $errors[] = "Un compte existe déjà pour ce matricule.";
             }
             
             // S'il n'y a pas d'erreurs, vérifier si le matricule existe dans la table init_employe
@@ -185,10 +179,10 @@ class AuthController
                     $compteExists = $this->authModel->matriculeExistsInCompte($matricule);
                     
                     if (!$compteExists) {
-                        // Créer un nouveau compte dans la table gmao_compte
+                        // Créer un nouveau compte dans la table gmao__compte
                         $compteData = [
                             'matricule' => $matricule,
-                            'email' => $email,
+                            // email optionnel
                             'password' => password_hash($password, PASSWORD_DEFAULT)
                         ];
                         
@@ -199,13 +193,13 @@ class AuthController
                             $_SESSION['is_logged_in'] = true;
                             $_SESSION['user'] = [
                                 'matricule' => $matricule,
-                                'email' => $email,
+                                'email' => null,
                                 'firstname' => $employe['prenom'] ?? '',
                                 'lastname' => $employe['nom'] ?? '',
                                 'role' => $employe['role'] ?? 'user'
                             ];
-                            $this->logout();
-                            // Rediriger vers le tableau de bord
+
+                            $this->logout();                            // Rediriger vers la page de connexion
                             header("Location: index.php?route=login");
                             exit;
                         } else {
@@ -226,8 +220,7 @@ class AuthController
             if (!empty($errors)) {
                 $_SESSION['register_errors'] = $errors;
                 $_SESSION['register_old_values'] = [
-                    'matricule' => $matricule,
-                    'email' => $email
+                    'matricule' => $matricule
                 ];
                 
                 header("Location: index.php?route=register");

@@ -21,8 +21,43 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link rel="stylesheet" href="/platform_gmao/public/css/sb-admin-2.min.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
-    <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/datatables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* CSS personnalisé pour Select2 */
+        .select2-search__field {
+            width: 100% !important;
+            height: 32px !important;
+            padding: 6px 12px !important;
+            border: 1px solid #ccc !important;
+            border-radius: 4px !important;
+            font-size: 14px !important;
+            background-color: white !important;
+            color: #333 !important;
+            cursor: text !important;
+            pointer-events: auto !important;
+        }
+
+        .select2-search__field:focus {
+            border-color: #007bff !important;
+            outline: none !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #aaa !important;
+        }
+
+        .select2-search {
+            display: block !important;
+        }
+
+        .select2-search__field {
+            display: block !important;
+            visibility: visible !important;
+        }
+    </style>
+
 </head>
 
 <body id="page-top">
@@ -160,35 +195,49 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     ?>
                                 </select>
                             </div>
-                            <!-- <div class="form-group">
-                                <label for="machine">Machine :</label>
-                                <select class="form-control" id="machine" name="machine" required>
-                                    <option value="">--Sélectionnez une machine--</option>
-                                    <?php
-                                    $controller = new Mouvement_equipmentController();
-                                    $machines = $controller->getMachines();
-                                    foreach ($machines as $machine) {
-                                        echo "<option value=\"{$machine['id']}\">{$machine['machine_id']}-{$machine['reference']}</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div> -->
+
                             <div class="form-group">
                                 <label for="maintenancier">Maintenancier :</label>
-                                <select class="form-control" id="maintenancier" name="maintenancier" required>
-                                    <option value="">--Maintenancier--</option>
-                                    <?php
-                                    // Charger les maintenanciers ici
-                                    $maintenanciers = []; // Remplacer par les données réelles
-                                    if (isset($controller)) {
-                                        $maintenanciers = $controller->getMaintainers();
+                                <?php
+                                // Récupérer l'ID du maintenancier connecté
+                                $connectedMatricule = $_SESSION['user']['matricule'] ?? null;
+                                $connectedMaintainerId = null;
+                                $connectedMaintainerName = '';
+
+                                if ($connectedMatricule) {
+                                    $db = \App\Models\Database::getInstance('db_digitex');
+                                    $conn = $db->getConnection();
+                                    $stmt = $conn->prepare("SELECT id, first_name, last_name FROM init__employee WHERE matricule = ?");
+                                    $stmt->execute([$connectedMatricule]);
+                                    $maintainer = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                                    if ($maintainer) {
+                                        $connectedMaintainerId = $maintainer['id'];
+                                        $connectedMaintainerName = trim($maintainer['first_name'] . ' ' . $maintainer['last_name']);
                                     }
-                                    foreach ($maintenanciers as $maintenancier) {
-                                        echo "<option value=\"{$maintenancier['id']}\">{$maintenancier['first_name']} {$maintenancier['last_name']}</option>";
-                                    }
-                                    ?>
-                                </select>
+                                }
+                                ?>
+                                <?php if ($isAdmin): ?>
+                                    <select class="form-control" id="maintenancier" name="maintenancier" required>
+                                        <option value="">--Maintenancier--</option>
+                                        <?php
+                                        // Charger les maintenanciers ici
+                                        $maintenanciers = []; // Remplacer par les données réelles
+                                        if (isset($controller)) {
+                                            $maintenanciers = $controller->getMaintainers();
+                                        }
+                                        foreach ($maintenanciers as $maintenancier) {
+                                            echo "<option value=\"{$maintenancier['id']}\">{$maintenancier['first_name']} {$maintenancier['last_name']}</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                <?php else: ?>
+                                    <input type="hidden" name="maintenancier" value="<?= htmlspecialchars($connectedMaintainerId) ?>">
+                                    <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMaintainerName) ?>" readonly>
+
+                                <?php endif; ?>
                             </div>
+
 
                             <div class="form-group">
                                 <label for="raisonMouvement">Raison Mouvement Machine :</label>
@@ -236,53 +285,80 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <input type="hidden" name="type_mouvement" value="sortie_magasin">
 
                             <div class="form-group">
-                                <label for="recepteur"> Sélectionner un maintenancier :</label>
-                                <select class="form-control" id="recepteur" name="recepteur">
-                                    <option value="">--Sélectionner un maintenancier--</option>
-                                    <?php
-                                    $controller = new Mouvement_equipmentController();
-                                    // Récupérer les maintenanciers depuis la base de données
-                                    $maintainers = $controller->getMaintainers();
+                                <label for="recepteur"> Maintenancier :</label>
+                                <?php
+                                // Récupérer l'ID du maintenancier connecté
+                                $connectedMatricule = $_SESSION['user']['matricule'] ?? null;
+                                $connectedMaintainerId = null;
+                                $connectedMaintainerName = '';
 
-                                    if (!empty($maintainers)) {
-                                        foreach ($maintainers as $maintainer) {
-                                            echo "<option value=\"{$maintainer['id']}\">{$maintainer['first_name']} {$maintainer['last_name']}</option>";
-                                        }
-                                    } else {
-                                        echo "<option value=\"\" disabled>Aucun maintenancier trouvé</option>";
+                                if ($connectedMatricule) {
+                                    $db = \App\Models\Database::getInstance('db_digitex');
+                                    $conn = $db->getConnection();
+                                    $stmt = $conn->prepare("SELECT id, first_name, last_name FROM init__employee WHERE matricule = ?");
+                                    $stmt->execute([$connectedMatricule]);
+                                    $maintainer = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                                    if ($maintainer) {
+                                        $connectedMaintainerId = $maintainer['id'];
+                                        $connectedMaintainerName = trim($maintainer['first_name'] . ' ' . $maintainer['last_name']);
                                     }
-                                    ?>
-                                </select>
-                                <div class="form-group">
-                                    <label for="etat_equipement">Etat de l'équipement :</label>
-                                    <select class="form-control" id="etat_equipement" name="etat_equipement" required>
-                                        <option value="">--Etat de l'Equipement--</option>
+                                }
+                                ?>
+                                <?php if ($isAdmin): ?>
+                                    <select class="form-control" id="recepteur" name="recepteur">
+
+                                        <option value="">--Sélectionner un maintenancier--</option>
                                         <?php
-                                        // Charger les raisons de mouvement ici
-                                        $etat_equipement = []; // Remplacer par les données réelles
-                                        if (isset($controller)) {
-                                            $etat_equipement = $controller->getEquipementStatus();
-                                        }
-                                        foreach ($etat_equipement as $etat) {
-                                            if ($etat['status_name'] === 'fonctionnelle' || $etat['status_name'] === 'non fonctionnelle') {
-                                                echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                        $controller = new Mouvement_equipmentController();
+                                        // Récupérer les maintenanciers depuis la base de données
+                                        $maintainers = $controller->getMaintainers();
+
+                                        if (!empty($maintainers)) {
+                                            foreach ($maintainers as $maintainer) {
+                                                echo "<option value=\"{$maintainer['id']}\">{$maintainer['first_name']} {$maintainer['last_name']}</option>";
                                             }
+                                        } else {
+                                            echo "<option value=\"\" disabled>Aucun maintenancier trouvé</option>";
                                         }
                                         ?>
                                     </select>
-                                </div>
-                                <div class="text-right mt-2">
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="fas fa-check"></i> Confirmer avec ce maintenancier
-                                    </button>
-                                </div>
+                                <?php else: ?>
+                                    <input type="hidden" name="recepteur" value="<?= htmlspecialchars($connectedMaintainerId) ?>">
+                                    <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMaintainerName) ?>" readonly>
+
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-group">
+                                <label for="etat_equipement">Etat de l'équipement :</label>
+                                <select class="form-control" id="etat_equipement" name="etat_equipement" required>
+                                    <option value="">--Etat de l'Equipement--</option>
+                                    <?php
+                                    // Charger les raisons de mouvement ici
+                                    $etat_equipement = []; // Remplacer par les données réelles
+                                    if (isset($controller)) {
+                                        $etat_equipement = $controller->getEquipementStatus();
+                                    }
+                                    foreach ($etat_equipement as $etat) {
+                                        if ($etat['status_name'] === 'fonctionnelle' || $etat['status_name'] === 'non fonctionnelle') {
+                                            echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="text-right mt-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Confirmer
+                                </button>
                             </div>
                         </div>
-
-                    </form>
                 </div>
+
+                </form>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Scripts JavaScript -->
@@ -292,10 +368,69 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
     <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
     <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
     <script src="/platform_gmao/public/js/sideBare.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
     <script>
         // Document ready function
         $(document).ready(function() {
+            // Fonction pour initialiser Select2
+            function initSelect2() {
+                // Détruire toute instance existante de Select2
+                if ($('#equipment').hasClass('select2-hidden-accessible')) {
+                    $('#equipment').select2('destroy');
+                }
+
+                // Initialiser Select2 pour le select d'équipement
+                $('#equipment').select2({
+                    placeholder: '--Sélectionnez un équipement--',
+                    allowClear: true,
+                    width: '100%',
+                    minimumResultsForSearch: 0, // Toujours afficher la zone de recherche
+                    dropdownAutoWidth: true,
+                    dropdownParent: $('#mouvementModal'), // Important pour les modals
+                    language: {
+                        noResults: function() {
+                            return "Aucun équipement trouvé";
+                        },
+                        searching: function() {
+                            return "Recherche en cours...";
+                        }
+                    }
+                });
+
+                // Forcer le focus sur la zone de recherche quand le dropdown s'ouvre
+                $('#equipment').on('select2:open', function() {
+                    setTimeout(function() {
+                        $('.select2-search__field').focus();
+                        $('.select2-search__field').attr('readonly', false);
+                    }, 100);
+                });
+
+                // S'assurer que la zone de recherche est cliquable
+                $(document).on('click', '.select2-search__field', function() {
+                    $(this).focus();
+                    $(this).attr('readonly', false);
+                });
+            }
+
+            // Initialiser Select2 quand le modal s'ouvre
+            $('#mouvementModal').on('shown.bs.modal', function() {
+                setTimeout(function() {
+                    initSelect2();
+                }, 100);
+            });
+
+            // Détruire Select2 quand le modal se ferme
+            $('#mouvementModal').on('hidden.bs.modal', function() {
+                if ($('#equipment').hasClass('select2-hidden-accessible')) {
+                    $('#equipment').select2('destroy');
+                }
+            });
+
+            // Initialiser Select2 au chargement de la page (au cas où)
+            initSelect2();
+
 
             var table = $('#dataTable').DataTable({
                 language: {
@@ -333,6 +468,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 $('#mouvement_id').val(mouvementId);
                 $('#equipment_id').val(equipmentId);
             });
+
         });
     </script>
 </body>

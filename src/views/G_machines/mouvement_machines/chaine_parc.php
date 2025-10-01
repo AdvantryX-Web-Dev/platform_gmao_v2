@@ -27,6 +27,10 @@ if (!isset($mouvements)) {
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/datatables.min.css">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
         .equipment-list-container {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -324,16 +328,16 @@ if (!isset($mouvements)) {
                                                             if (is_array($arr) && count($arr) > 0) {
                                                                 echo htmlspecialchars(implode(', ', $arr));
                                                             } else {
-                                                                echo '—';
+                                                                echo ' ';
                                                             }
                                                         } else {
-                                                            echo '—';
+                                                            echo ' ';
                                                         }
                                                         ?>
                                                     </td>
                                                     <td><?= htmlspecialchars($mouvement['Comment'] ?? '') ?></td>
 
-                                                   
+
 
                                                 </tr>
                                             <?php endforeach; ?>
@@ -419,7 +423,7 @@ if (!isset($mouvements)) {
                             console.log(data);
                             var options = '<option value="">--Sélectionnez une machine--</option>';
                             $.each(data, function(index, machine) {
-                                options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference +' </option>';
+                                options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference + ' </option>';
                             });
                             $('#machine').html(options);
                         },
@@ -545,6 +549,8 @@ if (!isset($mouvements)) {
             });
         });
     </script>
+
+
 </body>
 
 </html>

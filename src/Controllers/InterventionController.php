@@ -40,7 +40,7 @@ class InterventionController
         return $machines;
     }
 
- 
+
 
 
     public function ajouterDemande()
@@ -66,17 +66,21 @@ class InterventionController
                 $db = new Database();
                 $conn = $db->getConnection();
 
-             
 
+                $isadmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
                 try {
-                    // Démarrer la transaction
+                    // Démarrer la transaction pour tous les cas
                     $conn->beginTransaction();
 
-                    // Convertir le matricule du maintenancier en ID
-                    $stmt = $conn->prepare("SELECT id FROM init__employee WHERE matricule = :matricule");
-                    $stmt->bindParam(':matricule', $maintainer_matricule, \PDO::PARAM_STR);
-                    $stmt->execute();
-                    $maintainer_id = $stmt->fetchColumn();
+                    if ($isadmin) {
+                        //Convertir le matricule du maintenancier en ID
+                        $stmt = $conn->prepare("SELECT id FROM init__employee WHERE matricule = :matricule");
+                        $stmt->bindParam(':matricule', $maintainer_matricule, \PDO::PARAM_STR);
+                        $stmt->execute();
+                        $maintainer_id = $stmt->fetchColumn();
+                    } else {
+                        $maintainer_id = $maintainer_matricule;
+                    }
 
                     if (!$maintainer_id) {
                         throw new \PDOException("Impossible de trouver l'ID de l'employé avec le matricule: " . $maintainer_matricule);
@@ -107,21 +111,20 @@ class InterventionController
                     $stmt->bindParam(':status_id', $machine_status, \PDO::PARAM_INT);
                     $stmt->bindParam(':machine_id', $machine_id, \PDO::PARAM_INT);
                     $stmt->execute();
-                   
+
                     // Commit les deux transactions si tout s'est bien passé
                     $conn->commit();
-                 
+
                     header('Location: index.php?route=intervention_curative&status=succ');
                     exit;
                 } catch (\PDOException $e) {
-                  //  die();
-                    // Rollback en cas d'erreur sur les deux connexions
+                    // Rollback en cas d'erreur
                     if ($conn->inTransaction()) {
                         $conn->rollBack();
                     }
 
                     // Log l'erreur
-                  //  error_log("PDOException dans ajouterDemande: " . $e->getMessage());
+                    error_log("PDOException dans ajouterDemande: " . $e->getMessage());
 
                     // Rediriger avec le message d'erreur
                     header('Location: index.php?route=intervention_curative&status=error');
@@ -132,6 +135,7 @@ class InterventionController
                 exit;
             }
         } catch (\Exception $e) {
+
             error_log("Exception dans ajouterDemande: " . $e->getMessage());
             header('Location: index.php?route=intervention_curative&status=error');
             exit;

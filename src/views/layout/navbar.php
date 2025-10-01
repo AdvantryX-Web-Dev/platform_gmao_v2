@@ -69,15 +69,21 @@
                 <i class="fas fa-sign-out-alt fa-lg text-gray-600"></i>
             </a>
         </li>
-        <!-- Cercle avec la première lettre de l'email, cliquable pour éditer le compte -->
-        <?php if (isset($_SESSION['email'])):
-            $email = $_SESSION['email'];
-            $firstLetter = strtoupper(substr($email, 0, 1));
+        <!-- Avatar cercle avec initiales prénom/nom -->
+        <?php if (isset($_SESSION['user'])):
+            $firstname = trim($_SESSION['user']['firstname'] ?? '');
+            $lastname = trim($_SESSION['user']['lastname'] ?? '');
+            $matricule = $_SESSION['user']['matricule'] ?? '';
+            $firstInitial = $firstname !== '' ? strtoupper(mb_substr($firstname, 0, 1, 'UTF-8')) : '';
+            $lastInitial = $lastname !== '' ? strtoupper(mb_substr($lastname, 0, 1, 'UTF-8')) : '';
+            $initials = ($firstInitial . $lastInitial) !== '' ? ($firstInitial . $lastInitial) : strtoupper(substr((string)$matricule, 0, 4));
+            $fullName = trim($firstname . ' ' . $lastname);
+            $tooltip = $fullName !== '' ? $fullName : ('Matricule: ' . htmlspecialchars((string)$matricule));
         ?>
             <li class="nav-item mx-2">
-                <a href="../../platform_gmao/public/index.php?route=compte/update_compte&id=<?= urlencode($_SESSION['matricule'] ?? '') ?>" title="Modifier mon compte">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:40px; height:40px; font-size:1.2rem; cursor:pointer;" data-toggle="tooltip" data-placement="bottom" title="<?= htmlspecialchars($email) ?>">
-                        <?= $firstLetter ?>
+                <a href="../../platform_gmao/public/index.php?route=compte/update_compte&id=<?= urlencode((string)$matricule) ?>" title="Modifier mon compte">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:40px; height:40px; font-size:1.2rem; cursor:pointer;" data-toggle="tooltip" data-placement="bottom" title="<?= htmlspecialchars($tooltip) ?>">
+                        <?= htmlspecialchars($initials) ?>
                     </div>
                 </a>
             </li>

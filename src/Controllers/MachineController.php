@@ -181,8 +181,11 @@ class MachineController
     /** Gestion des machines */
     public function machines_state()
     {
-        $machines = Machine_model::MachinesStateTable();
-
+        // Récupérer le matricule de l'utilisateur connecté
+        $userMatricule = $_SESSION['user']['matricule'] ?? null;
+        
+        // Appeler le modèle avec le matricule de l'utilisateur
+        $machines = Machine_model::MachinesStateTable($userMatricule);
 
         include(__DIR__ . '/../views/G_machines/G_machines_status/machineStatus.php');
     }

@@ -17,7 +17,47 @@
 
              <form id="ajouterInterventionForm" action="?route=intervention_curative/ajouterDemande" method="post">
                  <div class="modal-body">
+                     <div class="form-group">
+                         <label for="maintenance_by"> Maintenancier :</label>
+                         <?php
+                            // Récupérer l'ID du maintenancier connecté
+                            $connectedMatricule = $_SESSION['user']['matricule'] ?? null;
+                            $connectedMaintainerId = null;
+                            $connectedMaintainerName = '';
 
+                            if ($connectedMatricule) {
+                                $db = \App\Models\Database::getInstance('db_digitex');
+                                $conn = $db->getConnection();
+                                $stmt = $conn->prepare("SELECT id, first_name, last_name FROM init__employee WHERE matricule = ?");
+                                $stmt->execute([$connectedMatricule]);
+                                $maintainer = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                                if ($maintainer) {
+                                    $connectedMaintainerId = $maintainer['id'];
+                                    $connectedMaintainerName = trim($maintainer['first_name'] . ' ' . $maintainer['last_name']);
+                                }
+                            }
+                            ?>
+                         <?php if ($isAdmin): ?>
+
+                             <select class="form-control" id="maintenancier" name="maintenanciers" required>
+                                 <option value="">-- Sélectionner un maintenancier --</option>
+                                 <?php
+                                    $dispoMaints = $interventionController->maint_dispo();
+                                    foreach ($dispoMaints as $dispoMaint) {
+                                        echo '<option value="' . htmlspecialchars($dispoMaint['matricule']) . '">' .
+                                            htmlspecialchars($dispoMaint['matricule']) . ' - ' .
+                                            htmlspecialchars($dispoMaint['first_name']) . ' ' .
+                                            htmlspecialchars($dispoMaint['last_name']) . '</option>';
+                                    }
+                                    ?>
+                             </select>
+                         <?php else: ?>
+                             <input type="hidden" id="maintenancier" name="maintenanciers" value="<?= htmlspecialchars($connectedMaintainerId) ?>">
+                             <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMaintainerName) ?>" readonly>
+
+                         <?php endif; ?>
+                     </div>
                      <div class="form-group">
                          <label for="machine"> Machine :</label>
                          <select class="form-control" id="machine" name="machines" required>
@@ -25,7 +65,7 @@
                              <?php
                                 foreach ($all_machines as $machine) {
                                     echo '<option value="' . htmlspecialchars($machine['id']) . '" data-reference="' . htmlspecialchars($machine['reference']) . '">' .
-                                        htmlspecialchars($machine['reference'] . ' - ' . $machine['machine_id']) .  '</option>';
+                                        htmlspecialchars($machine['machine_id'] . ' - ' . $machine['reference']) .  '</option>';
                                 }
                                 ?>
                          </select>
@@ -48,21 +88,7 @@
                          </select>
                      </div>
 
-                     <div class="form-group">
-                         <label for="maintenancier"> Maintenancier :</label>
-                         <select class="form-control" id="maintenancier" name="maintenanciers" required>
-                             <option value="">-- Sélectionner un maintenancier --</option>
-                             <?php
-                                $dispoMaints = $interventionController->maint_dispo();
-                                foreach ($dispoMaints as $dispoMaint) {
-                                    echo '<option value="' . htmlspecialchars($dispoMaint['matricule']) . '">' .
-                                        htmlspecialchars($dispoMaint['matricule']) . ' - ' .
-                                        htmlspecialchars($dispoMaint['first_name']) . ' ' .
-                                        htmlspecialchars($dispoMaint['last_name']) . '</option>';
-                                }
-                                ?>
-                         </select>
-                     </div>
+
 
                      <div class="form-group">
                          <label for="intervention_date">Date d'intervention :</label>
@@ -74,7 +100,9 @@
                          <select class="form-control" id="machine_status" name="machine_status" required>
                              <option value="">-- Sélectionner un statut --</option>
                              <?php foreach ($machineStatuses as $status): ?>
-                                 <option value="<?php echo htmlspecialchars($status['id']); ?>"><?php echo htmlspecialchars($status['status_name']); ?></option>
+                                 <?php if ($status['status_name'] != 'non fonctionnelle' && $status['status_name'] != 'fonctionnelle'): ?>
+                                     <option value="<?php echo htmlspecialchars($status['id']); ?>"><?php echo htmlspecialchars($status['status_name']); ?></option>
+                                 <?php endif; ?>
                              <?php endforeach; ?>
                          </select>
                      </div>

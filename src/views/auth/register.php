@@ -140,14 +140,20 @@ unset($_SESSION['register_errors'], $_SESSION['register_old_values'], $_SESSION[
                 
              
                 
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="email" class="col">Adresse e-mail:</label>
                     <span class="input-group-addon">
                         <i class="fas fa-envelope"></i>
                     </span>
                     <input type="email" class="form-control input" id="email" name="email" value="<?php echo htmlspecialchars($old_values['email'] ?? ''); ?>" required>
+                </div> -->
+                <div class="form-group">
+                    <label for="nom_complet" class="col">Nom et prénom:</label>
+                    <span class="input-group-addon">
+                        <i class="fas fa-user"></i>
+                    </span>
+                        <input type="text" id="nom_complet" name="nom_complet" class="form-control input" required>
                 </div>
-                
               
                 
                 <div class="form-group">

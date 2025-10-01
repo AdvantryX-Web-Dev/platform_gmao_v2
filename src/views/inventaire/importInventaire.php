@@ -141,8 +141,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                         <input type="file" name="file" id="file" accept=".csv,.xlsx,.xls" style="display:none" required>
                                         <div id="file-info" class="mt-2"></div>
                                     </div>
-                                    <button id="btn-import" type="submit" class="btn btn-primary">Importer</button>
-                                    <a href="../../platform_gmao/public/index.php?route=listInventaire" class="btn btn-secondary ml-2">Voir la liste</a>
+                                    <button id="btn-import" type="submit" class="btn btn-success">Importer</button>
                                 </form>
 
                                 <!-- Overlay de chargement -->

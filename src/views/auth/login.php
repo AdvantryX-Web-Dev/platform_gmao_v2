@@ -121,14 +121,20 @@ unset($_SESSION['login_errors'], $_SESSION['login_old_values']);
             <?php endif; ?>
             
             <form action="/platform_gmao/public/index.php?route=login" method="post">
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="email" class="col">Adresse e-mail:</label>
                     <span class="input-group-addon ">
                         <i class="fas fa-envelope mt-4"></i>
                     </span>
                     <input type="email" class="form-control input" id="email" name="email" value="<?php echo htmlspecialchars($old_values['email'] ?? ''); ?>" required>
+                </div> -->
+                <div class="form-group">
+                    <label for="matricule" class="col">Matricule:</label>
+                    <span class="input-group-addon">
+                        <i class="fas fa-id-badge mt-4"></i>
+                    </span>
+                    <input type="text" id="matricule" name="matricule" class="form-control input" required>
                 </div>
-                
                 <div class="form-group">
                     <label for="password" class="col">Mot de passe:</label>
                         <span class="input-group-addon ">

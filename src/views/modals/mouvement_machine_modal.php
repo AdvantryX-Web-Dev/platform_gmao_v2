@@ -18,14 +18,55 @@
                 <div class="modal-body">
                     <input type="hidden" name="type_mouvement" value="<?= htmlspecialchars($type_mouvement ?? '') ?>">
                     <div class="form-group">
+                        <label for="maintenancier">Maintenancier :</label>
+                        <?php
+                        // Récupérer l'ID du maintenancier connecté
+                        $connectedMatricule = $_SESSION['user']['matricule'] ?? null;
+                        $connectedMaintainerId = null;
+                        $connectedMaintainerName = '';
+
+                        if ($connectedMatricule) {
+                            $db = \App\Models\Database::getInstance('db_digitex');
+                            $conn = $db->getConnection();
+                            $stmt = $conn->prepare("SELECT id, first_name, last_name FROM init__employee WHERE matricule = ?");
+                            $stmt->execute([$connectedMatricule]);
+                            $maintainer = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                            if ($maintainer) {
+                                $connectedMaintainerId = $maintainer['id'];
+                                $connectedMaintainerName = trim($maintainer['first_name'] . ' ' . $maintainer['last_name']);
+                            }
+                        }
+                        $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+                        ?>
+
+                        <?php if ($isAdmin): ?>
+                            <select class="form-control" id="maintenancier" name="maintenancier" required>
+                                <option value="">--Maintenancier--</option>
+                                <?php
+                                $controller = new \App\Controllers\Mouvement_machinesController();
+                                $maintenanciers = $controller->getMaintainers();
+                                foreach ($maintenanciers as $maintenancier) {
+                                    echo "<option value=\"{$maintenancier['id']}\">{$maintenancier['first_name']} {$maintenancier['last_name']}</option>";
+                                }
+                                ?>
+                            </select>
+
+                        <?php else: ?>
+                            <input type="hidden" name="maintenancier" value="<?= htmlspecialchars($connectedMaintainerId) ?>">
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMaintainerName) ?>" readonly>
+
+                        <?php endif; ?>
+                    </div>
+                    <div class="form-group">
                         <label for="typeMachine">Type de Machine :</label>
                         <select class="form-control" id="typeMachine" name="typeMachine" required>
-                            <option value="">--Type de Machine--</option>
+                            <option value="">-- Sélectionner un type de machine --</option>
                             <?php
                             $controller = new \App\Controllers\Mouvement_machinesController();
                             $types = $controller->getTypes($location ?? '');
                             foreach ($types as $type) {
-                                echo "<option value=\"{$type['type']}\">{$type['type']}</option>";
+                                echo "<option value=\"{$type['type']}\" data-reference=\"{$type['type']}\">{$type['type']}</option>";
                             }
                             ?>
                         </select>
@@ -36,18 +77,7 @@
                             <option value="">--Sélectionnez une machine--</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="maintenancier">Maintenancier :</label>
-                        <select class="form-control" id="maintenancier" name="maintenancier" required>
-                            <option value="">--Maintenancier--</option>
-                            <?php
-                            $maintenanciers = $controller->getMaintainers();
-                            foreach ($maintenanciers as $maintenancier) {
-                                echo "<option value=\"{$maintenancier['id']}\">{$maintenancier['first_name']} {$maintenancier['last_name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
+
                     <div class="form-group">
                         <label for="raisonMouvement">Raison Mouvement Machine :</label>
                         <select class="form-control" id="raisonMouvement" name="raisonMouvement" required>
@@ -69,5 +99,3 @@
         </div>
     </div>
 </div>
-
-

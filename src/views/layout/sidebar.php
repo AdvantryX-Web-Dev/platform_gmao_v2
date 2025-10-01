@@ -1,4 +1,3 @@
-
 <?php
 // Vérifie si l'utilisateur est un administrateur
 $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
@@ -26,24 +25,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
     <!-- Divider -->
     <hr class="sidebar-divider">
-    <!-- 0. Inventaire -->
-    <?php if ($isAdmin): ?>
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMaintenance" aria-expanded="true" aria-controls="collapseMaintenance"
-                style="width: 260px !important;">
-                <i class="fas fa-fw fa-wrench"></i>
-                <span>Inventaire</span>
-            </a>
-            <div id="collapseMaintenance" class="collapse" aria-labelledby="headingMaintenance" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=importInventaire">Import</a>
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=maintenancier_machine">Maintenancier - machine</a>
 
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=listInventaire">Liste</a>
-                </div>
-            </div>
-        </li>
-    <?php endif; ?>
 
     <!-- 1. Données de base -->
     <li class="nav-item">
@@ -61,13 +43,34 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=categories">Liste des motifs de mvt</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=location/list">Liste des emplacements</a>
 
-                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipementsCategory/list">Liste des catatgories</a>
+                <!-- <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipementsCategory/list">Liste des catatgories</a> -->
 
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement/list">Liste des équipements</a>
             </div>
         </div>
     </li>
+    <!-- 0. Inventaire -->
+    <li class="nav-item">
 
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseInventaire" aria-expanded="true" aria-controls="collapseMaintenance"
+            style="width: 260px !important;">
+            <i class="fas fa-fw fa-wrench"></i>
+            <span>Inventaire</span>
+        </a>
+
+        <div id="collapseInventaire" class="collapse" aria-labelledby="headingInventaire" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <?php if ($isAdmin): ?>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=importInventaire">Import</a>
+                <?php endif; ?>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=ajouterInventaire">Ajouter Inventaire</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=historyInventaire">Evaluation Inventaire</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=maintenancier_machine">Maintenancier - machine</a>
+
+
+            </div>
+        </div>
+    </li>
     <!-- 2. Gestion de machine -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGestionMachine" aria-expanded="true" aria-controls="collapseGestionMachine"

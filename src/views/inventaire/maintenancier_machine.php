@@ -15,7 +15,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
 <head>
     <meta charset="UTF-8">
-    <title>Liste des machines</title>
+    <title>Inventaire </title>
     <link rel="icon" type="image/x-icon" href="/public/images/images.png" />
     <link rel="stylesheet" href="/platform_gmao/public/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -26,7 +26,6 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
-
 <body id="page-top">
     <div id="wrapper">
         <?php include(__DIR__ . "/../../views/layout/sidebar.php") ?>
@@ -34,39 +33,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
             <div id="content">
                 <?php include(__DIR__ . "/../../views/layout/navbar.php"); ?>
 
-
                 <div class="container-fluid">
-
-                    <?php
-                    // Préparer les options uniques pour les filtres si des données existent
-                    $chainOptions = [];
-                    $machineOptions = [];
-                    if (!empty($maintenances)) {
-                        foreach ($maintenances as $row) {
-                            if (!empty($row['chains_list'])) {
-                                $chains = explode(', ', $row['chains_list']);
-                                foreach ($chains as $c) {
-                                    $c = trim($c);
-                                    if ($c !== '') {
-                                        $chainOptions[$c] = true;
-                                    }
-                                }
-                            }
-                            if (!empty($row['machines_with_status'])) {
-                                $machinesTmp = explode('||', $row['machines_with_status']);
-                                foreach ($machinesTmp as $machineData) {
-                                    $parts = explode('|', $machineData);
-                                    $machineLabel = trim($parts[0]);
-                                    if ($machineLabel !== '') {
-                                        $machineOptions[$machineLabel] = true;
-                                    }
-                                }
-                            }
-                        }
-                        ksort($chainOptions);
-                        ksort($machineOptions);
-                    }
-                    ?>
 
                     <?php if (!empty($_SESSION['flash_error'])): ?>
                         <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
@@ -88,80 +55,142 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                     <?php endif; ?>
 
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Maintenancier - Machines :</h6>
-                            <div class="d-flex flex-wrap align-items-center" style="gap: 10px;">
-                                <div>
-                                    <label for="filterMatricule" class="mb-0 small text-muted">Matricule</label>
-                                    <input type="text" id="filterMatricule" class="form-control form-control-sm" placeholder="Rechercher matricule">
-                                </div>
-                                <div style="min-width:220px;">
-                                    <label for="filterChaine" class="mb-0 small text-muted">Chaînes</label>
-                                    <select id="filterChaine" class="form-control form-control-sm" multiple>
-                                        <?php foreach ($chainOptions as $opt => $_): ?>
-                                            <option value="<?php echo htmlspecialchars($opt); ?>"><?php echo htmlspecialchars($opt); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div style="min-width:220px;">
-                                    <label for="filterMachine" class="mb-0 small text-muted">Machine</label>
-                                    <select id="filterMachine" class="form-control form-control-sm">
-                                        <option value="">Toutes</option>
-                                        <?php foreach ($machineOptions as $opt => $_): ?>
-                                            <option value="<?php echo htmlspecialchars($opt); ?>"><?php echo htmlspecialchars($opt); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <?php if ($isAdmin): ?>
+                                    Maintenance - Filtres administrateur
+                                <?php else: ?>
+                                    Mes machines assignées (<?= htmlspecialchars($_SESSION['user']['matricule'] ?? 'non défini') ?>)
+                                <?php endif; ?>
+                            </h6>
                         </div>
+
+                        <?php if ($isAdmin): ?>
+                            <div class="card-body border-bottom pb-2 mb-3">
+                                <form method="GET" action="" id="filterForm">
+                                    <input type="hidden" name="route" value="maintenancier_machine">
+
+
+                                    <!-- Première ligne : les 3 champs de filtre -->
+                                    <div class="row align-items-end justify-content-end">
+                                        <div class="col-2 pr-3">
+                                            <label for="filterMatricule" class="mb-1 small text-muted">Matricule</label>
+                                            <select name="matricule" id="filterMatricule" class="form-control form-control-sm">
+                                                <option value="">Tous les matricules</option>
+                                                <?php foreach ($matriculeOptions as $matricule): ?>
+                                                    <option value="<?= htmlspecialchars($matricule) ?>"
+                                                        <?= (isset($_GET['matricule']) && $_GET['matricule'] === $matricule) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($matricule) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-2 pr-3">
+                                            <label for="filterChaine" class="mb-1 small text-muted">Chaîne</label>
+                                            <select name="chaine" id="filterChaine" class="form-control form-control-sm">
+                                                <option value="">Toutes les chaînes</option>
+                                                <?php foreach ($chainOptions as $chaine): ?>
+                                                    <option value="<?= htmlspecialchars($chaine) ?>"
+                                                        <?= (isset($_GET['chaine']) && $_GET['chaine'] === $chaine) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($chaine) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-2 pr-3">
+                                            <label for="filterMachine" class="mb-1 small text-muted">Machine</label>
+                                            <select name="machine" id="filterMachine" class="form-control form-control-sm">
+                                                <option value="">Toutes les machines</option>
+                                                <?php foreach ($machineOptions as $machine): ?>
+                                                    <option value="<?= htmlspecialchars($machine) ?>"
+                                                        <?= (isset($_GET['machine']) && $_GET['machine'] === $machine) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($machine) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-2">
+                                            <button type="submit" class="btn btn-primary btn-sm mr-2">
+                                                <i class="fas fa-search"></i> Filtrer
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="card-body">
-                           <?php if (!empty($maintenances)): ?>
-                               <div class="table-responsive">
-                               <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                               <thead class="thead-light">
-                                           <tr>
-                                               <th>Matricule</th>
-                                               <th>Chaines </th>
-                                               <th>Machines </th>
-                                              
-                                           </tr>
-                                       </thead>
-                                       <tbody>
-                                           <?php foreach ($maintenances as $row): ?>
+                            <?php if (!empty($maintenances)): ?>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Matricule</th>
+                                                <th>Maintenancier</th>
+                                                <th>Chaîne</th>
+                                                <th>Machine</th>
+                                                <th>Statut</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($maintenances as $row): ?>
                                                 <tr>
-                                                    <td><?php echo htmlspecialchars($row['maintener_name']); ?></td>
+                                                    <td><?= htmlspecialchars($row['maintener_name']); ?></td>
+                                                    <td><?= htmlspecialchars(trim($row['last_name'] . ' ' . $row['first_name'])); ?></td>
                                                     <td>
-                                                        <?php 
-                                                        $chains = !empty($row['chains_list']) ? explode(', ', $row['chains_list']) : [];
-                                                        foreach ($chains as $chain): ?>
-                                                            <span class="badge badge-info mr-1 mb-1"><?php echo htmlspecialchars(trim($chain)); ?></span>
-                                                        <?php endforeach; ?>
+                                                        <span class="badge badge-info">
+                                                            <?= htmlspecialchars($row['location_name'] ?? 'non défini'); ?>
+                                                        </span>
                                                     </td>
                                                     <td>
-                                                        <?php 
-                                                        $machines = !empty($row['machines_with_status']) ? explode('||', $row['machines_with_status']) : [];
-                                                        foreach ($machines as $machineData): 
-                                                            $parts = explode('|', $machineData);
-                                                            $machine = $parts[0];
-                                                            $status = isset($parts[1]) ? $parts[1] : 'unknown';
-                                                            $badgeClass = ($status === 'active') ? 'badge' : 'badge-';
+                                                        <?php
+                                                        $machineId = $row['machine_id'] ?? '';
+                                                        $machineRef = $row['machine_reference'] ?? '';
+                                                        $machineDisplay = '';
+
+                                                        if (!empty($machineId) && !empty($machineRef)) {
+                                                            $machineDisplay = htmlspecialchars($machineId . ' - ' . $machineRef);
+                                                        } elseif (!empty($machineId)) {
+                                                            $machineDisplay = htmlspecialchars($machineId);
+                                                        } elseif (!empty($machineRef)) {
+                                                            $machineDisplay = htmlspecialchars($machineRef);
+                                                        } else {
+                                                            $machineDisplay = 'non défini';
+                                                        }
+                                                        echo $machineDisplay;
                                                         ?>
-                                                            <span class="badge <?php echo $badgeClass; ?> mr-1 mb-1"><?php echo htmlspecialchars(trim($machine)); ?></span>
-                                                        <?php endforeach; ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $status = $row['machine_status'] ?? 'non défini';
+                                                        $badgeClass = ($status === 'active') ? 'badge-success' : 'badge-warning';
+                                                        ?>
+                                                        <span class="badge <?= $badgeClass; ?>">
+                                                            <?= htmlspecialchars($status); ?>
+                                                        </span>
                                                     </td>
                                                 </tr>
-                                           <?php endforeach; ?>
-                                       </tbody>
-                                   </table>
-                               </div>
-                           <?php else: ?>
-                               <div class="text-muted">Aucune liaison maintenancier/machine trouvée.</div>
-                           <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php else: ?>
+                                <div class="text-muted">
+                                    <?php if ($isAdmin): ?>
+                                        Aucune liaison maintenancier/machine trouvée avec les filtres appliqués.
+                                    <?php else: ?>
+                                        Aucune machine assignée à votre matricule (<?= htmlspecialchars($_SESSION['user']['matricule'] ?? 'N/A') ?>).
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
+
                 </div>
-
-
 
             </div>
             <?php include(__DIR__ . "/../../views/layout/footer.php"); ?>
@@ -180,49 +209,10 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
         <script>
             $(document).ready(function() {
                 // Init Select2 for better search/UX
-                $('#filterChaine').select2({
+                $('#filterMatricule, #filterChaine, #filterMachine').select2({
                     width: 'resolve',
-                    placeholder: 'Sélectionner des chaînes',
+                    placeholder: 'Sélectionner...',
                     allowClear: true
-                });
-                $('#filterMachine').select2({
-                    width: 'resolve',
-                    placeholder: 'Rechercher une machine',
-                    allowClear: true
-                });
-
-                // Custom filter en fonction des contrôles
-                $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-                    var valMatricule = ($('#filterMatricule').val() || '').toString().toLowerCase();
-                    var selectedChaines = $('#filterChaine').val() || [];
-                    var valMachine = ($('#filterMachine').val() || '').toString().toLowerCase();
-
-                    // data[0] = Matricule, data[1] = Chaines (HTML), data[2] = Machines (HTML)
-                    var matriculeText = (data[0] || '').toString().toLowerCase();
-                    var chainesHtml = (data[1] || '').toString();
-                    var machinesHtml = (data[2] || '').toString();
-
-                    var chainesText = $('<div>').html(chainesHtml).text().toLowerCase();
-                    var machinesText = $('<div>').html(machinesHtml).text().toLowerCase();
-
-                    if (valMatricule && matriculeText.indexOf(valMatricule) === -1) {
-                        return false;
-                    }
-                    if (selectedChaines.length > 0) {
-                        var allMatch = true;
-                        for (var i = 0; i < selectedChaines.length; i++) {
-                            var c = (selectedChaines[i] || '').toString().toLowerCase();
-                            if (c && chainesText.indexOf(c) === -1) {
-                                allMatch = false;
-                                break;
-                            }
-                        }
-                        if (!allMatch) { return false; }
-                    }
-                    if (valMachine && machinesText.indexOf(valMachine) === -1) {
-                        return false;
-                    }
-                    return true;
                 });
 
                 var table = $('#dataTable').DataTable({
@@ -240,17 +230,26 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             last: "Dernier"
                         }
                     },
-                    pageLength: 10
+                    pageLength: 10,
+                    order: [
+                        [0, 'asc']
+                    ] // Trier par matricule par défaut
                 });
 
-                // Rafraîchir le tableau sur changement des filtres
-                $('#filterMatricule').on('input', function() { table.draw(); });
-                $('#filterChaine').on('change', function() { table.draw(); });
-                $('#filterMachine').on('change', function() { table.draw(); });
+                // Bouton pour vider les filtres
+                $('#clearFilters').on('click', function() {
+                    // Réinitialiser tous les selects
+                    $('#filterMatricule').val('').trigger('change');
+                    $('#filterChaine').val('').trigger('change');
+                    $('#filterMachine').val('').trigger('change');
+
+                    // Rediriger vers la page sans filtres
+                    window.location.href = '?route=maintenancier_machine';
+                });
 
                 // Faire disparaître les messages flash après 4 secondes
                 setTimeout(function() {
-                    $("#flash-message").fadeOut("slow");
+                    $(".auto-dismiss").fadeOut("slow");
                 }, 4000);
             });
         </script>

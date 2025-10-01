@@ -49,13 +49,16 @@ if (session_status() === PHP_SESSION_NONE) {
                                     $countEmpty = 0;
                                     $countInactive = 0;
                                     $countTotal = is_array($machines) ? count($machines) : 0;
-
+                                    // print_r("<pre>");
+                                    // print_r($machines);
+                                    // print_r("</pre>");
+                                    // die;
                                     if (is_array($machines)) {
                                         foreach ($machines as $m) {
-                                            if (!empty($m['location']) && $m['location'] == 'prodline') {
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'prodline') {
                                                 $countProduction++;
                                             }
-                                            if (!empty($m['location']) && $m['location'] == 'parc') {
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'parc') {
                                                 $countParc++;
                                             }
                                             if (!empty($m['etat_machine']) && ($m['etat_machine'] == 'en panne' || $m['etat_machine'] == 'ferraille')) {
@@ -64,7 +67,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             if (!empty($m['etat_machine']) && $m['etat_machine'] == 'inactive') {
                                                 $countInactive++;
                                             }
-                                            if (empty($m['etat_machine'])) {
+                                            if (empty($m['location'])) {
                                                 $countEmpty++;
                                             }
                                         }
@@ -100,6 +103,22 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     </div>
                                                     <div class="col-auto">
                                                         <i class="fas fa-warehouse fa-2x status-card-icon text-primary"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- No Status Card -->
+                                    <div class="col-xl-2 col-md-4 mb-4">
+                                        <div class="card border-left-warning shadow h-100 py-3">
+                                            <div class="card-body">
+                                                <div class="row no-gutters align-items-center">
+                                                    <div class="col mr-2">
+                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Machines non définis</div>
+                                                        <div class="status-count text-gray-800" id="count-empty-status"><?php echo $countEmpty; ?></div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <i class="fas fa-question-circle fa-2x status-card-icon text-warning"></i>
                                                     </div>
                                                 </div>
                                             </div>
@@ -157,23 +176,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </div>
                                     </div>
 
-                                    <!-- No Status Card -->
-                                    <div class="col-xl-2 col-md-4 mb-4">
-                                        <div class="card border-left-warning shadow h-100 py-3">
-                                            <div class="card-body">
-                                                <div class="row no-gutters align-items-center">
-                                                    <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Machines non définies</div>
-                                                        <div class="status-count text-gray-800" id="count-empty-status"><?php echo $countEmpty; ?></div>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <i class="fas fa-question-circle fa-2x status-card-icon text-warning"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
+
                                 </div>
                             </div>
                             <div class="table-responsive">
@@ -211,9 +214,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         if (empty($machine['location_category'])) {
                                                             echo '<span class="badge badge-secondary">Non défini</span>';
                                                         } elseif ($machine['location_category'] == 'parc') {
-                                                            echo '<span class="badge badge-primary">Parc</span>';
+                                                            echo '<span class="badge badge-primary"> ' . htmlspecialchars($machine['location']) . '</span>';
                                                         } elseif ($machine['location_category'] == 'prodline') {
-                                                            echo '<span class="badge badge-success">En production</span>';
+                                                            echo '<span class="badge badge-success"> ' . htmlspecialchars($machine['location']) . '</span>';
                                                         } else {
                                                             echo htmlspecialchars($machine['location_category']);
                                                         }
@@ -229,6 +232,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                                             echo '<span class="badge badge-danger">' . htmlspecialchars($status) . '</span>';
                                                         } elseif ($status == 'inactive') {
                                                             echo '<span class="badge badge-warning ">' . htmlspecialchars($status) . '</span>';
+                                                        } elseif ($status == 'fonctionnelle') {
+                                                            echo '<span class="badge badge-success ">' . 'active' . '</span>';
                                                         } else {
                                                             echo '<span class="badge badge-secondary ">' . htmlspecialchars($status) . '</span>';
                                                         }
@@ -267,33 +272,33 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <script>
             $(document).ready(function() {
-            var table = $('#dataTable').DataTable({
-                language: {
-                    search: "Rechercher:",
-                    lengthMenu: "Afficher _MENU_ éléments par page",
-                    info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-                    infoEmpty: "Aucun élément à afficher",
-                    infoFiltered: "(filtré de _MAX_ éléments au total)",
-                    zeroRecords: "Aucun enregistrement correspondant trouvé",
-                    paginate: {
-                        first: "Premier",
-                        previous: "Précédent",
-                        next: "Suivant",
-                        last: "Dernier"
-                    }
-                },
-                pageLength: 10,
-                order: [
-                    [0, 'asc']
-                ]
-            });
-      
+                var table = $('#dataTable').DataTable({
+                    language: {
+                        search: "Rechercher:",
+                        lengthMenu: "Afficher _MENU_ éléments par page",
+                        info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+                        infoEmpty: "Aucun élément à afficher",
+                        infoFiltered: "(filtré de _MAX_ éléments au total)",
+                        zeroRecords: "Aucun enregistrement correspondant trouvé",
+                        paginate: {
+                            first: "Premier",
+                            previous: "Précédent",
+                            next: "Suivant",
+                            last: "Dernier"
+                        }
+                    },
+                    pageLength: 10,
+                    order: [
+                        [0, 'asc']
+                    ]
+                });
+
                 // Faire disparaître les messages flash après 3 secondes
                 setTimeout(function() {
                     $("#flash-message").fadeOut("slow");
                 }, 4000);
 
-                
+
             });
         </script>
     </div>

@@ -45,7 +45,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     // Calculer les statistiques
                                     $countProduction = 0;
                                     $countmagasin = 0;
-                                    $countFonctionnel = 0;
+                                    $countDisponible = 0;
                                     $countNonFonctionnel = 0;
                                     $countnondefini = 0;
                                     $countTotal = is_array($equipements) ? count($equipements) : 0;
@@ -58,8 +58,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                             if (!empty($m['location_category']) && $m['location_category'] == 'magasin') {
                                                 $countmagasin++;
                                             }
-                                            if (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'fonctionnelle')) {
-                                                $countFonctionnel++;
+                                            if (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'fonctionnelle') && $m['location_category'] == 'magasin') {
+                                                $countDisponible++;
                                             } elseif (!empty($m['etat_equipement']) && ($m['etat_equipement'] == 'non fonctionnelle')) {
                                                 $countNonFonctionnel++;
                                             }
@@ -104,14 +104,29 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </div>
                                         </div>
                                     </div>
-
+                                    <!-- No Status Card -->
+                                    <div class="col-xl-2 col-md-4 mb-4">
+                                        <div class="card border-left-warning shadow h-100 py-3">
+                                            <div class="card-body">
+                                                <div class="row no-gutters align-items-center">
+                                                    <div class="col mr-2">
+                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Equipements non définies</div>
+                                                        <div class="status-count text-gray-800" id="count-empty-status"><?php echo $countnondefini; ?></div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <i class="fas fa-question-circle fa-2x status-card-icon text-warning"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <!-- non fonctionnel Card -->
                                     <div class="col-xl-2 col-md-4 mb-4">
                                         <div class="card border-left-danger shadow h-100 py-3">
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Non fonctionnel</div>
+                                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Feraille</div>
                                                         <div class="status-count text-gray-800" id="count-nonFonctionnel"><?php echo $countNonFonctionnel; ?></div>
                                                     </div>
                                                     <div class="col-auto">
@@ -128,8 +143,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <div class="card-body">
                                                 <div class="row no-gutters align-items-center">
                                                     <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Fonctionnel</div>
-                                                        <div class="status-count text-gray-800" id="count-Fonctionnel"><?php echo $countFonctionnel; ?></div>
+                                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Disponible</div>
+                                                        <div class="status-count text-gray-800" id="count-Fonctionnel"><?php echo $countDisponible; ?></div>
                                                     </div>
                                                     <div class="col-auto">
                                                         <i class="fas fa-check-circle fa-2x status-card-icon text-success"></i>
@@ -154,22 +169,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- No Status Card -->
-                                    <div class="col-xl-2 col-md-4 mb-4">
-                                        <div class="card border-left-warning shadow h-100 py-3">
-                                            <div class="card-body">
-                                                <div class="row no-gutters align-items-center">
-                                                    <div class="col mr-2">
-                                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Equipements non définies</div>
-                                                        <div class="status-count text-gray-800" id="count-empty-status"><?php echo $countnondefini; ?></div>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <i class="fas fa-question-circle fa-2x status-card-icon text-warning"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+
 
 
                                 </div>
@@ -205,7 +205,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         if (empty($equipement['location_category'])) {
                                                             echo '<span class="badge badge-secondary">Non défini</span>';
                                                         } elseif ($equipement['location_category'] == 'prodline') {
-                                                            echo '<span class="badge badge-success">En production</span>';
+                                                            echo '<span class="badge badge-success">'.htmlspecialchars($equipement['location_name']).'</span>';
                                                         } else {
                                                             echo '<span class="badge badge-primary">' . htmlspecialchars($equipement['location_name']) . '</span>';
                                                         }
@@ -216,10 +216,12 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         $status = $equipement['etat_equipement'] ?? 'Non défini';
                                                         if (empty($equipement['etat_equipement'])) {
                                                             echo '<span class="badge badge-secondary ">' . 'non défini' . '</span>';
-                                                        } elseif ($status == 'fonctionnelle') {
-                                                            echo '<span class="badge badge-success ">' . htmlspecialchars($status) . '</span>';
-                                                        } else {
-                                                            echo '<span class="badge badge-danger ">' . 'non fonctionnelle' . '</span>';
+                                                        } elseif ($status == 'fonctionnelle' && $equipement['location_category'] == 'prodline') {
+                                                            echo '<span class="badge badge-success ">' . 'En production' . '</span>';
+                                                        } elseif ($status == 'fonctionnelle' && $equipement['location_category'] == 'magasin') {
+                                                        echo '<span class="badge badge-warning ">' . 'Disponible' . '</span>';
+                                                    } else {
+                                                            echo '<span class="badge badge-danger ">' . 'feraille' . '</span>';
                                                         }
                                                         ?>
                                                     </td>

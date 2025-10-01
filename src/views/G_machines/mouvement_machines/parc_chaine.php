@@ -27,6 +27,8 @@ if (!isset($mouvements)) {
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/datatables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 </head>
 <style>
     .equipment-list-container {
@@ -165,12 +167,37 @@ if (!isset($mouvements)) {
         transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
         margin-right: 6px;
     }
-    .action-icon i { font-size: 12px; }
-    .action-icon .label { display: none; font-size: 12px; font-weight: 500; }
-    .action-icon:hover .label { display: inline; }
-    .action-icon.accept:hover { background: rgba(40, 167, 69, 0.08); color: #28a745; border-color: rgba(40, 167, 69, 0.25); }
-    .action-icon.reject:hover { background: rgba(220, 53, 69, 0.08); color: #dc3545; border-color: rgba(220, 53, 69, 0.25); }
-    .action-icon:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,123,255,.2); }
+
+    .action-icon i {
+        font-size: 12px;
+    }
+
+    .action-icon .label {
+        display: none;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .action-icon:hover .label {
+        display: inline;
+    }
+
+    .action-icon.accept:hover {
+        background: rgba(40, 167, 69, 0.08);
+        color: #28a745;
+        border-color: rgba(40, 167, 69, 0.25);
+    }
+
+    .action-icon.reject:hover {
+        background: rgba(220, 53, 69, 0.08);
+        color: #dc3545;
+        border-color: rgba(220, 53, 69, 0.25);
+    }
+
+    .action-icon:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, .2);
+    }
 </style>
 
 <body id="page-top">
@@ -216,8 +243,8 @@ if (!isset($mouvements)) {
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                        <th>Action</th>
-                                        <th>Statut</th>
+                                            <th>Action</th>
+                                            <th>Statut</th>
 
                                             <th>Machine ID</th>
                                             <th>Référence</th>
@@ -234,21 +261,21 @@ if (!isset($mouvements)) {
                                         <?php if (is_array($mouvements) && count($mouvements) > 0): ?>
                                             <?php foreach ($mouvements as $mouvement): ?>
                                                 <tr>
-                                                <td>
+                                                    <td>
                                                         <?php if (empty($mouvement['idEmp_accepted']) && empty($mouvement['status'])): ?>
                                                             <button class="action-icon accept  reception-btn" data-toggle="modal" data-target="#receptionModal"
                                                                 title="Réceptionner"
                                                                 data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
                                                                 data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
                                                                 <i class="fas fa-check text-success"></i>
-                                                               
+
                                                             </button>
                                                             <button class="action-icon reject reject-btn" data-toggle="modal" data-target="#rejectModal"
                                                                 title="Rejeter"
                                                                 data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
                                                                 data-machine-id="<?= htmlspecialchars($mouvement['id_machine'] ?? '') ?>">
                                                                 <i class="fas fa-times text-danger"></i>
-                                                              
+
                                                             </button>
                                                         <?php else: ?>
                                                             <span class="text-muted">Traité</span>
@@ -298,17 +325,17 @@ if (!isset($mouvements)) {
                                                             if (is_array($arr) && count($arr) > 0) {
                                                                 echo htmlspecialchars(implode(', ', $arr));
                                                             } else {
-                                                                echo '—';
+                                                                echo ' ';
                                                             }
                                                         } else {
-                                                            echo '—';
+                                                            echo ' ';
                                                         }
                                                         ?>
                                                     </td>
                                                     <td><?= htmlspecialchars($mouvement['Comment'] ?? '') ?></td>
-                                                   
-                                                    
-                                                   
+
+
+
 
                                                 </tr>
                                             <?php endforeach; ?>
@@ -325,9 +352,13 @@ if (!isset($mouvements)) {
             <?php include(__DIR__ . "/../../../views/layout/footer.php"); ?>
         </div>
 
-        <?php $type_mouvement = 'parc_chaine'; $location = 'parc'; include(__DIR__ . '/../../modals/mouvement_machine_modal.php'); ?>
-        <?php $type_mouvement = 'parc_chaine'; include(__DIR__ . '/../../modals/reception_modal.php'); ?>
-        <?php $type_mouvement = 'parc_chaine'; include(__DIR__ . '/../../modals/reject_modal.php'); ?>
+        <?php $type_mouvement = 'parc_chaine';
+        $location = 'parc';
+        include(__DIR__ . '/../../modals/mouvement_machine_modal.php'); ?>
+        <?php $type_mouvement = 'parc_chaine';
+        include(__DIR__ . '/../../modals/reception_modal.php'); ?>
+        <?php $type_mouvement = 'parc_chaine';
+        include(__DIR__ . '/../../modals/reject_modal.php'); ?>
 
         <!-- Scripts JavaScript -->
         <script src="/platform_gmao/public/js/jquery-3.6.4.min.js"></script>
@@ -390,7 +421,7 @@ if (!isset($mouvements)) {
                                 console.log(data);
                                 var options = '<option value="">--Sélectionnez une machine--</option>';
                                 $.each(data, function(index, machine) {
-                                    options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference +' </option>';
+                                    options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference + ' </option>';
                                 });
                                 $('#machine').html(options);
                             },

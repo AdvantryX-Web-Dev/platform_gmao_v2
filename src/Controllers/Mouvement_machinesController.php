@@ -8,10 +8,11 @@ use App\Models\MouvementMachine_model;
 use App\Models\Maintainer_model;
 use App\Models\Database;
 use PDOException;
+use App\Models\AuditTrail_model;
 
 class Mouvement_machinesController
 {
-    
+
     public function chaine_parc()
     {
         $mouvements = MouvementMachine_model::findChaineParc();
@@ -50,7 +51,7 @@ class Mouvement_machinesController
         return MouvementMachine_model::findByType($type);
     }
 
-    
+
 
     public function getMaintainers()
     {
@@ -75,7 +76,7 @@ class Mouvement_machinesController
             $machine = $_POST['machine'] ?? '';
             $maintenancier = $_POST['maintenancier'] ?? '';
             $raison = $_POST['raisonMouvement'] ?? '';
-            $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine'; 
+            $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine';
 
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
@@ -112,6 +113,8 @@ class Mouvement_machinesController
                 $stmt->execute();
 
                 if ($stmt->rowCount() > 0) {
+                    // Audit trail pour saveMouvement
+                    $this->logAuditSaveMouvement($machine, $maintenancier, $raison, $type_mouvement);
                     $_SESSION['flash_message'] = [
                         'type' => 'success',
                         'text' => 'Le mouvement a été enregistré avec succès.'
@@ -175,7 +178,7 @@ class Mouvement_machinesController
             // Mettre à jour le mouvement avec l'ID de l'employé qui accepte
             $db =  new Database();
             $conn = $db->getConnection();
-           
+
             try {
                 // Transaction pour assurer l'intégrité des données
                 $conn->beginTransaction();
@@ -238,7 +241,18 @@ class Mouvement_machinesController
                         }
                         $stmt->execute();
                     }
+
+                    //cherche id correspondant à machine_id
+                    $stmt = $conn->prepare("SELECT id FROM init__machine WHERE machine_id = :machine_id LIMIT 1");
+                    $stmt->execute([':machine_id' => $machineId]);
+                    $machineId = $stmt->fetchColumn();
+
+                    //insert into gmao__machine_maint
+                    $stmt = $conn->prepare("INSERT INTO gmao__machine_maint (machine_id, maintener_id, location_id) VALUES (:machine_id, :maintener_id, :location_id)");
+                    $stmt->execute([':machine_id' => $machineId, ':maintener_id' => $userId, ':location_id' => $locationId]);
                 }
+                // Audit trails
+                $this->logAuditAccept($mouvementId, $machineId, $userId, $locationId, $etat_machine);
 
                 // Commit la transaction
                 $conn->commit();
@@ -411,5 +425,110 @@ class Mouvement_machinesController
     {
         // Inclure la vue d'historique des mouvements d'une machine
         include(__DIR__ . '/../views/G_machines/G_machines_status/history_machineStatus.php');
+    }
+
+    /**
+     * Audit trail pour la fonction accept
+     * Tables: gmao__machine_maint (ADD), gmao__mouvement_machine (UPDATE), init__machine (UPDATE)
+     */
+    private function logAuditAccept($mouvementId, $machineId, $userId, $locationId, $etatMachine)
+    {
+        try {
+            $userMatricule = $_SESSION['user']['matricule'] ?? null;
+            if (!$userMatricule) return;
+
+            $db = new Database();
+            $conn = $db->getConnection();
+
+            // 1. gmao__machine_maint (ADD)
+            $newValue = [
+                'machine_id' => $machineId,
+                'maintener_id' => $userId,
+                'location_id' => $locationId,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__machine_maint', null, $newValue);
+
+            // 2. gmao__mouvement_machine (UPDATE)
+            // Récupérer les anciennes valeurs
+            $stmt = $conn->prepare("SELECT idEmp_accepted, status, equipement FROM gmao__mouvement_machine WHERE num_Mouv_Mach = :mouvement_id");
+            $stmt->execute([':mouvement_id' => $mouvementId]);
+            $oldValues = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $oldValue = [
+                'num_Mouv_Mach' => $mouvementId,
+                'idEmp_accepted' => $oldValues['idEmp_accepted'],
+                'status' => $oldValues['status'],
+                'equipement' => $oldValues['equipement']
+            ];
+
+            $newValue = [
+                'num_Mouv_Mach' => $mouvementId,
+                'idEmp_accepted' => $userId,
+                'status' => 'accepté',
+                'equipement' => $_POST['equipment_ids'] ?? '[]'
+            ];
+            AuditTrail_model::logAudit($userMatricule, 'update', 'gmao__mouvement_machine', $oldValue, $newValue);
+
+            // 3. init__machine (UPDATE)
+            // Récupérer les anciennes valeurs
+            $stmt = $conn->prepare("SELECT machines_status_id, machines_location_id FROM init__machine WHERE id = :machine_id");
+            $stmt->execute([':machine_id' => $machineId]);
+            $oldValues = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $oldValue = [
+                'id' => $machineId,
+                'machines_status_id' => $oldValues['machines_status_id'],
+                'machines_location_id' => $oldValues['machines_location_id']
+            ];
+
+            $newValue = [
+                'id' => $machineId,
+                'machines_status_id' => $etatMachine,
+                'machines_location_id' => $locationId
+            ];
+            AuditTrail_model::logAudit($userMatricule, 'update', 'init__machine', $oldValue, $newValue);
+
+        } catch (\Throwable $e) {
+            error_log("Erreur audit accept: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Audit trail pour la fonction saveMouvement
+     * Table: gmao__mouvement_machine (ADD)
+     */
+    private function logAuditSaveMouvement($machine, $maintenancier, $raison, $typeMouvement)
+    {
+        try {
+            $userMatricule = $_SESSION['user']['matricule'] ?? null;
+            if (!$userMatricule) return;
+
+            // Récupérer l'ID du mouvement créé
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("SELECT num_Mouv_Mach FROM gmao__mouvement_machine WHERE id_machine = :machine AND idEmp_moved = :maintenancier AND type_Mouv = :type ORDER BY num_Mouv_Mach DESC LIMIT 1");
+            $stmt->execute([
+                ':machine' => $machine,
+                ':maintenancier' => $maintenancier,
+                ':type' => $typeMouvement
+            ]);
+            $mouvementId = $stmt->fetchColumn();
+
+            if ($mouvementId) {
+                $newValue = [
+                    'num_Mouv_Mach' => $mouvementId,
+                    'date_mouvement' => date('Y-m-d H:i:s'),
+                    'id_machine' => $machine,
+                    'id_Rais' => $raison,
+                    'idEmp_moved' => $maintenancier,
+                    'type_Mouv' => $typeMouvement
+                ];
+                AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__mouvement_machine', null, $newValue);
+            }
+
+        } catch (\Throwable $e) {
+            error_log("Erreur audit saveMouvement: " . $e->getMessage());
+        }
     }
 }

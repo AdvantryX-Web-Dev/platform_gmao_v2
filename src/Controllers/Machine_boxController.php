@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Machines_box_model;
 use App\Models\Database;
+use App\Models\AuditTrail_model;
 
 class Machine_boxController
 {
@@ -76,6 +77,9 @@ class Machine_boxController
             ]);
 
             if ($success) {
+                // Audit trail pour l'affectation
+                $this->logAuditAffecter($prod_line, $machine_id, $box_id, $maintainer, $potential, $cur_date, $cur_time);
+                
                 $_SESSION['flash_success'] = 'Machine affectée avec succès !';
             } else {
                 $_SESSION['flash_error'] = 'Erreur lors de l\'affectation de la machine.';
@@ -90,5 +94,44 @@ class Machine_boxController
         // Redirection
         header('Location: /platform_gmao/public/index.php?route=box_machine/affectation_scan');
         exit;
+    }
+
+    /**
+     * Audit trail pour la fonction affecter
+     * Table: prod__implantation (ADD)
+     */
+    private function logAuditAffecter($prodLine, $machineId, $boxId, $maintainer, $potential, $curDate, $curTime)
+    {
+        try {
+            $userMatricule = $_SESSION['user']['matricule'] ?? null;
+            if (!$userMatricule) return;
+
+            // Récupérer l'ID de l'affectation créée
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("SELECT id FROM prod__implantation WHERE machine_id = :machine_id AND smartbox = :box_id ORDER BY id DESC LIMIT 1");
+            $stmt->execute([
+                ':machine_id' => $machineId,
+                ':box_id' => $boxId
+            ]);
+            $affectationId = $stmt->fetchColumn();
+
+            if ($affectationId) {
+                $newValue = [
+                    'id' => $affectationId,
+                    'prod_line' => $prodLine,
+                    'machine_id' => $machineId,
+                    'smartbox' => $boxId,
+                    'operator' => $maintainer,
+                    'potential' => $potential,
+                    'cur_date' => $curDate,
+                    'cur_time' => $curTime
+                ];
+                AuditTrail_model::logAudit($userMatricule, 'add', 'prod__implantation', null, $newValue);
+            }
+
+        } catch (\Throwable $e) {
+            error_log("Erreur audit affecter: " . $e->getMessage());
+        }
     }
 }

@@ -17,6 +17,50 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
 
             <form id="ajoutInterventionPreventiveForm" action="../../platform_gmao/public/index.php?route=intervention/savePreventive" method="POST">
                 <div class="modal-body">
+                    <div class="form-group">
+                        <label for="maintenance_by"> Maintenancier :</label>
+                        <?php
+                        // Récupérer l'ID du maintenancier connecté
+                        $connectedMatricule = $_SESSION['user']['matricule'] ?? null;
+                        $connectedMaintainerId = null;
+                        $connectedMaintainerName = '';
+
+                        if ($connectedMatricule) {
+                            $db = \App\Models\Database::getInstance('db_digitex');
+                            $conn = $db->getConnection();
+                            $stmt = $conn->prepare("SELECT id, first_name, last_name FROM init__employee WHERE matricule = ?");
+                            $stmt->execute([$connectedMatricule]);
+                            $maintainer = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                            if ($maintainer) {
+                                $connectedMaintainerId = $maintainer['id'];
+                                $connectedMaintainerName = trim($maintainer['first_name'] . ' ' . $maintainer['last_name']);
+                            }
+                        }
+                        ?>
+                        <?php if ($isAdmin): ?>
+
+                            <select class="form-control" id="maintenance_by" name="maintenance_by" required>
+                                <option value="">-- Sélectionner un maintenancier --</option>
+                                <?php
+                                // Load maintainers
+                                $maintainers = \App\Models\Maintainer_model::findAll();
+
+                                if (isset($maintainers) && is_array($maintainers)) {
+                                    foreach ($maintainers as $maintainer) {
+                                        echo '<option value="' . htmlspecialchars($maintainer['id']) . '">' .
+                                            htmlspecialchars($maintainer['first_name']) . ' ' .
+                                            htmlspecialchars($maintainer['last_name']) . '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
+                        <?php else: ?>
+                            <input type="hidden" name="maintenance_by" value="<?= htmlspecialchars($connectedMaintainerId) ?>">
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMaintainerName) ?>" readonly>
+
+                        <?php endif; ?>
+                    </div>
                     <div class="form-group planning">
                         <label for="planning_id"> Planning (optionnel) :</label>
                         <select class="form-control" id="planning_id" name="planning_id">
@@ -62,10 +106,9 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                             <?php
                             if (isset($all_machines) && is_array($all_machines)) {
                                 foreach ($all_machines as $machine) {
-                                   // echo '<option value="' . htmlspecialchars($machine['id']) . '">' .
                                     echo '<option value="' . htmlspecialchars($machine['id']) . '" data-reference="' . htmlspecialchars($machine['reference']) . '">' .
 
-                                        htmlspecialchars($machine['reference'] . ' - ' . $machine['machine_id']) . '</option>';
+                                        htmlspecialchars($machine['machine_id'] . ' - ' . $machine['reference']) .  '</option>';
                                 }
                             }
                             ?>
@@ -74,7 +117,7 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                     <?php
 
                     ?>
-                    <div class="form-group intervention-details">
+                    <!-- <div class="form-group intervention-details">
                         <label for="production_line_id"> Chaîne de production :</label>
                         <select class="form-control" id="production_line_id" name="production_line_id" required>
                             <option value="">-- Sélectionner une chaîne --</option>
@@ -88,27 +131,10 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                             }
                             ?>
                         </select>
-                    </div>
+                    </div> -->
 
 
-                    <div class="form-group">
-                        <label for="maintenance_by"> Maintenancier :</label>
-                        <select class="form-control" id="maintenance_by" name="maintenance_by" required>
-                            <option value="">-- Sélectionner un maintenancier --</option>
-                            <?php
-                            // Load maintainers
-                            $maintainers = \App\Models\Maintainer_model::findAll();
 
-                            if (isset($maintainers) && is_array($maintainers)) {
-                                foreach ($maintainers as $maintainer) {
-                                    echo '<option value="' . htmlspecialchars($maintainer['id']) . '">' .
-                                        htmlspecialchars($maintainer['first_name']) . ' ' .
-                                        htmlspecialchars($maintainer['last_name']) . '</option>';
-                                }
-                            }
-                            ?>
-                        </select>
-                    </div>
                     <div class="form-group">
                         <label for="intervention_date"> Date d'intervention :</label>
                         <input type="date" class="form-control" id="intervention_date" name="intervention_date" required>
@@ -183,6 +209,6 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
             updateVisibility();
         });
 
-    
+
     });
 </script>

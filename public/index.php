@@ -29,7 +29,7 @@ use App\Controllers\Mouvement_equipmentController;
 use App\Controllers\LocationController;
 use App\Controllers\ScanController;
 use App\Controllers\InventaireController;
-
+use App\Controllers\HistoriqueInventaireController;
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -49,9 +49,18 @@ $Mouvement_equipmentController = new Mouvement_equipmentController();
 $locationController = new LocationController();
 $scanController = new ScanController();
 $inventaireController = new InventaireController();
-
+$historiqueInventaireController = new HistoriqueInventaireController();
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
+
+// Protéger toutes les routes si l'utilisateur n'est pas connecté (sauf routes publiques)
+$publicRoutes = ['login', 'register'];
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    if (!in_array($route, $publicRoutes, true)) {
+        header('Location: index.php?route=login');
+        exit;
+    }
+}
 
 // Router les requêtes vers les contrôleurs appropriés
 switch ($route) {
@@ -96,12 +105,21 @@ switch ($route) {
     case 'importInventaire':
         $inventaireController->importInventaire();
         break;
+        case 'historyInventaire':
+            $historiqueInventaireController->index();
+            break;
+    case 'ajouterInventaire':
+        $inventaireController->AddInventaire();
+        break;
         case 'listInventaire':
             $inventaireController->listInventaire();
             break;
-        case 'maintenancier_machine':
-            $inventaireController->maintenancier_machine();
-            break;
+    case 'maintenancier_machine':
+        $inventaireController->maintenancier_machine();
+        break;
+    case 'maintenance_default':
+        $inventaireController->maintenance_default();
+        break;
     /** Gestion initiale des machines */
 
     case 'machines':
@@ -359,12 +377,8 @@ switch ($route) {
             $authController->updateCompte();
         } else {
             $matricule = $_GET['id'] ?? null;
-            if (!$matricule && isset($_SESSION['email'])) {
-                $db = new \App\Models\Database();
-                $conn = $db->getConnection();
-                $stmt = $conn->prepare("SELECT matricule FROM gmao__compte WHERE email = ?");
-                $stmt->execute([$_SESSION['email']]);
-                $matricule = $stmt->fetchColumn();
+            if (!$matricule && isset($_SESSION['user']['matricule'])) {
+                $matricule = $_SESSION['user']['matricule'];
             }
             if ($matricule) {
                 $db = new \App\Models\Database();

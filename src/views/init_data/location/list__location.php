@@ -49,59 +49,115 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     <a href="../../platform_gmao/public/index.php?route=location/create" class="btn btn-success mr-2">
                                         <i class="fas fa-plus"></i> Ajouter emplacement
                                     </a>
-                                   
                                 </div>
                             <?php endif; ?>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTableLocations" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <?php if ($isAdmin): ?>
-                                                <th style="width: 8%;">Actions</th>
-                                            <?php endif; ?>
-                                            <th>Emplacement</th>
-                                            <th>Type</th>
-                                           <!-- <th>Type</th> -->
-
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (!empty($Locations)): ?>
-                                            <?php foreach ($Locations as $loc): ?>
+                            <ul class="nav nav-tabs" id="locationTabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="machines-tab" data-toggle="tab" href="#machines" role="tab" aria-controls="machines" aria-selected="true">Machines</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="equipments-tab" data-toggle="tab" href="#equipments" role="tab" aria-controls="equipments" aria-selected="false">Équipements</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content pt-3" id="locationTabsContent">
+                                <div class="tab-pane fade show active" id="machines" role="tabpanel" aria-labelledby="machines-tab">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="dataTableLocationsMachines" width="100%" cellspacing="0">
+                                            <thead>
                                                 <tr>
                                                     <?php if ($isAdmin): ?>
-                                                        <td>
-                                                            <a href="../../platform_gmao/public/index.php?route=location/edit&id=<?= urlencode($loc['id']) ?>">
-                                                                <i class="fas fa-edit m-2 text-primary"></i>
-                                                            </a>
-                                                            <a href="../../platform_gmao/public/index.php?route=location/delete&id=<?= urlencode($loc['id']) ?>"
-                                                                onclick="return confirm('Supprimer cet emplacement ?');">
-                                                                <i class="fas fa-trash text-danger"></i>
-                                                            </a>
-                                                        </td>
+                                                        <th style="width: 8%;">Actions</th>
                                                     <?php endif; ?>
-
-                                                    <td><?= htmlspecialchars($loc['location_name'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($loc['location_category'] ?? '') ?></td>
-                                                    <!-- <td>
-                                                        <span class="badge badge-<?= $loc['location_type'] === 'machine' ? 'primary' : 'success' ?>">
-                                                            <?= htmlspecialchars($loc['location_type'] ?? '') ?>
-                                                        </span>
-                                                    </td>
-                                                    -->
+                                                    <th>Emplacement</th>
+                                                    <th>Type</th>
+                                                    <th>categories</th>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <tr>
-                                                <td colspan="<?= $isAdmin ? '4' : '3' ?>" class="text-center">
-                                                    Aucun emplacement trouvé.
-                                                </td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (!empty($Locations)): ?>
+                                                    <?php foreach ($Locations as $loc): ?>
+                                                        <?php if (($loc['location_type'] ?? '') === 'machine'): ?>
+                                                            <tr>
+                                                                <?php if ($isAdmin): ?>
+                                                                    <td>
+                                                                        <a href="../../platform_gmao/public/index.php?route=location/edit&id=<?= urlencode($loc['id']) ?>">
+                                                                            <i class="fas fa-edit m-2 text-primary"></i>
+                                                                        </a>
+                                                                        <a href="../../platform_gmao/public/index.php?route=location/delete&id=<?= urlencode($loc['id']) ?>"
+                                                                            onclick="return confirm('Supprimer cet emplacement ?');">
+                                                                            <i class="fas fa-trash text-danger"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                <?php endif; ?>
+                                                                <td><?= htmlspecialchars($loc['location_name'] ?? '') ?></td>
+                                                                <td><?= htmlspecialchars($loc['location_category'] ?? '') ?></td>
+                                                                <td>
+                                                                    <span class="badge badge-primary">machine</span>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <tr>
+                                                        <td colspan="<?= $isAdmin ? '4' : '3' ?>" class="text-center">
+                                                            Aucun emplacement trouvé.
+                                                        </td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="equipments" role="tabpanel" aria-labelledby="equipments-tab">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="dataTableLocationsEquipments" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <?php if ($isAdmin): ?>
+                                                        <th style="width: 8%;">Actions</th>
+                                                    <?php endif; ?>
+                                                    <th>Emplacement</th>
+                                                    <th>Type</th>
+                                                    <th>categories</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (!empty($Locations)): ?>
+                                                    <?php foreach ($Locations as $loc): ?>
+                                                        <?php if (($loc['location_type'] ?? '') !== 'machine'): ?>
+                                                            <tr>
+                                                                <?php if ($isAdmin): ?>
+                                                                    <td>
+                                                                        <a href="../../platform_gmao/public/index.php?route=location/edit&id=<?= urlencode($loc['id']) ?>">
+                                                                            <i class="fas fa-edit m-2 text-primary"></i>
+                                                                        </a>
+                                                                        <a href="../../platform_gmao/public/index.php?route=location/delete&id=<?= urlencode($loc['id']) ?>"
+                                                                            onclick="return confirm('Supprimer cet emplacement ?');">
+                                                                            <i class="fas fa-trash text-danger"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                <?php endif; ?>
+                                                                <td><?= htmlspecialchars($loc['location_name'] ?? '') ?></td>
+                                                                <td><?= htmlspecialchars($loc['location_category'] ?? '') ?></td>
+                                                                <td>
+                                                                    <span class="badge badge-success">equipment</span>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <tr>
+                                                        <td colspan="<?= $isAdmin ? '4' : '3' ?>" class="text-center">
+                                                            Aucun emplacement trouvé.
+                                                        </td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

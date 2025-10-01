@@ -260,15 +260,23 @@ class Machine_model
 
 
 
-    public static function MachinesStateTable()
+    public static function MachinesStateTable($userMatricule = null)
     {
 
-        $db = new Database(); // Spécifier explicitement la base de données db_digitex
 
+        $db = new Database(); // Spécifier explicitement la base de données db_digitex
         $conn = $db->getConnection();
+        $userID = "select id from init__employee where matricule = '$userMatricule'";
+        $stmt = $conn->prepare($userID);
+        $stmt->execute();
+        $userID = $stmt->fetchColumn();
+
         try {
             // Obtenir la date d'aujourd'hui
             $today = date('Y-m-d');
+
+            // Vérifier si c'est un admin
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
 
             // Requête principale pour obtenir les machines et leurs informations
             // avec jointure sur la table de présence pour aujourd'hui
@@ -291,7 +299,24 @@ class Machine_model
                         GROUP BY machine_id
                     ) lpp ON lpp.machine_id = m.machine_id
                     LEFT JOIN prod__presence pp 
-                        ON pp.id = lpp.max_id
+                        ON pp.id = lpp.max_id";
+
+            // Si ce n'est pas un admin, filtrer par les machines associées à l'utilisateur
+            if (!$isAdmin && $userID) {
+                $query .= "
+                    WHERE m.id IN (
+                        SELECT mm.machine_id 
+                        FROM gmao__machine_maint mm
+                        INNER JOIN (
+                            SELECT MAX(id) AS id
+                            FROM gmao__machine_maint
+                            GROUP BY machine_id
+                        ) last ON last.id = mm.id 
+                        WHERE mm.maintener_id = :userID
+                    )";
+            }
+
+            $query .= "
                 ORDER BY 
                     m.updated_at DESC
             ";
@@ -299,6 +324,12 @@ class Machine_model
             $stmt = $conn->prepare($query);
 
             $stmt->bindParam(':today', $today);
+
+            // Bind du paramètre userID si nécessaire
+            if (!$isAdmin && $userID) {
+                $stmt->bindParam(':userID', $userID);
+            }
+
             $stmt->execute();
             $machines = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
