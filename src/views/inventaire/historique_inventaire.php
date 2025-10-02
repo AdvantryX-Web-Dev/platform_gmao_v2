@@ -151,7 +151,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <option value="conforme" <?= ($filterStatus == 'conforme') ? 'selected' : '' ?>>Conforme</option>
                                             <option value="non_conforme" <?= ($filterStatus == 'non_conforme') ? 'selected' : '' ?>>Non Conforme</option>
                                             <option value="non_inventoriee" <?= ($filterStatus == 'non_inventoriee') ? 'selected' : '' ?>>Non Inventoriée</option>
-                                            <option value="supprimer" <?= ($filterStatus == 'supprimer') ? 'selected' : '' ?>>Machine Supprimée</option>
+                                            <!-- <option value="supprimer" <?= ($filterStatus == 'supprimer') ? 'selected' : '' ?>>Machine Supprimée</option> -->
                                             <option value="ajouter" <?= ($filterStatus == 'ajouter') ? 'selected' : '' ?>>Machine Ajoutée</option>
                                         </select>
                                     </div>
