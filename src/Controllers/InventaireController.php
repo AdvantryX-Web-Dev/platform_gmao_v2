@@ -111,38 +111,92 @@ class InventaireController
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         $conn->beginTransaction();
-        //insert into gmao__inventaire_machine
+        //insert into gmao__inventaire_machine - VERSION OPTIMISÉE avec fallback
+        try {
+            $this->save_inventaire_machine_optimized($conn, $rows);
+        } catch (\Throwable $e) {
+            error_log("Erreur avec la version optimisée, utilisation de la version classique: " . $e->getMessage());
+            $conn->rollBack();
+            $conn->beginTransaction();
         $this->save_inventaire_machine($conn, $rows);
+        }
 
 
         header('Location: index.php?route=importInventaire');
         exit;
     }
+
+    /**
+     * VERSION OPTIMISÉE: Seulement 2 connexions à la base de données
+     * 1. Charger toutes les données de référence
+     * 2. Traiter en mémoire PHP
+     * 3. Insérer toutes les données validées
+     */
+    private function save_inventaire_machine_optimized($conn, $rows)
+    {
+        try {
+            // ÉTAPE 1: Charger TOUTES les données de référence en une seule fois
+            $referenceData = $this->loadAllReferenceData($conn);
+            
+            // ÉTAPE 2: Traiter TOUTES les données Excel en mémoire PHP
+            $validatedData = $this->processAllExcelDataInMemory($rows, $referenceData);
+            
+            // ÉTAPE 3: Insérer TOUTES les données validées en une seule fois
+            $insertSuccess = $this->insertAllValidatedData($conn, $validatedData);
+            
+            if ($insertSuccess) {
+                $conn->commit();
+                
+                // Message de succès avec statistiques détaillées
+                $message = sprintf(
+                    //'Import effectué avec succès!
+                    //  Machines mises à jour: %d/%d| Lignes ignorées: %d | Machines trouvées: %d | Machines crées: %d | Inventaires ajoutés: %d ',
+                    // $validatedData['stats']['rows_processed'],
+                    // $validatedData['stats']['total_rows'],
+                    // $validatedData['stats']['rows_skipped'],
+                    // $validatedData['stats']['machines_found'],
+                    // $validatedData['stats']['machines_created'],
+                    // count($validatedData['inventaire']
+                    'Import effectué avec succès!',
+                    
+                );
+                $_SESSION['flash_success'] = $message;
+            } else {
+                $conn->rollBack();
+                $_SESSION['flash_error'] = 'Erreur lors de l\'insertion des données validées';
+            }
+            
+        } catch (\Throwable $e) {
+            $conn->rollBack();
+            error_log("Erreur détaillée import optimisé: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            $_SESSION['flash_error'] = 'Erreur lors de l\'import optimisé: ' . $e->getMessage();
+        }
+    }
+
     private function save_inventaire_machine($conn, $rows)
     {
 
+
+        $stats = [
+            'total_rows' => count($rows),
+            'machines_created' => 0,
+            'machines_found' => 0,
+            'rows_processed' => 0,
+            'rows_skipped' => 0
+        ];
+
         try {
-            $insert = $conn->prepare("INSERT INTO gmao__inventaire_machine (machine_id, maintener_id, location_id, status_id, created_at) VALUES (:machine_id, :maintener_id, :location_id, :status_id, :created_at)");
-            // Lookup prepared statements
-            $idMachine = $conn->prepare("SELECT id FROM init__machine WHERE machine_id = :id_machine LIMIT 1");
-            // Vérifier l'existence d'une ligne avec même machine_id et created_at
+            // Vérifier l'existence d'une ligne avec même machine_id et la même date
             $checkDuplicate = $conn->prepare("SELECT id FROM gmao__inventaire_machine WHERE machine_id = :machine_id AND DATE(created_at) = :current_date LIMIT 1");
 
             foreach ($rows as $row) {
-
-                $machine_idxl = trim((string)$row[10]);
-                // id machine
-                if ($machine_idxl !== '') {
-                    $idMachine->execute([':id_machine' => $machine_idxl]);
-                    $machineId = $idMachine->fetchColumn();
-                    if ($machineId === false || $machineId === null || $machineId === '') {
-                        // Aucun équipement correspondant, ignorer la ligne pour éviter la violation FK
+                // 1. Validation et récupération de l'ID machine
+                $machineId = $this->validateAndGetMachineId($conn, $row, $stats);
+                if ($machineId === null) {
                         continue;
                     }
-                    $machineId = (int)$machineId;
-                } else {
-                    continue;
-                }
+
                 // Vérifier s'il existe déjà une ligne avec le même machine_id et la même date
                 $currentDate = date('Y-m-d');
                 $checkDuplicate->execute([
@@ -150,108 +204,57 @@ class InventaireController
                     ':current_date' => $currentDate
                 ]);
 
-                // id maintenancier
-                $idMaintener = $conn->prepare("SELECT id FROM init__employee WHERE matricule = :id_maintener LIMIT 1");
-                $maintener_idxl = trim((string)$row[7]);
+                // 2. Validation et récupération de l'ID location
+                $locationId = $this->validateAndGetLocationId($conn, $row, $stats);
+                if ($locationId === null && trim((string)$row[9]) !== '') {
+                    continue; // Location invalide (ex: FERAILLE)
+                }
 
-                if ($maintener_idxl !== '') {
-                    $idMaintener->execute([':id_maintener' => $maintener_idxl]);
-                    $maintenerId = $idMaintener->fetchColumn();
-                    if ($maintenerId === false || $maintenerId === null || $maintenerId === '') {
-                        // Matricule inconnu, ignorer la ligne pour éviter la violation FK
-                        continue;
-                    }
-                    $maintenerId = (int)$maintenerId;
-                } else {
+                // 3. Détermination du statut
+                $location_idxl = trim((string)$row[9]);
+                $location_category = null;
+                if ($locationId !== null) {
+                    $location_category_stmt = $conn->prepare("SELECT location_category FROM gmao__location WHERE id = :location_id");
+                    $location_category_stmt->execute([':location_id' => $locationId]);
+                    $location_category = $location_category_stmt->fetchColumn();
+                }
+                
+                $status = $this->determineStatus($row, $location_idxl, $location_category);
+                $statusId = $this->getStatusId($conn, $status);
+
+                // 4. Mise à jour de init__machine AVANT la section maintenancier
+                $this->updateMachineStatusAndLocation($conn, $machineId, $statusId, $locationId);
+
+                // 5. Validation et récupération de l'ID maintenancier
+                $maintenerId = $this->validateAndGetMaintenerId($conn, $row, $stats);
+                if ($maintenerId === null) {
+                            continue;
+                }
+
+                // 6. Insertions dans les tables gmao__inventaire_machine
+                $insertSuccess = $this->insertInventoryAndMaintenance($conn, $machineId, $maintenerId, $locationId, $statusId);
+                if (!$insertSuccess) {
+                    $stats['rows_skipped']++;
                     continue;
                 }
-                // id location
-                $idLocation = $conn->prepare("SELECT id FROM gmao__location WHERE location_name = :id_location LIMIT 1");
-                $location_idxl = trim((string)$row[9]);
 
-                if ($location_idxl !== '') {
-
-
-                    $location_category =  ($conn->prepare("select location_category
-                     from gmao__location 
-                     where location_name = :id_location;"));
-
-                    $location_category->execute([':id_location' => $location_idxl]);
-                    $location_category = $location_category->fetchColumn();
-
-                    $idLocation->execute([':id_location' => $location_idxl]);
-                    $locationId = $idLocation->fetchColumn();
-
-
-                    if (empty($locationId)) {
-                        if (strpos($location_idxl, 'CH') === 0 || strpos($location_idxl, 'ECH') === 0 || strpos($location_idxl, 'ch') === 0) {
-                            $location_category = 'prodline';
-                        } elseif ($location_idxl === "FERAILLE") {
-                            continue;
-                        } else {
-                            $location_category = 'parc';
-                        }
-                        $stmt = $conn->prepare("INSERT INTO gmao__location (location_name, location_category) VALUES (:location_name, :location_category)");
-                        $stmt->execute([':location_name' => $location_idxl, ':location_category' => $location_category]);
-                        $locationId = $conn->lastInsertId(); // récupérer l'ID correct après INSERT
-
-
-
-                    }
-                    // Cast en entier si présent
-                    if ($locationId !== false && $locationId !== null && $locationId !== '') {
-                        $locationId = (int)$locationId;
-                    }
-                } else {
-                    $locationId = null;
-                }
-
-                //id status
-                $status_idxl = trim((string)$row[18]);
-                $status = null;
-                if ($status_idxl !== '') {
-                    if ($status_idxl === "NON OK" && $location_category === "parc") {
-                        $status = "en panne";
-                    } elseif ($status_idxl === "NON OK" && $location_idxl === "ANNEX CHIBA") {
-                        $status = "ferraille";
-                    } elseif ($status_idxl === "OK" && $location_category === "parc") {
-                        $status = "inactive";
-                    } elseif ($status_idxl === "NON OK" && $location_category === "prodline") {
-                        $status = "inactive";
-                    } elseif ($status_idxl === "OK" && $location_category === "prodline") {
-                        $status = "active";
-                    }
-                }
-                if ($status !== null) {
-                    $idStatus = $conn->prepare("SELECT id FROM gmao__status WHERE status_name = :id_status LIMIT 1");
-                    $idStatus->execute([':id_status' => $status]);
-                    $statusId = $idStatus->fetchColumn();
-                    $statusId = ($statusId !== false && $statusId !== null && $statusId !== '') ? (int)$statusId : null;
-                } else {
-                    $statusId = null;
-                }
-
-
-
-
-                $insert->execute([
-                    ':machine_id' => $machineId,
-                    ':maintener_id' => $maintenerId,
-                    ':location_id' => $locationId,
-                    ':status_id' => $statusId,
-                    ':created_at' => date('Y-m-d H:i:s')
-                ]);
-                //insert into gmao__machine_maint
-                $stmt = $conn->prepare("INSERT INTO gmao__machine_maint (machine_id, maintener_id, location_id) VALUES (:machine_id, :maintener_id, :location_id)");
-                $stmt->execute([':machine_id' => $machineId, ':maintener_id' => $maintenerId, ':location_id' => $locationId]);
-                //update init__machine set machines_status_id et machines_location_id 
-                $stmt = $conn->prepare("UPDATE init__machine SET machines_status_id = :status_id, machines_location_id = :location_id WHERE id = :machine_id");
-                $stmt->execute([':status_id' => $statusId, ':location_id' => $locationId, ':machine_id' => $machineId]);
+                // 7. Audit trail
                 $this->logAuditImport($machineId, $maintenerId, $locationId, $statusId);
+                $stats['rows_processed']++;
             }
             $conn->commit();
 
-            $_SESSION['flash_success'] = 'Import effectué avec succès';
+            // Message de succès avec statistiques détaillées
+            $message = sprintf(
+                'Import effectué avec succès! Lignes traitées: %d/%d| Lignes ignorées: %d | Machines trouvées: %d | Machines crées: %d ',
+                $stats['rows_processed'],
+                $stats['total_rows'],
+               
+                $stats['rows_skipped'],
+                $stats['machines_found'],
+                $stats['machines_created']
+            );
+            $_SESSION['flash_success'] = $message;
         } catch (\Throwable $e) {
             $conn->rollBack();
             $_SESSION['flash_error'] = 'Erreur lors de l\'import: ' . $e->getMessage();
@@ -709,34 +712,763 @@ class InventaireController
             error_log("Erreur audit admin: " . $e->getMessage());
         }
     }
+
+    /**
+     * Crée une nouvelle machine dans init__machine avec les données du fichier Excel
+     * @param PDO $conn Connexion à la base de données
+     * @param array $row Ligne du fichier Excel
+     * @return int|null ID de la machine créée ou null en cas d'échec
+     */
+    private function createNewMachine($conn, $row)
+    {
+        try {
+            // Mapping des colonnes Excel vers les champs de la table init__machine
+            // Basé sur votre structure: machine_id=row[0], reference=row[18], etc.
+            $machineData = [
+                'machine_id' => trim((string)($row[10] ?? '')),      // Colonne A (machine_id)
+                'reference' => trim((string)($row[17] ?? '')),
+                'brand' => trim((string)($row[4] ?? '')),           // Colonne B (brand) mafque
+                'type' => trim((string)($row[2] ?? '')),
+                'designation' => trim((string)($row[3] ?? '')),
+                'billing_num' => trim((string)($row[19] ?? '')),
+                'bill_date' => $this->parseDate($row[20] ?? ''),
+                'cur_date' => date('Y-m-d'),                        // Date actuelle
+                'machines_location_id' => null,                     // Sera mis à jour plus tard
+                'machines_status_id' => null                        // Sera mis à jour plus tard
+            ];
+
+            // Validation des champs obligatoires
+            if (empty($machineData['machine_id'])) {
+                error_log("Impossible de créer la machine: machine_id manquant");
+                return null;
+            }
+
+            // Vérifier si la machine n'existe pas déjà (double vérification)
+            $checkStmt = $conn->prepare("SELECT id FROM init__machine WHERE machine_id = ? LIMIT 1");
+            $checkStmt->execute([$machineData['machine_id']]);
+            if ($checkStmt->fetchColumn()) {
+                // La machine existe déjà, récupérer son ID
+                $checkStmt->execute([$machineData['machine_id']]);
+                return (int)$checkStmt->fetchColumn();
+            }
+
+            // Préparer la requête d'insertion
+            $insertStmt = $conn->prepare("
+                INSERT INTO init__machine (
+                    machine_id, reference, brand, type, designation, 
+                    billing_num, bill_date,  cur_date, 
+                    machines_location_id, machines_status_id, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, NOW())
+            ");
+
+            // Exécuter l'insertion
+            $result = $insertStmt->execute([
+                $machineData['machine_id'],
+                $machineData['reference'],
+                $machineData['brand'],
+                $machineData['type'],
+                $machineData['designation'],
+                $machineData['billing_num'],
+                $machineData['bill_date'],
+
+                $machineData['cur_date'],
+                $machineData['machines_location_id'],
+                $machineData['machines_status_id']
+            ]);
+
+            if ($result) {
+                $newMachineId = $conn->lastInsertId();
+                error_log("Nouvelle machine crée: ID={$newMachineId}, machine_id={$machineData['machine_id']}");
+                return (int)$newMachineId;
+            } else {
+                error_log("Échec de création de la machine: " . implode(', ', $insertStmt->errorInfo()));
+                return null;
+            }
+        } catch (\Throwable $e) {
+            error_log("Erreur lors de la création de la machine: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Parse une date depuis le fichier Excel
+     * @param mixed $dateValue Valeur de date du fichier Excel
+     * @return string|null Date au format Y-m-d ou null
+     */
+    private function parseDate($dateValue)
+    {
+        if (empty($dateValue)) {
+            return null;
+        }
+
+        // Si c'est déjà une date au bon format
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateValue)) {
+            return $dateValue;
+        }
+
+        // Si c'est un timestamp Excel
+        if (is_numeric($dateValue)) {
+            $timestamp = ($dateValue - 25569) * 86400; // Conversion Excel vers Unix timestamp
+            return date('Y-m-d', $timestamp);
+        }
+
+        // Essayer de parser avec strtotime
+        $parsed = strtotime($dateValue);
+        if ($parsed !== false) {
+            return date('Y-m-d', $parsed);
+        }
+
+        return null;
+    }
+
+    /**
+     * Fonction privée pour valider et récupérer les données machine
+     * @param PDO $conn Connexion à la base de données
+     * @param array $row Ligne du fichier Excel
+     * @param array $stats Statistiques (passé par référence)
+     * @return int|null ID de la machine ou null si échec
+     */
+    private function validateAndGetMachineId($conn, $row, &$stats)
+    {
+        $machine_idxl = trim((string)$row[10]);
+        
+        if ($machine_idxl === '') {
+            $stats['rows_skipped']++;
+            return null;
+        }
+
+        $idMachine = $conn->prepare("SELECT id FROM init__machine WHERE machine_id = :id_machine LIMIT 1");
+        $idMachine->execute([':id_machine' => $machine_idxl]);
+        $machineId = $idMachine->fetchColumn();
+        
+        if ($machineId === false || $machineId === null || $machineId === '') {
+            // Créer une nouvelle machine dans init__machine
+            $machineId = $this->createNewMachine($conn, $row);
+            if ($machineId === null) {
+                $stats['rows_skipped']++;
+                return null;
+            }
+            $stats['machines_created']++;
+        } else {
+            $stats['machines_found']++;
+        }
+        
+        return (int)$machineId;
+    }
+
+    /**
+     * Fonction privée pour gérer les locations
+     * @param PDO $conn Connexion à la base de données
+     * @param array $row Ligne du fichier Excel
+     * @param array $stats Statistiques (passé par référence)
+     * @return int|null ID de la location ou null
+     */
+    private function validateAndGetLocationId($conn, $row, &$stats)
+    {
+        $location_idxl = trim((string)$row[9]);
+        
+        if ($location_idxl === '') {
+            return null;
+        }
+
+        $idLocation = $conn->prepare("SELECT id FROM gmao__location WHERE location_name = :id_location LIMIT 1");
+        $location_category = $conn->prepare("SELECT location_category FROM gmao__location WHERE location_name = :id_location");
+        
+        $location_category->execute([':id_location' => $location_idxl]);
+        $location_category = $location_category->fetchColumn();
+        
+        $idLocation->execute([':id_location' => $location_idxl]);
+        $locationId = $idLocation->fetchColumn();
+        
+        if (empty($locationId)) {
+            if (strpos($location_idxl, 'CH') === 0 || strpos($location_idxl, 'ECH') === 0 || strpos($location_idxl, 'ch') === 0) {
+                $location_category = 'prodline';
+            } elseif ($location_idxl === "FERAILLE") {
+                $stats['rows_skipped']++;
+                return null;
+            } else {
+                $location_category = 'parc';
+            }
+            
+            $stmt = $conn->prepare("INSERT INTO gmao__location (location_name, location_category) VALUES (:location_name, :location_category)");
+            $stmt->execute([':location_name' => $location_idxl, ':location_category' => $location_category]);
+            $locationId = $conn->lastInsertId();
+        }
+        
+        return ($locationId !== false && $locationId !== null && $locationId !== '') ? (int)$locationId : null;
+    }
+
+    /**
+     * Fonction privée pour gérer les statuts
+     * @param array $row Ligne du fichier Excel
+     * @param string $location_idxl Nom de la location
+     * @param string $location_category Catégorie de la location
+     * @return string|null Nom du statut ou null
+     */
+    private function determineStatus($row, $location_idxl, $location_category)
+    {
+        $status_idxl = trim((string)$row[18]);
+        
+        if ($status_idxl === '') {
+            return null;
+        }
+        
+        if ($status_idxl === "NON OK" && $location_category === "parc") {
+            return "en panne";
+        } elseif ($status_idxl === "NON OK" && $location_idxl === "ANNEX CHIBA") {
+            
+            return "ferraille";
+        } elseif ($status_idxl === "OK" && $location_category === "parc") {
+            return "inactive";
+        } elseif ($status_idxl === "NON OK" && $location_category === "prodline") {
+            return "inactive";
+        } elseif ($status_idxl === "OK" && $location_category === "prodline") {
+            return "active";
+        }
+        
+        return null;
+    }
+
+    /**
+     * Fonction privée pour récupérer l'ID du statut
+     * @param PDO $conn Connexion à la base de données
+     * @param string|null $status Nom du statut
+     * @return int|null ID du statut ou null
+     */
+    private function getStatusId($conn, $status)
+    {
+        if ($status === null) {
+            return null;
+        }
+        
+        $idStatus = $conn->prepare("SELECT id FROM gmao__status WHERE status_name = :id_status LIMIT 1");
+        $idStatus->execute([':id_status' => $status]);
+        $statusId = $idStatus->fetchColumn();
+        
+        return ($statusId !== false && $statusId !== null && $statusId !== '') ? (int)$statusId : null;
+    }
+
+    /**
+     * Fonction privée pour mettre à jour init__machine
+     * @param PDO $conn Connexion à la base de données
+     * @param int $machineId ID de la machine
+     * @param int|null $statusId ID du statut
+     * @param int|null $locationId ID de la location
+     * @return bool Succès de la mise à jour
+     */
+    private function updateMachineStatusAndLocation($conn, $machineId, $statusId, $locationId)
+    {
+        $stmt = $conn->prepare("UPDATE init__machine SET machines_status_id = :status_id, machines_location_id = :location_id WHERE id = :machine_id");
+        return $stmt->execute([':status_id' => $statusId, ':location_id' => $locationId, ':machine_id' => $machineId]);
+    }
+
+    /**
+     * Fonction privée pour valider le maintenancier
+     * @param PDO $conn Connexion à la base de données
+     * @param array $row Ligne du fichier Excel
+     * @param array $stats Statistiques (passé par référence)
+     * @return int|null ID du maintenancier ou null si échec
+     */
+    private function validateAndGetMaintenerId($conn, $row, &$stats)
+    {
+        $maintener_idxl = trim((string)$row[7]);
+        
+        if ($maintener_idxl === '') {
+            $stats['rows_skipped']++;
+            return null;
+        }
+        
+        $idMaintener = $conn->prepare("SELECT id FROM init__employee WHERE matricule = :id_maintener LIMIT 1");
+        $idMaintener->execute([':id_maintener' => $maintener_idxl]);
+        $maintenerId = $idMaintener->fetchColumn();
+        
+        if ($maintenerId === false || $maintenerId === null || $maintenerId === '') {
+            $stats['rows_skipped']++;
+            return null;
+        }
+        
+        return (int)$maintenerId;
+    }
+
+    /**
+     * Fonction privée pour effectuer les insertions dans les tables
+     * @param PDO $conn Connexion à la base de données
+     * @param int $machineId ID de la machine
+     * @param int $maintenerId ID du maintenancier
+     * @param int|null $locationId ID de la location
+     * @param int|null $statusId ID du statut
+     * @return bool Succès des insertions
+     */
+    private function insertInventoryAndMaintenance($conn, $machineId, $maintenerId, $locationId, $statusId)
+    {
+        try {
+            // 1. INSERT dans gmao__inventaire_machine
+            $insertInventaire = $conn->prepare("INSERT INTO gmao__inventaire_machine (machine_id, maintener_id, location_id, status_id, created_at) VALUES (:machine_id, :maintener_id, :location_id, :status_id, :created_at)");
+            $insertInventaire->execute([
+                ':machine_id' => $machineId,
+                ':maintener_id' => $maintenerId,
+                ':location_id' => $locationId,
+                ':status_id' => $statusId,
+                ':created_at' => date('Y-m-d H:i:s')
+            ]);
+            
+            // 2. INSERT dans gmao__machine_maint
+            $insertMachineMaint = $conn->prepare("INSERT INTO gmao__machine_maint (machine_id, maintener_id, location_id) VALUES (:machine_id, :maintener_id, :location_id)");
+            $insertMachineMaint->execute([
+                ':machine_id' => $machineId,
+                ':maintener_id' => $maintenerId,
+                ':location_id' => $locationId
+            ]);
+            
+            return true;
+        } catch (\Throwable $e) {
+            error_log("Erreur lors des insertions: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * OPTIMISATION: Charge toutes les données de référence en une seule fois
+     * @param PDO $conn Connexion à la base de données
+     * @return array Toutes les données de référence indexées
+     */
+    private function loadAllReferenceData($conn)
+    {
+        $referenceData = [
+            'machines' => [],
+            'employees' => [],
+            'locations' => [],
+            'statuses' => [],
+            'existing_inventaire' => []
+        ];
+
+        try {
+            // 1. Charger toutes les machines
+            $stmt = $conn->query("SELECT id, machine_id FROM init__machine");
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $referenceData['machines'][$row['machine_id']] = (int)$row['id'];
+            }
+
+            // 2. Charger tous les employés
+            $stmt = $conn->query("SELECT id, matricule FROM init__employee");
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $referenceData['employees'][$row['matricule']] = (int)$row['id'];
+            }
+
+            // 3. Charger toutes les locations
+            $stmt = $conn->query("SELECT id, location_name, location_category FROM gmao__location");
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $referenceData['locations'][$row['location_name']] = [
+                    'id' => (int)$row['id'],
+                    'category' => $row['location_category']
+                ];
+            }
+
+            // 4. Charger tous les statuts
+            $stmt = $conn->query("SELECT id, status_name FROM gmao__status");
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $referenceData['statuses'][$row['status_name']] = (int)$row['id'];
+            }
+
+            // 5. Charger l'inventaire existant pour aujourd'hui
+            $today = date('Y-m-d');
+            $stmt = $conn->prepare("SELECT machine_id FROM gmao__inventaire_machine WHERE DATE(created_at) = :today");
+            $stmt->execute([':today' => $today]);
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $referenceData['existing_inventaire'][(int)$row['machine_id']] = true;
+            }
+
+        } catch (\Throwable $e) {
+            error_log("Erreur lors du chargement des données de référence: " . $e->getMessage());
+        }
+
+        return $referenceData;
+    }
+
+    /**
+     * OPTIMISATION: Traite toutes les données Excel en mémoire PHP
+     * @param array $rows Données Excel
+     * @param array $referenceData Données de référence chargées
+     * @return array Données validées prêtes pour insertion
+     */
+    private function processAllExcelDataInMemory($rows, $referenceData)
+    {
+        $validatedData = [
+            'inventaire' => [],
+            'machine_maint' => [],
+            'machine_updates' => [],
+            'new_locations' => [],
+            'new_machines' => [],
+            'stats' => [
+                'total_rows' => count($rows),
+                'machines_created' => 0,
+                'machines_found' => 0,
+                'rows_processed' => 0,
+                'rows_skipped' => 0
+            ]
+        ];
+
+        foreach ($rows as $rowIndex => $row) {
+            // 1. Validation machine
+            $machine_idxl = trim((string)($row[10] ?? ''));
+            if ($machine_idxl === '') {
+                $validatedData['stats']['rows_skipped']++;
+                continue;
+            }
+
+            $machineId = $referenceData['machines'][$machine_idxl] ?? null;
+            if ($machineId === null) {
+                // Vérifier si cette machine n'a pas déjà été ajoutée dans new_machines
+                $alreadyAdded = false;
+                foreach ($validatedData['new_machines'] as $newMachine) {
+                    if ($newMachine['machine_id'] === $machine_idxl) {
+                        $alreadyAdded = true;
+                        $machineId = -array_search($newMachine, $validatedData['new_machines']) - 1;
+                        break;
+                    }
+                }
+                
+                if (!$alreadyAdded) {
+                    // Créer une nouvelle machine seulement si elle n'existe pas
+                    $newMachine = $this->prepareNewMachineData($row);
+                    if ($newMachine === null) {
+                        $validatedData['stats']['rows_skipped']++;
+                        continue;
+                    }
+                    $validatedData['new_machines'][] = $newMachine;
+                    $validatedData['stats']['machines_created']++;
+                    // Utiliser un ID temporaire négatif pour le suivi
+                    $machineId = -count($validatedData['new_machines']);
+                }
+            } else {
+                $validatedData['stats']['machines_found']++;
+            }
+
+            // Vérifier si déjà dans l'inventaire d'aujourd'hui
+            if (isset($referenceData['existing_inventaire'][$machineId])) {
+                $validatedData['stats']['rows_skipped']++;
+                continue;
+            }
+
+            // 2. Validation location
+            $location_idxl = trim((string)($row[9] ?? ''));
+            $locationId = null;
+            $location_category = null;
+
+            if ($location_idxl !== '') {
+                // Vérifier d'abord dans les locations existantes
+                if (isset($referenceData['locations'][$location_idxl])) {
+                    $locationId = $referenceData['locations'][$location_idxl]['id'];
+                    $location_category = $referenceData['locations'][$location_idxl]['category'];
+                } else {
+                    // Vérifier si cette location n'a pas déjà été ajoutée dans new_locations
+                    $alreadyAdded = false;
+                    foreach ($validatedData['new_locations'] as $newLocation) {
+                        if ($newLocation['location_name'] === $location_idxl) {
+                            $alreadyAdded = true;
+                            $locationId = -array_search($newLocation, $validatedData['new_locations']) - 1;
+                            $location_category = $newLocation['location_category'];
+                            break;
+                        }
+                    }
+                    
+                    if (!$alreadyAdded) {
+                        // Créer une nouvelle location seulement si elle n'existe pas
+                        $location_category = $this->determineLocationCategory($location_idxl);
+                        if ($location_category === null) {
+                            $validatedData['stats']['rows_skipped']++;
+                            continue; // FERAILLE
+                        }
+                        $validatedData['new_locations'][] = [
+                            'location_name' => $location_idxl,
+                            'location_category' => $location_category
+                        ];
+                        // Utiliser un ID temporaire négatif
+                        $locationId = -count($validatedData['new_locations']);
+                    }
+                }
+            }
+
+            // 3. Détermination du statut
+            $status = $this->determineStatus($row, $location_idxl, $location_category);
+            $statusId = $status ? ($referenceData['statuses'][$status] ?? null) : null;
+
+            // 4. PRIORITÉ: Toujours mettre à jour init__machine si on a location ou status
+            if ($locationId !== null || $statusId !== null) {
+                $validatedData['machine_updates'][] = [
+                    'machine_id' => $machineId,
+                    'status_id' => $statusId,
+                    'location_id' => $locationId
+                ];
+                $validatedData['stats']['rows_processed']++;
+            }
+
+            // 5. Validation maintenancier (optionnel pour les autres tables)
+            $maintener_idxl = trim((string)($row[7] ?? ''));
+            $maintenerId = null;
+            
+            if ($maintener_idxl !== '') {
+                $maintenerId = $referenceData['employees'][$maintener_idxl] ?? null;
+            }
+
+            // 6. Insérer dans les autres tables SEULEMENT si maintenancier trouvé
+            if ($maintenerId !== null) {
+                $validatedData['inventaire'][] = [
+                    'machine_id' => $machineId,
+                    'maintener_id' => $maintenerId,
+                    'location_id' => $locationId,
+                    'status_id' => $statusId,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+
+                $validatedData['machine_maint'][] = [
+                    'machine_id' => $machineId,
+                    'maintener_id' => $maintenerId,
+                    'location_id' => $locationId
+                ];
+            } else {
+                // Maintenancier non trouvé, mais init__machine déjà mis à jour
+                $validatedData['stats']['rows_skipped']++;
+            }
+        }
+
+        return $validatedData;
+    }
+
+    /**
+     * OPTIMISATION: Insère toutes les données validées en une seule fois
+     * @param PDO $conn Connexion à la base de données
+     * @param array $validatedData Données validées
+     * @return bool Succès de l'insertion
+     */
+    private function insertAllValidatedData($conn, $validatedData)
+    {
+        try {
+            // 1. Insérer les nouvelles locations (éviter les doublons)
+            if (!empty($validatedData['new_locations'])) {
+                error_log("Insertion de " . count($validatedData['new_locations']) . " nouvelles locations");
+                $locationStmt = $conn->prepare("INSERT IGNORE INTO gmao__location (location_name, location_category) VALUES (?, ?)");
+                foreach ($validatedData['new_locations'] as $location) {
+                    $locationStmt->execute([$location['location_name'], $location['location_category']]);
+                }
+            }
+
+            // 2. Insérer les nouvelles machines (éviter les doublons)
+            if (!empty($validatedData['new_machines'])) {
+                error_log("Insertion de " . count($validatedData['new_machines']) . " nouvelles machines");
+                $machineStmt = $conn->prepare("
+                    INSERT IGNORE INTO init__machine (
+                        machine_id, reference, brand, type, designation, 
+                        billing_num, bill_date, cur_date, 
+                        machines_location_id, machines_status_id, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ");
+                foreach ($validatedData['new_machines'] as $index => $machine) {
+                    // Log des données avant insertion pour debug
+                    error_log("Machine $index: type='" . $machine['type'] . "' (longueur: " . strlen($machine['type']) . ")");
+                    
+                    // Tronquer les champs trop longs
+                    $machine['type'] = substr($machine['type'], 0, 16); // Limiter à 16 caractères
+                    $machine['brand'] = substr($machine['brand'], 0, 24); // Limiter à 24 caractères
+                    $machine['designation'] = substr($machine['designation'], 0, 48); // Limiter à 48 caractères
+                    $machine['reference'] = substr($machine['reference'], 0, 16); // Limiter à 16 caractères
+                    $machine['billing_num'] = substr($machine['billing_num'], 0, 10); // Limiter à 10 caractères
+                    
+                    $machineStmt->execute([
+                        $machine['machine_id'], $machine['reference'], $machine['brand'],
+                        $machine['type'], $machine['designation'], $machine['billing_num'],
+                        $machine['bill_date'], $machine['cur_date'],
+                        $machine['machines_location_id'], $machine['machines_status_id']
+                    ]);
+                }
+            }
+
+            // 3. Mettre à jour les IDs temporaires avec les vrais IDs
+            $this->updateTemporaryIds($conn, $validatedData);
+
+            // 4. PRIORITÉ: Mettre à jour init__machine en premier
+            if (!empty($validatedData['machine_updates'])) {
+                error_log("Mise à jour de " . count($validatedData['machine_updates']) . " machines (PRIORITÉ)");
+                $updateStmt = $conn->prepare("
+                    UPDATE init__machine 
+                    SET machines_status_id = ?, machines_location_id = ? 
+                    WHERE id = ?
+                ");
+                foreach ($validatedData['machine_updates'] as $update) {
+                    $updateStmt->execute([
+                        $update['status_id'], $update['location_id'], $update['machine_id']
+                    ]);
+                }
+            }
+
+            // 5. Insérer l'inventaire
+            if (!empty($validatedData['inventaire'])) {
+                error_log("Insertion de " . count($validatedData['inventaire']) . " enregistrements d'inventaire");
+                $inventaireStmt = $conn->prepare("
+                    INSERT INTO gmao__inventaire_machine 
+                    (machine_id, maintener_id, location_id, status_id, created_at) 
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                foreach ($validatedData['inventaire'] as $inventaire) {
+                    $inventaireStmt->execute([
+                        $inventaire['machine_id'], $inventaire['maintener_id'],
+                        $inventaire['location_id'], $inventaire['status_id'],
+                        $inventaire['created_at']
+                    ]);
+                }
+            }
+
+            // 5. Insérer les maintenances
+            if (!empty($validatedData['machine_maint'])) {
+                error_log("Insertion de " . count($validatedData['machine_maint']) . " enregistrements de maintenance");
+                $maintStmt = $conn->prepare("
+                    INSERT INTO gmao__machine_maint 
+                    (machine_id, maintener_id, location_id) 
+                    VALUES (?, ?, ?)
+                ");
+                foreach ($validatedData['machine_maint'] as $maint) {
+                    $maintStmt->execute([
+                        $maint['machine_id'], $maint['maintener_id'], $maint['location_id']
+                    ]);
+                }
+            }
+
+            // 6. Les machines ont déjà été mises à jour en priorité (étape 4)
+
+            return true;
+
+        } catch (\Throwable $e) {
+            error_log("Erreur lors de l'insertion des données: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fonction utilitaire pour préparer les données d'une nouvelle machine
+     */
+    private function prepareNewMachineData($row)
+    {
+        $machineData = [
+            'machine_id' => trim((string)($row[10] ?? '')),
+            'reference' => trim((string)($row[17] ?? '')),
+            'brand' => trim((string)($row[4] ?? '')),
+            'type' => trim((string)($row[2] ?? '')),
+            'designation' => trim((string)($row[3] ?? '')),
+            'billing_num' => trim((string)($row[19] ?? '')),
+            'bill_date' => $this->parseDate($row[20] ?? ''),
+            'cur_date' => date('Y-m-d'),
+            'machines_location_id' => null,
+            'machines_status_id' => null
+        ];
+
+        if (empty($machineData['machine_id'])) {
+            return null;
+        }
+
+        return $machineData;
+    }
+
+    /**
+     * Fonction utilitaire pour déterminer la catégorie de location
+     */
+    private function determineLocationCategory($location_idxl)
+    {
+        if (strpos($location_idxl, 'CH') === 0 || strpos($location_idxl, 'ECH') === 0 || strpos($location_idxl, 'ch') === 0) {
+            return 'prodline';
+        } elseif ($location_idxl === "FERAILLE") {
+            return null; // Ignorer FERAILLE
+        } else {
+            return 'parc';
+        }
+    }
+
+    /**
+     * Fonction utilitaire pour mettre à jour les IDs temporaires
+     */
+    private function updateTemporaryIds($conn, &$validatedData)
+    {
+        // Mettre à jour les IDs temporaires des nouvelles locations
+        if (!empty($validatedData['new_locations'])) {
+            $locationMap = [];
+            // Récupérer les IDs des locations par nom (plus fiable que ORDER BY id DESC)
+            $locationNames = array_column($validatedData['new_locations'], 'location_name');
+            $placeholders = str_repeat('?,', count($locationNames) - 1) . '?';
+            $stmt = $conn->prepare("SELECT id, location_name FROM gmao__location WHERE location_name IN ($placeholders)");
+            $stmt->execute($locationNames);
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $locationMap[$row['location_name']] = (int)$row['id'];
+            }
+            
+            // Mettre à jour les IDs temporaires dans les données
+            foreach ($validatedData['inventaire'] as &$inventaire) {
+                if ($inventaire['location_id'] < 0) {
+                    $tempIndex = abs($inventaire['location_id']) - 1;
+                    if (isset($validatedData['new_locations'][$tempIndex])) {
+                        $locationName = $validatedData['new_locations'][$tempIndex]['location_name'];
+                        $inventaire['location_id'] = $locationMap[$locationName] ?? null;
+                    }
+                }
+            }
+            
+            foreach ($validatedData['machine_maint'] as &$maint) {
+                if ($maint['location_id'] < 0) {
+                    $tempIndex = abs($maint['location_id']) - 1;
+                    if (isset($validatedData['new_locations'][$tempIndex])) {
+                        $locationName = $validatedData['new_locations'][$tempIndex]['location_name'];
+                        $maint['location_id'] = $locationMap[$locationName] ?? null;
+                    }
+                }
+            }
+            
+            foreach ($validatedData['machine_updates'] as &$update) {
+                if ($update['location_id'] < 0) {
+                    $tempIndex = abs($update['location_id']) - 1;
+                    if (isset($validatedData['new_locations'][$tempIndex])) {
+                        $locationName = $validatedData['new_locations'][$tempIndex]['location_name'];
+                        $update['location_id'] = $locationMap[$locationName] ?? null;
+                    }
+                }
+            }
+        }
+        
+        // Mettre à jour les IDs temporaires des nouvelles machines
+        if (!empty($validatedData['new_machines'])) {
+            $machineMap = [];
+            $stmt = $conn->query("SELECT id, machine_id FROM init__machine ORDER BY id DESC LIMIT " . count($validatedData['new_machines']));
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $machineMap[$row['machine_id']] = (int)$row['id'];
+            }
+            
+            // Mettre à jour les IDs temporaires dans les données
+            foreach ($validatedData['inventaire'] as &$inventaire) {
+                if ($inventaire['machine_id'] < 0) {
+                    $tempIndex = abs($inventaire['machine_id']) - 1;
+                    if (isset($validatedData['new_machines'][$tempIndex])) {
+                        $machineId = $validatedData['new_machines'][$tempIndex]['machine_id'];
+                        $inventaire['machine_id'] = $machineMap[$machineId] ?? null;
+                    }
+                }
+            }
+            
+            foreach ($validatedData['machine_maint'] as &$maint) {
+                if ($maint['machine_id'] < 0) {
+                    $tempIndex = abs($maint['machine_id']) - 1;
+                    if (isset($validatedData['new_machines'][$tempIndex])) {
+                        $machineId = $validatedData['new_machines'][$tempIndex]['machine_id'];
+                        $maint['machine_id'] = $machineMap[$machineId] ?? null;
+                    }
+                }
+            }
+            
+            foreach ($validatedData['machine_updates'] as &$update) {
+                if ($update['machine_id'] < 0) {
+                    $tempIndex = abs($update['machine_id']) - 1;
+                    if (isset($validatedData['new_machines'][$tempIndex])) {
+                        $machineId = $validatedData['new_machines'][$tempIndex]['machine_id'];
+                        $update['machine_id'] = $machineMap[$machineId] ?? null;
+                    }
+                }
+            }
+        }
+    }
 }
-  
-
-
-// if ($ext === 'csv') {
-//     if (($handle = fopen($tmpPath, 'r')) !== false) {
-//         // Read header
-//         $header = fgetcsv($handle, 0, ';');
-//         if ($header === false) {
-//             $header = fgetcsv($handle, 0, ',');
-//         }
-//         if ($header === false) {
-//             $_SESSION['flash_error'] = 'CSV vide ou illisible';
-//             header('Location: index.php?route=importInventaire');
-//             exit;
-//         }
-//         // normalise header
-//         $header = array_map(function($h){ return strtolower(trim($h)); }, $header);
-//         while (($data = fgetcsv($handle, 0, ';')) !== false) {
-//             if (count($data) === 1) {
-//                 // maybe comma separated
-//                 $data = str_getcsv($data[0], ',');
-//             }
-//             if (count($data) !== count($header)) {
-//                 continue;
-//             }
-//             $rows[] = array_combine($header, $data);
-//         }
-//         fclose($handle);
-//     }
-// }

@@ -176,17 +176,17 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
         <script>
             (function() {
                 // Auto-dismiss des alertes après 5 secondes
-                setTimeout(function() {
-                    var alerts = document.querySelectorAll('.alert.auto-dismiss');
-                    alerts.forEach(function(a){
-                        if (typeof $ === 'function' && typeof $(a).alert === 'function') {
-                            $(a).alert('close');
-                        } else {
-                            a.classList.remove('show');
-                            a.addEventListener('transitionend', function(){ a.parentNode && a.parentNode.removeChild(a); }, { once: true });
-                        }
-                    });
-                }, 5000);
+                // setTimeout(function() {
+                //     var alerts = document.querySelectorAll('.alert.auto-dismiss');
+                //     alerts.forEach(function(a){
+                //         if (typeof $ === 'function' && typeof $(a).alert === 'function') {
+                //             $(a).alert('close');
+                //         } else {
+                //             a.classList.remove('show');
+                //             a.addEventListener('transitionend', function(){ a.parentNode && a.parentNode.removeChild(a); }, { once: true });
+                //         }
+                //     });
+                // }, 5000);
 
                 var dz = document.getElementById('dropzone'),
                     fi = document.getElementById('file'),
