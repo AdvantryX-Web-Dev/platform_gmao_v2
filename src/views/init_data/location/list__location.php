@@ -58,7 +58,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     <a class="nav-link active" id="machines-tab" data-toggle="tab" href="#machines" role="tab" aria-controls="machines" aria-selected="true">Machines</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="equipments-tab" data-toggle="tab" href="#equipments" role="tab" aria-controls="equipments" aria-selected="false">Équipements</a>
+                                    <a class="nav-link" id="equipments-tab" data-toggle="tab" href="#equipments" role="tab" aria-controls="equipments" aria-selected="false">Equipements</a>
                                 </li>
                             </ul>
                             <div class="tab-content pt-3" id="locationTabsContent">
@@ -176,7 +176,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
         <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
         <script>
             $(document).ready(function() {
-                $('#dataTableLocations').DataTable({
+                $('#dataTable, #dataTableLocationsEquipments,#dataTableLocationsMachines').DataTable({
                     language: {
                         search: "Rechercher:",
                         lengthMenu: "Afficher _MENU_ éléments par page",
@@ -191,24 +191,9 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             last: "Dernier"
                         }
                     },
-                    pageLength: 10,
-                    order: [
-                        [1, 'asc']
-                    ], // Trier par défaut sur la colonne Type
-                    columnDefs: [{
-                            targets: 1, // Colonne Type
-                            width: "15%"
-                        },
-                        <?php if ($isAdmin): ?> {
-                                targets: 0, // Colonne Actions
-                                orderable: false,
-                                searchable: false
-                            }
-                        <?php endif; ?>
-                    ]
+                    pageLength: 10
                 });
-
-                // Faire disparaître les messages flash après 4 secondes
+                // Faire disparaître les messages flash après 3 secondes
                 setTimeout(function() {
                     $("#flash-message").fadeOut("slow");
                 }, 4000);

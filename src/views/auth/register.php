@@ -99,11 +99,11 @@ unset($_SESSION['register_errors'], $_SESSION['register_old_values'], $_SESSION[
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">GMAO System</a>
-        </div>
-    </nav>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand mx-auto" href="#">GMAO System</a>
+  </div>
+</nav>
 
     <div class="main-content">
         <div class="register-box">

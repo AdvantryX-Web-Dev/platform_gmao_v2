@@ -62,12 +62,12 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <th style="width: 5%;">Actions</th>
                                             <?php endif; ?>
                                             <th>Machine ID</th>
-                                            <th>Référence</th>
+                                            <th class="d-none d-md-table-cell">Référence</th>
                                             <th>Marque</th>
-                                            <th>Type</th>
+                                            <th class="d-none d-md-table-cell">Type</th>
                                             <th>Désignation</th>
-                                            <th>Numéro Facture</th>
-                                            <th>Date Facture</th>
+                                            <th class="d-none d-md-table-cell">Numéro Facture</th>
+                                            <th class="d-none d-md-table-cell">Date Facture</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -81,12 +81,12 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                         </td>
                                                     <?php endif; ?>
                                                     <td><?= htmlspecialchars($machine['machine_id'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($machine['reference'] ?? '') ?></td>
+                                                    <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['reference'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($machine['brand'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($machine['type'] ?? '') ?></td>
+                                                    <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['type'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($machine['designation'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($machine['billing_num'] ?? '') ?></td>
-                                                    <td><?= htmlspecialchars($machine['bill_date'] ?? '') ?></td>
+                                                    <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['billing_num'] ?? '') ?></td>
+                                                    <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['bill_date'] ?? '') ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else: ?>
@@ -135,8 +135,9 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                         </div>
                     </div>
                 </div>
-                <?php include(__DIR__ . "/../../../views/layout/footer.php"); ?>
             </div>
+            <?php include(__DIR__ . "/../../../views/layout/footer.php"); ?>
+
         </div>
         <a class="scroll-to-top rounded" href="#page-top">
             <i class="fas fa-angle-up"></i>

@@ -25,11 +25,12 @@ if (!isset($mouvements)) {
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link rel="stylesheet" href="/platform_gmao/public/css/sb-admin-2.min.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
-    <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css">
+    <!-- <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css"> -->
     <link rel="stylesheet" href="/platform_gmao/public/css/datatables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 </head>
+
 <style>
     .equipment-list-container {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -359,185 +360,209 @@ if (!isset($mouvements)) {
         include(__DIR__ . '/../../modals/reject_modal.php'); ?>
 
         <!-- Scripts JavaScript -->
-        <script src="/platform_gmao/public/js/jquery-3.6.4.min.js"></script>
+   <!-- Scripts JavaScript -->
+   <script src="/platform_gmao/public/js/jquery-3.6.4.min.js"></script>
         <script src="/platform_gmao/public/js/bootstrap.bundle.min.js"></script>
         <script src="/platform_gmao/public/js/jquery.dataTables.min.js"></script>
         <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
         <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
         <script src="/platform_gmao/public/js/sideBare.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
         <script>
-            // Document ready function
-            $(document).ready(function() {
-                var table = $('#dataTable').DataTable({
-                    language: {
-                        search: "Rechercher:",
-                        lengthMenu: "Afficher _MENU_ éléments par page",
-                        info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-                        infoEmpty: "Aucun élément à afficher",
-                        infoFiltered: "(filtré de _MAX_ éléments au total)",
-                        zeroRecords: "Aucun enregistrement correspondant trouvé",
-                        paginate: {
-                            first: "Premier",
-                            previous: "Précédent",
-                            next: "Suivant",
-                            last: "Dernier"
-                        }
-                    },
-                    pageLength: 10,
-                    order: [
-                        [0, 'asc']
-                    ]
-                });
+       
+       // Document ready function
+       $(document).ready(function() {
+           var table = $('#dataTable').DataTable({
+               language: {
+                   search: "Rechercher:",
+                   lengthMenu: "Afficher _MENU_ éléments par page",
+                   info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+                   infoEmpty: "Aucun élément à afficher",
+                   infoFiltered: "(filtré de _MAX_ éléments au total)",
+                   zeroRecords: "Aucun enregistrement correspondant trouvé",
+                   paginate: {
+                       first: "Premier",
+                       previous: "Précédent",
+                       next: "Suivant",
+                       last: "Dernier"
+                   }
+               },
+               pageLength: 10,
+               order: [
+                   [0, 'asc']
+               ]
+           });
 
-                // Faire disparaître les messages flash après 3 secondes
-                setTimeout(function() {
-                    $("#flash-message").fadeOut("slow");
-                }, 4000);
+           // Gestion des sélections dans le modal
+           // $('#typeMachine').change(function() {
+           //     var location = "prodline";
+           //     var machineType = $(this).val();
+           //     if (machineType) {
+           //         // Récupérer les machines du type sélectionné
+           //         $.ajax({
+           //             url: '../../platform_gmao/public/index.php?route=mouvement_machines/getMachinesByType',
+           //             type: 'GET',
+           //             data: {
+           //                 type: machineType,
+           //                 location: location
+           //             },
+           //             dataType: 'json',
+           //             success: function(data) {
+           //                 var options = '<option value="">--Sélectionnez une machine--</option>';
+           //                 $.each(data, function(index, machine) {
+           //                     options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference + ' </option>';
+           //                 });
+           //                 $('#machine').html(options);
+           //             },
+           //             error: function() {
+           //                 alert('Une erreur est survenue lors de la récupération des machines.');
+           //             }
+           //         });
+           //     } else {
+           //         $('#machine').html('<option value="">--Sélectionnez une machine--</option>');
+           //     }
+           // });
 
-                // Gestion des sélections dans le modal
-                $('#typeMachine').change(function() {
-                    var location = "prodline";
-                    var machineType = $(this).val();
-                    if (machineType) {
-                        // Récupérer les machines du type sélectionné
-                        $.ajax({
-                            url: '../../platform_gmao/public/index.php?route=mouvement_machines/getMachinesByType',
-                            type: 'GET',
-                            data: {
-                                type: machineType,
-                                location: location
-                            },
-                            dataType: 'json',
-                            success: function(data) {
-                                var options = '<option value="">--Sélectionnez une machine--</option>';
-                                $.each(data, function(index, machine) {
-                                    options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference + ' </option>';
-                                });
-                                $('#machine').html(options);
-                            },
-                            error: function() {
-                                alert('Une erreur est survenue lors de la récupération des machines.');
-                            }
-                        });
-                    } else {
-                        $('#machine').html('<option value="">--Sélectionnez une machine--</option>');
-                    }
-                });
+           // Mettre à jour l'ID du mouvement dans le modal de réception
+           $('.reception-btn').click(function() {
+               var mouvementId = $(this).data('id');
+               var machineId = $(this).data('machine-id');
+               $('#mouvement_id').val(mouvementId);
+               $('#machine_id').val(machineId);
 
-                // Mettre à jour l'ID du mouvement dans le modal de réception
-                $('.reception-btn').click(function() {
-                    var mouvementId = $(this).data('id');
-                    var machineId = $(this).data('machine-id');
-                    $('#mouvement_id').val(mouvementId);
-                    $('#machine_id').val(machineId);
+               // Charger dynamiquement les équipements de la machine
+               $('#equipementsList').html('<div class="loading-equipment"><i class="fas fa-spinner fa-spin"></i> <em>Chargement des équipements...</em></div>');
+               $.ajax({
+                   url: '../../platform_gmao/public/index.php?route=mouvement_machines/getEquipementsByMachine',
+                   type: 'GET',
+                   data: {
+                       machine_id: machineId
+                   },
+                   dataType: 'json',
+                   success: function(data) {
+                       if (data && data.length > 0) {
+                           var html = '<div class="equipment-grid">';
+                           var equipmentIds = [];
+                           data.forEach(function(equipement) {
+                               equipmentIds.push(equipement.accessory_ref);
+                               html += '<div class="equipment-item">';
+                               html += '<div class="equipment-icon"><i class="fas fa-cog"></i></div>';
+                               html += '<div class="equipment-details">';
+                               html += '<div class="equipment-ref"><strong>' + (equipement.accessory_ref || 'N/A') + '</strong></div>';
+                               if (equipement.designation) {
+                                   html += '<div class="equipment-designation">' + equipement.designation + '</div>';
+                               }
+                               if (equipement.reference && equipement.reference !== equipement.accessory_ref) {
+                                   html += '<div class="equipment-reference"><small class="text-muted">Réf: ' + equipement.reference + '</small></div>';
+                               }
+                               html += '</div>';
+                               html += '</div>';
+                           });
+                           html += '</div>';
+                           $('#equipementsList').html(html);
+                           // Sauvegarder les equipment_id en JSON
+                           $('#equipment_ids').val(JSON.stringify(equipmentIds));
+                       } else {
+                           $('#equipementsList').html('<div class="no-equipment"><i class="fas fa-info-circle"></i> <em>Aucun équipement trouvé pour cette machine</em></div>');
+                           $('#equipment_ids').val(JSON.stringify([]));
+                       }
+                   },
+                   error: function(xhr) {
+                       let msg = '<div class="error-equipment"><i class="fas fa-exclamation-triangle"></i> <em>Erreur lors du chargement des équipements</em>';
+                       if (xhr.responseJSON && xhr.responseJSON.error) {
+                           msg += '<br><span style="color:red">' + xhr.responseJSON.error + '</span>';
+                       }
+                       msg += '</div>';
+                       $('#equipementsList').html(msg);
+                       $('#equipment_ids').val(JSON.stringify([]));
+                   }
+               });
+           });
 
-                    // Charger dynamiquement les équipements de la machine
-                    $('#equipementsList').html('<div class="loading-equipment"><i class="fas fa-spinner fa-spin"></i> <em>Chargement des équipements...</em></div>');
-                    $.ajax({
-                        url: '../../platform_gmao/public/index.php?route=mouvement_machines/getEquipementsByMachine',
-                        type: 'GET',
-                        data: {
-                            machine_id: machineId
-                        },
-                        dataType: 'json',
-                        success: function(data) {
-                            if (data && data.length > 0) {
-                                var html = '<div class="equipment-grid">';
-                                var equipmentIds = [];
-                                data.forEach(function(equipement) {
-                                    equipmentIds.push(equipement.accessory_ref);
-                                    html += '<div class="equipment-item">';
-                                    html += '<div class="equipment-icon"><i class="fas fa-cog"></i></div>';
-                                    html += '<div class="equipment-details">';
-                                    html += '<div class="equipment-ref"><strong>' + (equipement.accessory_ref || 'N/A') + '</strong></div>';
-                                    if (equipement.designation) {
-                                        html += '<div class="equipment-designation">' + equipement.designation + '</div>';
-                                    }
-                                    if (equipement.reference && equipement.reference !== equipement.accessory_ref) {
-                                        html += '<div class="equipment-reference"><small class="text-muted">Réf: ' + equipement.reference + '</small></div>';
-                                    }
-                                    html += '</div>';
-                                    html += '</div>';
-                                });
-                                html += '</div>';
-                                $('#equipementsList').html(html);
-                                // Sauvegarder les equipment_id en JSON
-                                $('#equipment_ids').val(JSON.stringify(equipmentIds));
-                            } else {
-                                $('#equipementsList').html('<div class="no-equipment"><i class="fas fa-info-circle"></i> <em>Aucun équipement trouvé pour cette machine</em></div>');
-                                $('#equipment_ids').val(JSON.stringify([]));
-                            }
-                        },
-                        error: function(xhr) {
-                            let msg = '<div class="error-equipment"><i class="fas fa-exclamation-triangle"></i> <em>Erreur lors du chargement des équipements</em>';
-                            if (xhr.responseJSON && xhr.responseJSON.error) {
-                                msg += '<br><span style="color:red">' + xhr.responseJSON.error + '</span>';
-                            }
-                            msg += '</div>';
-                            $('#equipementsList').html(msg);
-                            $('#equipment_ids').val(JSON.stringify([]));
-                        }
-                    });
-                });
+           // Mettre a  jour l'ID du mouvement dans le modal de rejet
+           $('.reject-btn').click(function() {
+               var mouvementId = $(this).data('id');
+               var machineId = $(this).data('machine-id');
+               $('#reject_mouvement_id').val(mouvementId);
+               $('#reject_machine_id').val(machineId);
 
-                // Mettre à jour l'ID du mouvement dans le modal de rejet
-                $('.reject-btn').click(function() {
-                    var mouvementId = $(this).data('id');
-                    var machineId = $(this).data('machine-id');
-                    $('#reject_mouvement_id').val(mouvementId);
-                    $('#reject_machine_id').val(machineId);
+               // Charger dynamiquement les equipements de la machine pour le rejet
+               $('#rejectEquipementsList').html('<div class="loading-equipment"><i class="fas fa-spinner fa-spin"></i> <em>Chargement des équipements...</em></div>');
+               $.ajax({
+                   url: '../../platform_gmao/public/index.php?route=mouvement_machines/getEquipementsByMachine',
+                   type: 'GET',
+                   data: {
+                       machine_id: machineId
+                   },
+                   dataType: 'json',
+                   success: function(data) {
+                       if (data && data.length > 0) {
+                           var html = '<div class="equipment-grid">';
+                           var equipmentIds = [];
+                           data.forEach(function(equipement) {
+                               equipmentIds.push(equipement.accessory_ref);
+                               html += '<div class="equipment-item">';
+                               html += '<div class="equipment-icon"><i class="fas fa-cog"></i></div>';
+                               html += '<div class="equipment-details">';
+                               html += '<div class="equipment-ref"><strong>' + (equipement.accessory_ref || 'N/A') + '</strong></div>';
+                               if (equipement.designation) {
+                                   html += '<div class="equipment-designation">' + equipement.designation + '</div>';
+                               }
+                               if (equipement.reference && equipement.reference !== equipement.accessory_ref) {
+                                   html += '<div class="equipment-reference"><small class="text-muted">Réf: ' + equipement.reference + '</small></div>';
+                               }
+                               html += '</div>';
+                               html += '</div>';
+                           });
+                           html += '</div>';
+                           $('#rejectEquipementsList').html(html);
+                           // Sauvegarder les equipment_id en JSON
+                           $('#reject_equipment_ids').val(JSON.stringify(equipmentIds));
+                       } else {
+                           $('#rejectEquipementsList').html('<div class="no-equipment"><i class="fas fa-info-circle"></i> <em>Aucun équipement trouvé pour cette machine</em></div>');
+                           $('#reject_equipment_ids').val(JSON.stringify([]));
+                       }
+                   },
+                   error: function(xhr) {
+                       let msg = '<div class="error-equipment"><i class="fas fa-exclamation-triangle"></i> <em>Erreur lors du chargement des équipements</em>';
+                       if (xhr.responseJSON && xhr.responseJSON.error) {
+                           msg += '<br><span style="color:red">' + xhr.responseJSON.error + '</span>';
+                       }
+                       msg += '</div>';
+                       $('#rejectEquipementsList').html(msg);
+                       $('#reject_equipment_ids').val(JSON.stringify([]));
+                   }
+               });
+           });
 
-                    // Charger dynamiquement les équipements de la machine pour le rejet
-                    $('#rejectEquipementsList').html('<div class="loading-equipment"><i class="fas fa-spinner fa-spin"></i> <em>Chargement des équipements...</em></div>');
-                    $.ajax({
-                        url: '../../platform_gmao/public/index.php?route=mouvement_machines/getEquipementsByMachine',
-                        type: 'GET',
-                        data: {
-                            machine_id: machineId
-                        },
-                        dataType: 'json',
-                        success: function(data) {
-                            if (data && data.length > 0) {
-                                var html = '<div class="equipment-grid">';
-                                var equipmentIds = [];
-                                data.forEach(function(equipement) {
-                                    equipmentIds.push(equipement.accessory_ref);
-                                    html += '<div class="equipment-item">';
-                                    html += '<div class="equipment-icon"><i class="fas fa-cog"></i></div>';
-                                    html += '<div class="equipment-details">';
-                                    html += '<div class="equipment-ref"><strong>' + (equipement.accessory_ref || 'N/A') + '</strong></div>';
-                                    if (equipement.designation) {
-                                        html += '<div class="equipment-designation">' + equipement.designation + '</div>';
-                                    }
-                                    if (equipement.reference && equipement.reference !== equipement.accessory_ref) {
-                                        html += '<div class="equipment-reference"><small class="text-muted">Réf: ' + equipement.reference + '</small></div>';
-                                    }
-                                    html += '</div>';
-                                    html += '</div>';
-                                });
-                                html += '</div>';
-                                $('#rejectEquipementsList').html(html);
-                                // Sauvegarder les equipment_id en JSON
-                                $('#reject_equipment_ids').val(JSON.stringify(equipmentIds));
-                            } else {
-                                $('#rejectEquipementsList').html('<div class="no-equipment"><i class="fas fa-info-circle"></i> <em>Aucun équipement trouvé pour cette machine</em></div>');
-                                $('#reject_equipment_ids').val(JSON.stringify([]));
-                            }
-                        },
-                        error: function(xhr) {
-                            let msg = '<div class="error-equipment"><i class="fas fa-exclamation-triangle"></i> <em>Erreur lors du chargement des équipements</em>';
-                            if (xhr.responseJSON && xhr.responseJSON.error) {
-                                msg += '<br><span style="color:red">' + xhr.responseJSON.error + '</span>';
-                            }
-                            msg += '</div>';
-                            $('#rejectEquipementsList').html(msg);
-                            $('#reject_equipment_ids').val(JSON.stringify([]));
-                        }
-                    });
-                });
-            });
-        </script>
+           function initSelect2AlwaysSearch(sel) {
+               if (typeof $ !== 'undefined' && $.fn.select2) {
+                   $(sel).select2({
+                       width: '100%',
+                       placeholder: '-- Selectionner --',
+                       allowClear: true,
+                       minimumResultsForSearch: 0,
+                       dropdownParent: $('#mouvementModal')
+                   });
+                   console.log('Select2 initialisé pour:', sel);
+               } else {
+                   console.log('Select2 non disponible pour:', sel);
+                   // Fallback: activer la recherche native
+                   $(sel).attr('onfocus', 'this.size=10;');
+                   $(sel).attr('onblur', 'this.size=1;');
+                   $(sel).attr('onchange', 'this.size=1;');
+               }
+           }
+
+           // Initialiser Select2 avec un délai pour s'assurer que tout est chargé
+           setTimeout(function() {
+               initSelect2AlwaysSearch('#machine');
+           }, 500);
+       });
+   </script>
+
     </div>
 </body>
 

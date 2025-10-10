@@ -14,30 +14,6 @@ class Auth_model
     }
 
 
-    /**
-     * Vérifie si un email existe déjà dans la table gmao__compte
-     * 
-     * @param string $email L'email à vérifier
-     * @return bool True si l'email existe, false sinon
-     */
-    //login
-    public function emailExistsInCompte($email)
-    {
-        try {
-            $conn = $this->db->getConnection();
-
-            $sql = "SELECT COUNT(*) FROM gmao__compte WHERE email = :email";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':email', $email);
-            $stmt->execute();
-
-            return $stmt->fetchColumn() > 0;
-        } catch (\PDOException $e) {
-            // Log error
-            error_log("Erreur lors de la vérification de l'email dans gmao__compte: " . $e->getMessage());
-            return false;
-        }
-    }
 
     /**
      * Vérifie si un matricule existe dans la table init_employe
@@ -110,16 +86,13 @@ class Auth_model
         try {
             $conn = $this->db->getConnection();
 
-            $sql = "INSERT INTO gmao__compte (matricule, email, motDePasse) 
-                    VALUES (:matricule, :email, :motDePasse)";
+            $sql = "INSERT INTO gmao__compte (matricule, motDePasse) 
+                    VALUES (:matricule, :motDePasse)";
 
             $stmt = $conn->prepare($sql);
 
             // Lier les valeurs aux paramètres
             $stmt->bindParam(':matricule', $compteData['matricule']);
-            // L'email peut être optionnel lorsque l'auth se fait par matricule
-            $email = $compteData['email'] ?? null;
-            $stmt->bindParam(':email', $email);
             $stmt->bindParam(':motDePasse', $compteData['password']); // 'password' est bien défini dans le tableau
 
             $success = $stmt->execute();
@@ -138,29 +111,6 @@ class Auth_model
         }
     }
 
-    /**
-     * Trouve un utilisateur par son email dans la table gmao__compte
-     * 
-     * @param string $email L'email à rechercher
-     * @return array|false Les données de l'utilisateur ou false si l'utilisateur n'existe pas
-     */
-    public function findByEmailInCompte($email)
-    {
-        try {
-            $conn = $this->db->getConnection();
-
-            $sql = "SELECT * FROM gmao__compte WHERE email = :email";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':email', $email);
-            $stmt->execute();
-
-            return $stmt->fetch(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            // Log error
-            error_log("Erreur lors de la recherche de l'utilisateur par email dans gmao__compte: " . $e->getMessage());
-            return false;
-        }
-    }
 
     /**
      * Trouve un utilisateur par son matricule dans la table gmao__compte

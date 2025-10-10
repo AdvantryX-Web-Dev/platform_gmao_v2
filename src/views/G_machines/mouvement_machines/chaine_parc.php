@@ -25,12 +25,10 @@ if (!isset($mouvements)) {
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link rel="stylesheet" href="/platform_gmao/public/css/sb-admin-2.min.css">
     <link rel="stylesheet" href="/platform_gmao/public/css/table.css">
-    <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css">
+    <!-- <link rel="stylesheet" href="/platform_gmao/public/css/mouvementMachines.css"> -->
     <link rel="stylesheet" href="/platform_gmao/public/css/datatables.min.css">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
         .equipment-list-container {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -370,8 +368,11 @@ if (!isset($mouvements)) {
     <script src="/platform_gmao/public/js/dataTables.bootstrap4.min.js"></script>
     <script src="/platform_gmao/public/js/sb-admin-2.min.js"></script>
     <script src="/platform_gmao/public/js/sideBare.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+       
+        
         // Document ready function
         $(document).ready(function() {
 
@@ -402,39 +403,37 @@ if (!isset($mouvements)) {
             setTimeout(function() {
                 $("#flash-message").fadeOut("slow");
             }, 4000);
-            console.log("avon changement");
-
-            // Gestion des sélections dans le modal
-            $('#typeMachine').change(function() {
-                var location = "prodline";
-                var machineType = $(this).val();
-                console.log(machineType);
-                if (machineType) {
-                    // Récupérer les machines du type sélectionné
-                    $.ajax({
-                        url: '../../platform_gmao/public/index.php?route=mouvement_machines/getMachinesByType',
-                        type: 'GET',
-                        data: {
-                            type: machineType,
-                            location: location
-                        },
-                        dataType: 'json',
-                        success: function(data) {
-                            console.log(data);
-                            var options = '<option value="">--Sélectionnez une machine--</option>';
-                            $.each(data, function(index, machine) {
-                                options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference + ' </option>';
-                            });
-                            $('#machine').html(options);
-                        },
-                        error: function() {
-                            alert('Une erreur est survenue lors de la récupération des machines.');
-                        }
-                    });
-                } else {
-                    $('#machine').html('<option value="">--Sélectionnez une machine--</option>');
-                }
-            });
+            // // Gestion des sélections dans le modal
+            // $('#typeMachine').change(function() {
+            //     var location = "prodline";
+            //     var machineType = $(this).val();
+            //     console.log(machineType);
+            //     if (machineType) {
+            //         // Récupérer les machines du type sélectionné
+            //         $.ajax({
+            //             url: '../../platform_gmao/public/index.php?route=mouvement_machines/getMachinesByType',
+            //             type: 'GET',
+            //             data: {
+            //                 type: machineType,
+            //                 location: location
+            //             },
+            //             dataType: 'json',
+            //             success: function(data) {
+            //                 console.log(data);
+            //                 var options = '<option value="">--Sélectionnez une machine--</option>';
+            //                 $.each(data, function(index, machine) {
+            //                     options += '<option value="' + machine.machine_id + '">' + machine.machine_id + ' - ' + machine.reference + ' </option>';
+            //                 });
+            //                 $('#machine').html(options);
+            //             },
+            //             error: function() {
+            //                 alert('Une erreur est survenue lors de la récupération des machines.');
+            //             }
+            //         });
+            //     } else {
+            //         $('#machine').html('<option value="">--Sélectionnez une machine--</option>');
+            //     }
+            // });
 
             // Mettre à jour l'ID du mouvement dans le modal de réception
             $('.reception-btn').click(function() {
@@ -548,7 +547,35 @@ if (!isset($mouvements)) {
                 });
             });
         });
+
+        function initSelect2AlwaysSearch(sel) {
+               if (typeof $ !== 'undefined' && $.fn.select2) {
+                   $(sel).select2({
+                       width: '100%',
+                       placeholder: '-- Selectionner --',
+                       allowClear: true,
+                       minimumResultsForSearch: 0,
+                       dropdownParent: $('#mouvementModal')
+                   });
+                   console.log('Select2 initialisé pour:', sel);
+               } else {
+                   console.log('Select2 non disponible pour:', sel);
+                   // Fallback: activer la recherche native
+                   $(sel).attr('onfocus', 'this.size=10;');
+                   $(sel).attr('onblur', 'this.size=1;');
+                   $(sel).attr('onchange', 'this.size=1;');
+               }
+           }
+
+           // Initialiser Select2 avec un délai pour s'assurer que tout est chargé
+           setTimeout(function() {
+               initSelect2AlwaysSearch('#machine');
+           }, 500);
+
+
+
     </script>
+
 
 
 </body>

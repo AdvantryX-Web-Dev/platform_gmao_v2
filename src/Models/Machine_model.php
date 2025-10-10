@@ -257,7 +257,21 @@ class Machine_model
             return false;
         }
     }
+    public static function machineByLocation($location)
+    {
 
+        $db = Database::getInstance('db_digitex'); // Spécifier explicitement la base de données db_digitex
+        $conn = $db->getConnection();
+        try {
+            $req = $conn->query("SELECT * FROM init__machine 
+            left join gmao__location ml on ml.id=init__machine.machines_location_id
+             where ml.location_category='$location'
+            ORDER BY machine_id");
+            return $req->fetchAll();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
 
 
     public static function MachinesStateTable($userMatricule = null)

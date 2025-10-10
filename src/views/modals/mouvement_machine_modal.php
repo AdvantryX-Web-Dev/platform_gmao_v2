@@ -2,6 +2,10 @@
 // Variables requises:
 // - $type_mouvement: string ('chaine_parc' | 'parc_chaine' | 'inter_chaine')
 // - $location: string (ex: 'prodline' | 'parc')
+
+use App\Models\Machine_model;
+
+$machineOptions = Machine_model::machineByLocation($location);
 ?>
 <div class="modal fade" id="mouvementModal" tabindex="-1" role="dialog" aria-labelledby="mouvementModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -58,11 +62,11 @@
 
                         <?php endif; ?>
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="typeMachine">Type de Machine :</label>
                         <select class="form-control" id="typeMachine" name="typeMachine" required>
                             <option value="">-- Sélectionner un type de machine --</option>
-                            <?php
+                           <?php
                             $controller = new \App\Controllers\Mouvement_machinesController();
                             $types = $controller->getTypes($location ?? '');
                             foreach ($types as $type) {
@@ -70,26 +74,41 @@
                             }
                             ?>
                         </select>
-                    </div>
-                    <div class="form-group">
+                    </div> -->
+
+                    <!-- <div class="form-group">
                         <label for="machine">Machine :</label>
                         <select class="form-control" id="machine" name="machine" required>
                             <option value="">--Sélectionnez une machine--</option>
                         </select>
-                    </div>
+                    </div> -->
 
-                    <div class="form-group">
-                        <label for="raisonMouvement">Raison Mouvement Machine :</label>
-                        <select class="form-control" id="raisonMouvement" name="raisonMouvement" required>
-                            <option value="">--Raison Mouvement Machine--</option>
-                            <?php
-                            $raisons = $controller->getRaisons();
-                            foreach ($raisons as $raison) {
-                                echo "<option value=\"{$raison['id_Raison']}\">{$raison['raison_mouv_mach']}</option>";
+
+
+                    <label for="machine" class="mb-1">Machine</label>
+                    <select class="form-control" id="machine" name="machine" required onfocus="this.size=10;" onblur="this.size=1;" onchange="this.size=1;">
+                        <option value="">-- Sélectionner --</option>
+                        <?php
+                        if (!empty($machineOptions)) {
+                            foreach ($machineOptions as $machine) {
+                                echo "<option value=\"{$machine['machine_id']}\">{$machine['machine_id']} - {$machine['reference']}</option>";
                             }
-                            ?>
-                        </select>
-                    </div>
+                        }
+                        ?>
+                    </select>
+
+
+                    <label for="raisonMouvement">Raison Mouvement Machine :</label>
+                    <select class="form-control" id="raisonMouvement" name="raisonMouvement" required>
+                        <option value="">--Raison Mouvement Machine--</option>
+                        <?php
+                        $raisons = $controller->getRaisons();
+                        foreach ($raisons as $raison) {
+                            echo "<option value=\"{$raison['id_Raison']}\">{$raison['raison_mouv_mach']}</option>";
+                        }
+                        ?>
+                    </select>
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Enregistrer</button>

@@ -2,10 +2,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var toggleBtn = document.getElementById('sidebarTo');
     var sidebar = document.getElementById('accordionSidebar');
 
-    // Hide sidebar by default on small screens (tablet/mobile)
+    // Hide sidebar by default on small screens (tablet/mobile)//cas de tablette et mobile
     if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
         if (sidebar) sidebar.style.display = 'none';
     }
+
+    
 
     if (toggleBtn && sidebar) {
         toggleBtn.addEventListener('click', function () {

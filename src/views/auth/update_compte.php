@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-// $compte doit être fourni par le contrôleur (email, matricule)
+// $compte doit être fourni par le contrôleur (matricule)
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -37,10 +37,6 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <div class="form-group">
                                     <label>Matricule</label>
                                     <input type="text" name="matricule" class="form-control" value="<?= htmlspecialchars($compte['matricule'] ?? '') ?>" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label>Email</label>
-                                    <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($compte['email'] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Nouveau mot de passe</label>
@@ -88,6 +84,7 @@ if (session_status() === PHP_SESSION_NONE) {
                         icon.removeClass('fa-eye-slash').addClass('fa-eye');
                     }
                 });
+                
             });
         </script>
     </div>

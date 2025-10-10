@@ -68,9 +68,9 @@ use App\Controllers\Machine_boxController;
                                         <tr>
                                             <th>Chaine de production <i class="fas fa-sort"></i></th>
                                             <th>Machine <i class="fas fa-sort"></i></th>
-                                            <th>Désignation machine <i class="fas fa-sort"></i></th>
+                                            <th class="d-none d-md-table-cell">Désignation machine <i class="fas fa-sort"></i></th>
                                             <th>DigiTex<i class="fas fa-sort"></i></th>
-                                            <th>Poste <i class="fas fa-sort"></i></th>
+                                            <th class="d-none d-md-table-cell">Poste <i class="fas fa-sort"></i></th>
                                             <th>Date <i class="fas fa-sort"></i></th>
                                         </tr>
                                     </thead>
@@ -81,9 +81,12 @@ use App\Controllers\Machine_boxController;
 
                                         foreach ($machs_box as $mach_box) {
 
-                                            echo '<tr><td > ' . $mach_box['prod_line'] . '</td>
+                                            echo '<tr>
+                                            <td > ' . $mach_box['prod_line'] . '</td>
                                             <td > ' . $mach_box['machine_id'] . ': ' . $mach_box['reference'] . '</td>
-                                            <td > ' . $mach_box['designation'] . '</td> <td> ' . $mach_box['smartbox'] . '</td><td > ' . $mach_box['position'] . '</td><td> D: ' . $mach_box['cur_date'] . '<br> H: ' . $mach_box['cur_time'] .
+                                            <td class="d-none d-md-table-cell"> ' . $mach_box['designation'] . '</td> 
+                                            <td> ' . $mach_box['smartbox'] . '</td>
+                                            <td class="d-none d-md-table-cell"> ' . $mach_box['position'] . '</td><td> D: ' . $mach_box['cur_date'] . '<br> H: ' . $mach_box['cur_time'] .
                                                 '</td></tr>';
                                         }
                                         ?>

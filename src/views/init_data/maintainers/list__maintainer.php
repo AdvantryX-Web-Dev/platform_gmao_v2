@@ -96,8 +96,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                         </div>
                     </div>
                 </div>
-                <?php include(__DIR__ . "/../../../views/layout/footer.php"); ?>
             </div>
+            <?php include(__DIR__ . "/../../../views/layout/footer.php"); ?>
         </div>
         <a class="scroll-to-top rounded" href="#page-top">
             <i class="fas fa-angle-up"></i>

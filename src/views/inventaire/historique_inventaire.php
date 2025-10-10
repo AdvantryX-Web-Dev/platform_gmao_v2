@@ -66,7 +66,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             </div>
                         </div>
 
-                        <!-- Taux d'Écarts -->
+                        <!-- Taux Non conforme -->
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-danger shadow h-100 py-2">
                                 <div class="card-body">
@@ -145,7 +145,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </div>
                                     <?php endif; ?>
                                     <div class="col-md-3">
-                                        <label for="filter_status" class="form-label">Évaluation</label>
+                                        <label for="filter_status" class="form-label">Evaluation</label>
                                         <select name="filter_status" id="filter_status" class="form-control">
                                             <option value="">Toutes les évaluations</option>
                                             <option value="conforme" <?= ($filterStatus == 'conforme') ? 'selected' : '' ?>>Conforme</option>
@@ -164,7 +164,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     <!-- Tableau de comparaison -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Comparaison Machines vs Historique Inventaire</h6>
+                            <h6 class="m-0 font-weight-bold text-primary"> Evaluation Inventaire</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -172,15 +172,15 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <thead>
                                         <tr>
                                             <th>Machine ID</th>
-                                            <th>Référence</th>
-                                            <th>Type</th>
+                                            <th class="d-none d-md-table-cell">Référence</th>
+                                            <th class="d-none d-md-table-cell">Type</th>
                                             <th>Emplacement Actuel</th>
                                             <th>Statut Actuel</th>
                                             <?php if ($isAdmin): ?>
                                                 <th>Maintenancier Inventaire</th>
                                                 <th>Maintenancier Actuel</th>
                                             <?php endif; ?>
-                                            <th>Évaluation</th>
+                                            <th>Evaluation</th>
                                             <th>Différence</th>
                                             <th>Date Inventaire</th>
                                         </tr>
@@ -195,14 +195,14 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         <?= htmlspecialchars($comp['historique']['machine_code'] ?? '') ?>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td>
+                                                <td class="d-none d-md-table-cell">
                                                     <?php if ($comp['machine']): ?>
-                                                        <?= htmlspecialchars($comp['machine']['reference'] ?? '') ?>
+                                                            <?= htmlspecialchars($comp['machine']['reference'] ?? '') ?>
                                                     <?php elseif ($comp['historique']): ?>
                                                         <?= htmlspecialchars($comp['historique']['machine_reference'] ?? '') ?>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td>
+                                                <td class="d-none d-md-table-cell">
                                                     <?php if (($comp['machine']) || ($comp['historique'])): ?>
                                                         <?= htmlspecialchars($comp['machine']['type'] ?? $comp['historique']['type'] ?? '') ?>
                                                     <?php else: ?>

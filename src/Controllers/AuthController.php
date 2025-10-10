@@ -78,7 +78,6 @@ class AuthController
                             $_SESSION['user'] = [
                                 'id' => $employe['id'] ?? null,
                                 'matricule' => $user['matricule'],
-                                'email' => $user['email'] ?? null,
                                 'firstname' => $employe['first_name'] ?? '',
                                 'lastname' => $employe['last_name'] ?? '',
                                 'role' => $employe['qualification'] ?? 'user'
@@ -153,7 +152,7 @@ class AuthController
                 $errors[] = "Le matricule est requis.";
             }
             
-            // Email n'est plus requis pour l'inscription si on s'authentifie par matricule
+            // Inscription par matricule uniquement
             
             if (empty($password)) {
                 $errors[] = "Le mot de passe est requis.";
@@ -182,7 +181,7 @@ class AuthController
                         // Créer un nouveau compte dans la table gmao__compte
                         $compteData = [
                             'matricule' => $matricule,
-                            // email optionnel
+                            // Création du compte
                             'password' => password_hash($password, PASSWORD_DEFAULT)
                         ];
                         
@@ -193,7 +192,6 @@ class AuthController
                             $_SESSION['is_logged_in'] = true;
                             $_SESSION['user'] = [
                                 'matricule' => $matricule,
-                                'email' => null,
                                 'firstname' => $employe['prenom'] ?? '',
                                 'lastname' => $employe['nom'] ?? '',
                                 'role' => $employe['role'] ?? 'user'
@@ -271,30 +269,34 @@ class AuthController
             session_start();
         }
         $matricule = $_POST['matricule'] ?? null;
-        $email = $_POST['email'] ?? null;
         $motDePasse = $_POST['motDePasse'] ?? null;
         $success = false;
         $error = '';
-        if ($matricule && $email) {
+        
+        // Validation du matricule (obligatoire)
+        if (empty($matricule)) {
+            $error = "Le matricule est requis.";
+        } else {
             $db = new \App\Models\Database();
             $conn = $db->getConnection();
             try {
-                if (!empty($motDePasse)) {
-                    $motDePasseHash = password_hash($motDePasse, PASSWORD_DEFAULT);
-                    $stmt = $conn->prepare("UPDATE gmao__compte SET email = ?, motDePasse = ? WHERE matricule = ?");
-                    $stmt->execute([$email, $motDePasseHash, $matricule]);
-                } else {
-                    $stmt = $conn->prepare("UPDATE gmao__compte SET email = ? WHERE matricule = ?");
-                    $stmt->execute([$email, $matricule]);
+                // Si pas d'erreur de validation, procéder à la mise à jour
+                if (empty($error)) {
+                    if (!empty($motDePasse)) {
+                        // Mise à jour avec mot de passe
+                        $motDePasseHash = password_hash($motDePasse, PASSWORD_DEFAULT);
+                        $stmt = $conn->prepare("UPDATE gmao__compte SET motDePasse = ? WHERE matricule = ?");
+                        $stmt->execute([$motDePasseHash, $matricule]);
+                        $success = true;
+                    } else {
+                        $error = "Le mot de passe est requis pour la mise à jour.";
+                    }
                 }
-                $_SESSION['email'] = $email;
-                $success = true;
             } catch (\PDOException $e) {
                 $error = "Erreur lors de la mise à jour du compte : " . $e->getMessage();
             }
-        } else {
-            $error = "Champs manquants.";
         }
+        
         if ($success) {
             $_SESSION['compte_update_success'] = "Compte mis à jour avec succès.";
         } else {

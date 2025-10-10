@@ -57,8 +57,8 @@
                 <i class="fas fa-cog fa-lg text-gray-600"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="settingsDropdown">
-                <a class="dropdown-item" href="../../platform_gmao/public/index.php?route=compte/edit_email&id=<?= urlencode($_SESSION['matricule'] ?? '') ?>">
-                    <i class="fas fa-envelope fa-sm fa-fw mr-2 text-gray-400"></i>
+                <a class="dropdown-item" href="../../platform_gmao/public/index.php?route=compte/update_compte&id=<?= urlencode($_SESSION['user']['matricule'] ?? '') ?>">
+                    <i class="fas fa-user-cog fa-sm fa-fw mr-2 text-gray-400"></i>
                     Paramètres du compte
                 </a>
             </div>

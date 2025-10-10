@@ -509,7 +509,12 @@ class InventaireController
             }
 
             $conn->commit();
-            $_SESSION['flash_success'] = "Machine ajoutée avec succès: $ok, Machines introuvables: " . (count($machineNotfound) ? implode(',machine id ', $machineNotfound) : '0');
+            if($machineNotfound !== []){
+                $_SESSION['flash_error'] = " Machines introuvables: " . (count($machineNotfound) ? implode(',machine id ', $machineNotfound) : '0');
+
+            }else{
+                $_SESSION['flash_success'] = "Machine inventairees avec succès!, $ok machines ajoutées";
+            }
         } catch (\Throwable $e) {
             if ($conn->inTransaction()) {
                 $conn->rollBack();

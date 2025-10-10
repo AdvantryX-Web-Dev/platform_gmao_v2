@@ -97,11 +97,12 @@ unset($_SESSION['login_errors'], $_SESSION['login_old_values']);
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">GMAO System</a>
-        </div>
-    </nav>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand mx-auto" href="#">GMAO System</a>
+  </div>
+</nav>
+
 
     <div class="main-content">
         <div class="login-box">

@@ -196,7 +196,7 @@ class HistoriqueInventaireController
         // Calculer les pourcentages
         $pourcentageConformite = $totalMachines > 0 ? round(($confirmes / $totalMachines) * 100, 1) : 0;
         $pourcentageinventoriees = $totalMachines > 0 ? round(($totalInventoriees / $totalMachines) * 100, 1) : 0;
-        $pourcentageNonConforme = $totalMachines > 0 ? round((($differences + $totalNonInventoriees) / $totalMachines) * 100, 1) : 0;
+        $pourcentageNonConforme = $totalMachines > 0 ? round((($differences ) / $totalMachines) * 100, 1) : 0;
 
         include __DIR__ . '/../views/inventaire/historique_inventaire.php';
     }
