@@ -92,7 +92,7 @@ use App\Models\Equipement_model;
                                         <?php
                                         $statuses = Equipement_model::AllStatus();
                                         foreach ($statuses as $status) {
-                                            if ($status['status_name'] === 'fonctionnelle' || $status['status_name'] === 'non fonctionnelle') {
+                                            if ($status['status_name'] === 'disponible' || $status['status_name'] === 'implanté'|| $status['status_name'] === 'ferraille') {
                                                 echo '<option value="' . $status['id'] . '">' . $status['status_name'] . '</option>';
                                             }
                                         }

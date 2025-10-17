@@ -69,168 +69,231 @@ class MouvementMachine_model
 
     public static function findInterChaine()
     {
-        $dbGmao = Database::getInstance('db_digitex');
-        $conn = $dbGmao->getConnection();
-
-        // Utiliser une requête qui spécifie explicitement les bases de données
-        $query = "
-        SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-                e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
-                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
-                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM db_digitex.gmao__mouvement_machine mm 
-        INNER JOIN db_digitex.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
-        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
-        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
-        WHERE mm.type_Mouv = 'inter_chaine'
-        ORDER BY mm.date_mouvement DESC";
-
         try {
-            $req = $conn->query($query);
-            $resultats = $req->fetchAll();
-            return $resultats;
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+            $userId = $_SESSION['user']['id'] ?? null;
+
+            $dbGmao = Database::getInstance('db_digitex');
+            $conn = $dbGmao->getConnection();
+
+            $query = "
+                SELECT 
+                    mm.*, 
+                    m.reference, 
+                    m.designation, 
+                    rm.raison_mouv_mach AS raison_mouv,
+                    e1.first_name AS initiator_first_name, 
+                    e1.last_name AS initiator_last_name,
+                    e2.first_name AS acceptor_first_name, 
+                    e2.last_name AS acceptor_last_name,
+                    CONCAT(e1.first_name, ' ', e1.last_name) AS emp_initiator_name,
+                    CONCAT(e2.first_name, ' ', e2.last_name) AS emp_acceptor_name,
+                    (
+                        SELECT COUNT(*) 
+                        FROM gmao__mouvement_machine mm2 
+                        WHERE mm2.status IS NULL 
+                        AND mm2.type_Mouv = 'inter_chaine' 
+                        AND (
+                            mm2.idEmp_moved = :user_id_moved_sub 
+                            OR
+                            mm2.idEmp_accepted = :user_id_accepted_sub
+                        )
+                    ) AS count_machine           
+                FROM gmao__mouvement_machine mm
+                INNER JOIN gmao__raison_mouv_mach rm 
+                    ON mm.id_Rais = rm.id_Raison
+                INNER JOIN init__machine m 
+                    ON mm.id_machine = m.machine_id
+                LEFT JOIN init__employee e1 
+                    ON mm.idEmp_moved = e1.id
+                LEFT JOIN init__employee e2 
+                    ON mm.idEmp_accepted = e2.id
+                WHERE mm.type_Mouv = 'inter_chaine'
+            ";
+
+
+            if (!$isAdmin && $userId) {
+                $query .= " AND (mm.idEmp_moved = :user_id_moved_main OR mm.idEmp_accepted = :user_id_accepted_main)";
+            }
+            $query .= " ORDER BY mm.date_mouvement DESC";
+
+            $req = $conn->prepare($query);
+
+            if (!$isAdmin && $userId) {
+
+                $req->bindValue(':user_id_moved_main', $userId, PDO::PARAM_INT);
+                $req->bindValue(':user_id_accepted_main', $userId, PDO::PARAM_INT);
+            }
+            $req->bindValue(':user_id_moved_sub', $userId, PDO::PARAM_INT);
+            $req->bindValue(':user_id_accepted_sub', $userId, PDO::PARAM_INT);
+
+
+            $req->execute();
+            return $req->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
-            // En cas d'erreur (par exemple si les qualificateurs de bases ne fonctionnent pas)
-            // Logger l'erreur et utiliser la méthode alternative
-            error_log("Erreur dans findChaineParc: " . $e->getMessage());
-            return self::findInterChainev0();
+            error_log("Erreur dans findInterChaine : " . $e->getMessage());
+            echo "Erreur SQL : " . $e->getMessage();
+            return [];
         }
-        $req->execute();
-        $resultats = $req->fetchAll();
-
-        return $resultats;
     }
-    public static function findInterChainev0()
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
 
-        $req = $conn->query("SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-                e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
-                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
-                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-            FROM gmao__mouvement_machine mm 
-            INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-            INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-            LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
-            LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
-            WHERE mm.type_Mouv = 'inter_chaine'
-            ORDER BY mm.date_mouvement DESC");
-        $req->execute();
-        $resultats = $req->fetchAll();
 
-        return $resultats;
-    }
+
     public static function findParcChaine()
     {
-        $dbGmao = Database::getInstance('db_digitex');
-        $conn = $dbGmao->getConnection();
-
-        // Utiliser une requête qui spécifie explicitement les bases de données
-        $query = "
-        SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-                e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
-                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
-                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM db_digitex.gmao__mouvement_machine mm 
-        INNER JOIN db_digitex.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
-        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
-        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
-        WHERE mm.type_Mouv = 'parc_chaine'
-        ORDER BY mm.date_mouvement DESC";
 
         try {
-            $req = $conn->query($query);
-            $resultats = $req->fetchAll();
-            return $resultats;
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+            $userId = $_SESSION['user']['id'] ?? null;
+
+            $dbGmao = Database::getInstance('db_digitex');
+            $conn = $dbGmao->getConnection();
+
+            $query = "
+                SELECT 
+                    mm.*, 
+                    m.reference, 
+                    m.designation, 
+                    rm.raison_mouv_mach AS raison_mouv,
+                    e1.first_name AS initiator_first_name, 
+                    e1.last_name AS initiator_last_name,
+                    e2.first_name AS acceptor_first_name, 
+                    e2.last_name AS acceptor_last_name,
+                    CONCAT(e1.first_name, ' ', e1.last_name) AS emp_initiator_name,
+                    CONCAT(e2.first_name, ' ', e2.last_name) AS emp_acceptor_name,
+                    (
+                        SELECT COUNT(*) 
+                        FROM gmao__mouvement_machine mm2 
+                        WHERE mm2.status IS NULL 
+                        AND mm2.type_Mouv = 'parc_chaine' 
+                        AND (
+                            mm2.idEmp_moved = :user_id_moved_sub 
+                            OR
+                            mm2.idEmp_accepted = :user_id_accepted_sub
+                        )
+                    ) AS count_machine           
+                FROM gmao__mouvement_machine mm
+                INNER JOIN gmao__raison_mouv_mach rm 
+                    ON mm.id_Rais = rm.id_Raison
+                INNER JOIN init__machine m 
+                    ON mm.id_machine = m.machine_id
+                LEFT JOIN init__employee e1 
+                    ON mm.idEmp_moved = e1.id
+                LEFT JOIN init__employee e2 
+                    ON mm.idEmp_accepted = e2.id
+                        WHERE mm.type_Mouv = 'parc_chaine'
+            ";
+
+
+            if (!$isAdmin && $userId) {
+                $query .= " AND (mm.idEmp_moved = :user_id_moved_main OR mm.idEmp_accepted = :user_id_accepted_main)";
+            }
+            $query .= " ORDER BY mm.date_mouvement DESC";
+
+            $req = $conn->prepare($query);
+
+            if (!$isAdmin && $userId) {
+
+                $req->bindValue(':user_id_moved_main', $userId, PDO::PARAM_INT);
+                $req->bindValue(':user_id_accepted_main', $userId, PDO::PARAM_INT);
+            }
+            $req->bindValue(':user_id_moved_sub', $userId, PDO::PARAM_INT);
+            $req->bindValue(':user_id_accepted_sub', $userId, PDO::PARAM_INT);
+
+
+            $req->execute();
+            return $req->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
-            // En cas d'erreur (par exemple si les qualificateurs de bases ne fonctionnent pas)
-            // Logger l'erreur et utiliser la méthode alternative
-            error_log("Erreur dans findChaineParc: " . $e->getMessage());
-            return self::findParcChainev0();
+            error_log("Erreur dans findParcChaine : " . $e->getMessage());
+            echo "Erreur SQL : " . $e->getMessage();
+            return [];
         }
     }
-    public static function findParcChainev0()
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
 
-        $req = $conn->query("SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-                e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
-                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
-                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-            FROM gmao__mouvement_machine mm 
-            INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-            INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-            LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
-            LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
-            WHERE mm.type_Mouv = 'parc_chaine'
-            ORDER BY mm.date_mouvement DESC");
-        $req->execute();
-        $resultats = $req->fetchAll();
-        return $resultats;
-    }
-    public static function findChaineParcv2()
-    {
-        $db = new Database();
-        $conn = $db->getConnection();
 
-        $req = $conn->query("
-    SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-            e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-            e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
-            CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
-            CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM gmao__mouvement_machine mm 
-        INNER JOIN init__machine m ON mm.id_machine = m.machine_id
-        INNER JOIN gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        LEFT JOIN init__employee e1 ON mm.idEmp_moved = e1.id
-        LEFT JOIN init__employee e2 ON mm.idEmp_accepted = e2.id
-        WHERE mm.type_Mouv = 'chaine_parc'
-        ORDER BY mm.date_mouvement   DESC");
-        $req->execute();
-        $resultats = $req->fetchAll();
-        return $resultats;
-    }
+
     public static function findChaineParc()
     {
-        // Obtenir une connexion à la base de données db_digitex 
-        // (Les deux connexions pointeront vers le même serveur MySQL)
-        $dbGmao = Database::getInstance('db_digitex');
-        $conn = $dbGmao->getConnection();
-
-        // Utiliser une requête qui spécifie explicitement les bases de données
-        $query = "
-        SELECT mm.*, m.reference, m.designation, rm.raison_mouv_mach as raison_mouv,
-                e1.first_name as initiator_first_name, e1.last_name as initiator_last_name,
-                e2.first_name as acceptor_first_name, e2.last_name as acceptor_last_name,
-                CONCAT(e1.first_name, ' ', e1.last_name) as emp_initiator_name,
-                CONCAT(e2.first_name, ' ', e2.last_name) as emp_acceptor_name
-        FROM db_digitex.gmao__mouvement_machine mm 
-        INNER JOIN db_digitex.gmao__raison_mouv_mach rm ON mm.id_Rais = rm.id_Raison
-        INNER JOIN db_mahdco.init__machine m ON mm.id_machine = m.machine_id
-        LEFT JOIN db_mahdco.init__employee e1 ON mm.idEmp_moved = e1.id
-        LEFT JOIN db_mahdco.init__employee e2 ON mm.idEmp_accepted = e2.id
-        WHERE mm.type_Mouv = 'chaine_parc'
-        ORDER BY mm.date_mouvement DESC";
-
         try {
-            $req = $conn->query($query);
-            $resultats = $req->fetchAll();
-            return $resultats;
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+            $userId = $_SESSION['user']['id'] ?? null;
+
+            $dbGmao = Database::getInstance('db_digitex');
+            $conn = $dbGmao->getConnection();
+
+            $query = "
+                SELECT 
+                    mm.*, 
+                    m.reference, 
+                    m.designation, 
+                    rm.raison_mouv_mach AS raison_mouv,
+                    e1.first_name AS initiator_first_name, 
+                    e1.last_name AS initiator_last_name,
+                    e2.first_name AS acceptor_first_name, 
+                    e2.last_name AS acceptor_last_name,
+                    CONCAT(e1.first_name, ' ', e1.last_name) AS emp_initiator_name,
+                    CONCAT(e2.first_name, ' ', e2.last_name) AS emp_acceptor_name,
+                    (
+                        SELECT COUNT(*) 
+                        FROM gmao__mouvement_machine mm2 
+                        WHERE mm2.status IS NULL 
+                        AND mm2.type_Mouv = 'chaine_parc' 
+                        AND (
+                            mm2.idEmp_moved = :user_id_moved_sub 
+                            OR
+                            mm2.idEmp_accepted = :user_id_accepted_sub
+                        )
+                    ) AS count_machine           
+                FROM gmao__mouvement_machine mm
+                INNER JOIN gmao__raison_mouv_mach rm 
+                    ON mm.id_Rais = rm.id_Raison
+                INNER JOIN init__machine m 
+                    ON mm.id_machine = m.machine_id
+                LEFT JOIN init__employee e1 
+                    ON mm.idEmp_moved = e1.id
+                LEFT JOIN init__employee e2 
+                    ON mm.idEmp_accepted = e2.id
+                WHERE mm.type_Mouv = 'chaine_parc'
+            ";
+
+
+            if (!$isAdmin && $userId) {
+                $query .= " AND (mm.idEmp_moved = :user_id_moved_main OR mm.idEmp_accepted = :user_id_accepted_main)";
+            }
+            $query .= " ORDER BY mm.date_mouvement DESC";
+
+            $req = $conn->prepare($query);
+
+            if (!$isAdmin && $userId) {
+
+                $req->bindValue(':user_id_moved_main', $userId, PDO::PARAM_INT);
+                $req->bindValue(':user_id_accepted_main', $userId, PDO::PARAM_INT);
+            }
+            $req->bindValue(':user_id_moved_sub', $userId, PDO::PARAM_INT);
+            $req->bindValue(':user_id_accepted_sub', $userId, PDO::PARAM_INT);
+
+
+            $req->execute();
+            return $req->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
-            // En cas d'erreur (par exemple si les qualificateurs de bases ne fonctionnent pas)
-            // Logger l'erreur et utiliser la méthode alternative
-            error_log("Erreur dans findChaineParc: " . $e->getMessage());
-            return self::findChaineParcv2();
+            error_log("Erreur dans findChaineParc : " . $e->getMessage());
+            echo "Erreur SQL : " . $e->getMessage();
+            return [];
         }
     }
+
 
 
 

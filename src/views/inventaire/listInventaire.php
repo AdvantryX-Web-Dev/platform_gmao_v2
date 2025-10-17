@@ -1,14 +1,16 @@
-<?php include __DIR__ . '/../layout/header.php'; ?>
+<!-- <?php include __DIR__ . '/../layout/header.php'; ?>
 <?php include __DIR__ . '/../layout/sidebar.php'; ?>
 
 <div class="container-fluid">
     <h1 class="h3 mb-4 text-gray-800">Inventaire Machines</h1>
 
     <?php if (!empty($_SESSION['flash_error'])): ?>
-        <div class="alert alert-danger"><?php echo htmlspecialchars($_SESSION['flash_error']); unset($_SESSION['flash_error']); ?></div>
+        <div class="alert alert-danger"><?php echo htmlspecialchars($_SESSION['flash_error']);
+                                        unset($_SESSION['flash_error']); ?></div>
     <?php endif; ?>
     <?php if (!empty($_SESSION['flash_success'])): ?>
-        <div class="alert alert-success"><?php echo htmlspecialchars($_SESSION['flash_success']); unset($_SESSION['flash_success']); ?></div>
+        <div class="alert alert-success"><?php echo htmlspecialchars($_SESSION['flash_success']);
+                                            unset($_SESSION['flash_success']); ?></div>
     <?php endif; ?>
 
     <div class="card shadow mb-4">
@@ -48,4 +50,4 @@
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
 
-
+ -->

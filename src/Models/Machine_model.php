@@ -273,8 +273,254 @@ class Machine_model
         }
     }
 
+    public static function MachinesStateTable($userMatricule = null, $filters = [])
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
 
-    public static function MachinesStateTable($userMatricule = null)
+            $userID = $_SESSION['user']['id'] ?? null;
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+            $today = date('Y-m-d');
+
+            // Récupérer les filtres
+            $filterMatricule = $filters['matricule'] ?? null;
+            $filterMachineId = $filters['machine_id'] ?? null;
+            $filterLocation = $filters['location'] ?? null;
+            $filterStatus = $filters['status'] ?? null;
+
+            $query = "
+                SELECT 
+                    m.machine_id,
+                    m.id,
+                    m.reference,
+                    m.designation,
+                    m.type,
+                    m.brand,
+                    m.billing_num,
+                    m.machines_location_id,
+                    m.machines_status_id,
+                    m.bill_date,
+                    m.created_at,
+                    m.updated_at,
+                    ms.status_name AS etat_machine,
+                    ms.id AS status_id,
+                    ml.location_name AS location,
+                    ml.location_category AS location_category,
+                    maint.maintener_id AS maintener_id,
+                    -- Données du mainteneur (employé associé)
+                    e.matricule AS maintener_matricule,
+                    CONCAT(e.first_name, ' ', e.last_name) AS maintener_name,
+    
+                    -- Dernière présence avec priorité à celle d'aujourd'hui
+                    COALESCE(pp_today.p_state, pp_last.p_state, 0) AS p_state,
+                    COALESCE(pp_today.cur_time, pp_last.cur_time) AS cur_time,
+                    COALESCE(pp_today.cur_date, pp_last.cur_date) AS cur_date,
+                    COALESCE(
+                        CONCAT(pp_today.cur_date, ' ', pp_today.cur_time),
+                        CONCAT(pp_last.cur_date, ' ', pp_last.cur_time)
+                    ) AS cur_date_time,
+    
+                    -- Statut final (active/inactive)
+                    CASE 
+                        WHEN ms.status_name = 'active' AND COALESCE(pp_today.p_state, 0) = 0 THEN 'inactive'
+                        ELSE ms.status_name
+                    END AS status_name_final
+    
+                FROM init__machine m
+                LEFT JOIN gmao__status ms ON ms.id = m.machines_status_id
+                LEFT JOIN gmao__location ml ON ml.id = m.machines_location_id
+    
+                -- 🔹 Dernière présence du jour
+                LEFT JOIN (
+                    SELECT p1.*
+                    FROM prod__presence p1
+                    INNER JOIN (
+                        SELECT machine_id, MAX(id) AS last_id
+                        FROM prod__presence
+                        WHERE cur_date = :today
+                        GROUP BY machine_id
+                    ) t ON t.machine_id = p1.machine_id AND t.last_id = p1.id
+                ) pp_today ON pp_today.machine_id = m.machine_id
+    
+                -- 🔹 Dernière présence active globale
+                LEFT JOIN (
+                    SELECT p2.*
+                    FROM prod__presence p2
+                    INNER JOIN (
+                        SELECT machine_id, MAX(id) AS last_id
+                        FROM prod__presence
+                        WHERE p_state = 1
+                        GROUP BY machine_id
+                    ) t2 ON t2.machine_id = p2.machine_id AND t2.last_id = p2.id
+                ) pp_last ON pp_last.machine_id = m.machine_id
+    
+                -- 🔹 Récupération du mainteneur actuel et de son employé associé
+                LEFT JOIN (
+                    SELECT mm.machine_id, mm.maintener_id
+                    FROM gmao__machine_maint mm
+                    INNER JOIN (
+                        SELECT machine_id, MAX(id) AS last_id
+                        FROM gmao__machine_maint
+                        GROUP BY machine_id
+                    ) mm_last 
+                    ON mm_last.machine_id = mm.machine_id AND mm_last.last_id = mm.id
+                ) maint ON maint.machine_id = m.machine_id
+    
+                LEFT JOIN init__employee e ON e.id = maint.maintener_id
+            ";
+
+            // 🔸 Construction des conditions WHERE
+            $whereConditions = [];
+            $params = [];
+
+            // Si utilisateur non-admin : restriction à ses propres machines
+            if (!$isAdmin && $userID) {
+                $whereConditions[] = "maint.maintener_id = :userID";
+                $params[':userID'] = $userID;
+            }
+
+            // Filtre par matricule du mainteneur
+            if ($filterMatricule && $isAdmin) {
+                $whereConditions[] = "e.matricule = :filterMatricule";
+                $params[':filterMatricule'] = $filterMatricule;
+            } elseif (!$isAdmin && $userMatricule) {
+                // Pour les non-admins, filtrer automatiquement sur leur matricule
+                $whereConditions[] = "e.matricule = :userMatricule";
+                $params[':userMatricule'] = $userMatricule;
+            }
+
+            // Filtre par machine_id
+            if ($filterMachineId) {
+                $whereConditions[] = "m.machine_id LIKE :filterMachineId";
+                $params[':filterMachineId'] = '%' . $filterMachineId . '%';
+            }
+
+            // Filtre par emplacement
+            if ($filterLocation) {
+                $whereConditions[] = "ml.location_name = :filterLocation";
+                $params[':filterLocation'] = $filterLocation;
+            }
+
+            // Filtre par état
+            if ($filterStatus) {
+                if ($filterStatus === 'active') {
+                    $whereConditions[] = "COALESCE(pp_today.p_state, 0) = 1";
+                } elseif ($filterStatus === 'inactive') {
+                    $whereConditions[] = "COALESCE(pp_today.p_state, 0) = 0";
+                } else {
+                    // Utiliser l'ID du statut pour le filtrage
+                    $whereConditions[] = "ms.id = :filterStatus";
+                    $params[':filterStatus'] = $filterStatus;
+                }
+            }
+
+            // Ajouter les conditions WHERE si elles existent
+            if (!empty($whereConditions)) {
+                $query .= " WHERE " . implode(" AND ", $whereConditions);
+            }
+
+            $query .= " ORDER BY m.updated_at DESC";
+
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':today', $today);
+
+            // Bind tous les paramètres de filtrage
+            foreach ($params as $param => $value) {
+                if ($param === ':userID') {
+                    $stmt->bindValue($param, $value, PDO::PARAM_INT);
+                } else {
+                    $stmt->bindValue($param, $value);
+                }
+            }
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Error in MachinesStateTable: ' . $e->getMessage());
+            error_log('SQL Query: ' . $query);
+            return [];
+        }
+    }
+
+    /**
+     * Récupère la liste des mainteneurs pour le filtre
+     */
+    public static function getMaintainersList()
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+
+            $query = "
+                SELECT DISTINCT e.id, e.matricule, CONCAT(e.first_name, ' ', e.last_name) AS full_name
+                FROM init__employee e
+                INNER JOIN gmao__machine_maint mm ON mm.maintener_id = e.id
+                ORDER BY e.matricule
+            ";
+
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Error in getMaintainersList: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Récupère la liste des machines pour le filtre
+     */
+    public static function getMachinesList()
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+
+            $query = "
+                SELECT DISTINCT machine_id
+                FROM init__machine
+                ORDER BY machine_id
+            ";
+
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Error in getMachinesList: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Récupère la liste des emplacements pour le filtre
+     */
+    public static function getLocationsList()
+    {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+
+            $query = "
+                SELECT DISTINCT location_category, location_name
+                FROM gmao__location
+                WHERE location_category IS NOT NULL
+                ORDER BY location_category, location_name
+            ";
+
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Error in getLocationsList: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public static function MachinesStateTablev0($userMatricule = null)
     {
 
 
@@ -301,7 +547,10 @@ class Machine_model
                     ms.id as status_id,
                     ml.location_name as location,
                     ml.location_category as location_category,
-                    pp.p_state
+                    pp.p_state,
+                    pp.cur_time,
+                    pp.cur_date ,
+                    concat(pp.cur_date, ' ', pp.cur_time) as cur_date_time
                 FROM 
                     init__machine m
                     LEFT JOIN gmao__status ms ON ms.id = m.machines_status_id 
@@ -383,27 +632,27 @@ class Machine_model
                 }
                 // Pour les machines dans le parc
                 elseif ($location == 'parc') {
-                    if (in_array($currentStatus, ['en panne', 'ferraille', 'fonctionnelle'])) {
-                        // Conserver l'état actuel s'il est approprié pour le parc
-                        $newStatusId = $machine['status_id'];
-                    } else {
-                        // Sinon, mettre par défaut à "fonctionnelle"
-                        $machine['etat_machine'] = 'fonctionnelle';
-                        $newStatusId = isset($statusMap['fonctionnelle']) ? $statusMap['fonctionnelle'] : null;
-                    }
+                    //  if (in_array($currentStatus, ['en panne', 'ferraille', 'fonctionnelle'])) {
+                    // Conserver l'état actuel s'il est approprié pour le parc
+                    $newStatusId = $machine['status_id'];
+                    // } else {
+                    //     // Sinon, mettre par défaut à "fonctionnelle"
+                    //     $machine['etat_machine'] = 'fonctionnelle';
+                    //     $newStatusId = isset($statusMap['fonctionnelle']) ? $statusMap['fonctionnelle'] : null;
+                    // }
                 }
 
                 // Mettre à jour l'état dans la base de données si nécessaire
-                if ($newStatusId && $newStatusId != $machine['machines_status_id']) {
-                    $updateStmt = $conn->prepare("
-                        UPDATE init__machine 
-                        SET machines_status_id = :status_id, updated_at = NOW() 
-                        WHERE machine_id = :machine_id
-                    ");
-                    $updateStmt->bindParam(':status_id', $newStatusId, \PDO::PARAM_INT);
-                    $updateStmt->bindParam(':machine_id', $machineId, \PDO::PARAM_STR);
-                    $updateStmt->execute();
-                }
+                // if ($newStatusId && $newStatusId != $machine['machines_status_id']) {
+                //     $updateStmt = $conn->prepare("
+                //         UPDATE init__machine 
+                //         SET machines_status_id = :status_id, updated_at = NOW() 
+                //         WHERE machine_id = :machine_id
+                //     ");
+                //     $updateStmt->bindParam(':status_id', $newStatusId, \PDO::PARAM_INT);
+                //     $updateStmt->bindParam(':machine_id', $machineId, \PDO::PARAM_STR);
+                //     $updateStmt->execute();
+                // }
             }
 
             return $machines;
@@ -441,17 +690,82 @@ class Machine_model
      * @param int $statusId Status ID from gmao__status table
      * @return bool True if update was successful, false otherwise
      */
-    public static function updateMachineStatus($machineId, $statusId)
+    // public static function updateMachineStatus($machineId, $statusId)
+    // {
+    //     $db = Database::getInstance('db_digitex');
+    //     $conn = $db->getConnection();
+    //     try {
+    //         $query = "UPDATE init__machine SET machines_status_id = :status_id, updated_at = NOW() 
+    //                   WHERE machine_id = :machine_id";
+    //         $stmt = $conn->prepare($query);
+    //         $stmt->bindParam(':status_id', $statusId, PDO::PARAM_INT);
+    //         $stmt->bindParam(':machine_id', $machineId, PDO::PARAM_STR);
+    //         return $stmt->execute();
+    //     } catch (PDOException $e) {
+    //         return false;
+    //     }
+    // }
+    public static function getMachinePresence($machineId, $date = null)
     {
+        $dateToUse = $date ?? date('Y-m-d'); // Si date null, utiliser date actuelle
+
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
+
         try {
-            $query = "UPDATE init__machine SET machines_status_id = :status_id, updated_at = NOW() 
-                      WHERE machine_id = :machine_id";
+            // 1️ Tenter de récupérer la présence active pour la date donnée
+            $query = "
+            SELECT
+                m.*,
+                ml.location_name,
+                ms.status_name AS original_status,
+                pp.p_state,
+                pp.cur_time,
+                pp.cur_date,
+                CONCAT(pp.cur_date, ' ', pp.cur_time) AS cur_date_time
+            FROM init__machine m
+            LEFT JOIN gmao__location ml ON ml.id = m.machines_location_id
+            LEFT JOIN gmao__status ms ON ms.id = m.machines_status_id
+            LEFT JOIN prod__presence pp ON pp.id = (
+                SELECT MAX(id)
+                FROM prod__presence
+                WHERE machine_id = m.machine_id AND cur_date = :date AND p_state = 1
+            )
+                left join gmao__machine_maint mm on mm.machine_id = m.machine_id
+            WHERE m.machine_id = :machineId
+            ";
+
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':status_id', $statusId, PDO::PARAM_INT);
-            $stmt->bindParam(':machine_id', $machineId, PDO::PARAM_STR);
-            return $stmt->execute();
+            $stmt->bindParam(':machineId', $machineId, PDO::PARAM_STR);
+            $stmt->bindParam(':date', $dateToUse, PDO::PARAM_STR);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // 2️ Si aucune présence active pour la date, récupérer la dernière présence active globale
+            if (!$result || !$result['p_state']) {
+                $queryLastActive = "
+                SELECT CONCAT(cur_date, ' ', cur_time) AS cur_date_time
+                FROM prod__presence
+                WHERE machine_id = :machineId AND p_state = 1
+                ORDER BY id DESC
+                LIMIT 1
+                ";
+                $stmtLast = $conn->prepare($queryLastActive);
+                $stmtLast->bindParam(':machineId', $machineId, PDO::PARAM_STR);
+                $stmtLast->execute();
+                $lastActive = $stmtLast->fetch(PDO::FETCH_ASSOC);
+
+                if ($lastActive) {
+                    $result['cur_date_time'] = $lastActive['cur_date_time'];
+                }
+
+                $result['status_name'] = 'inactive';
+            } else {
+                $result['status_name'] = 'active';
+            }
+
+            return $result;
         } catch (PDOException $e) {
             return false;
         }

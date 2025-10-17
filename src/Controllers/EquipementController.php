@@ -140,7 +140,7 @@ class EquipementController
 
                 // Audit trail
                 if (isset($_SESSION['user']['matricule']) && $oldIntervention_type) {
-                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'init_equipment', $oldIntervention_type, null);
+                    AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'gmao__init_equipment', $oldIntervention_type, null);
                 }
             } else {
                 $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la suppression du équipement.'];

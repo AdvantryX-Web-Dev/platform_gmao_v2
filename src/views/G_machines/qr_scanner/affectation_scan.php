@@ -139,12 +139,40 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                                         <select class="form-control" name="prod_line" id="prod_line" required>
                                             <option value="">Sélectionner une chaîne</option>
                                             <?php
-                                            $chaines = Machines_box_model::findAllChaines();
+                                            $chaines = Machines_box_model::findAllLocations();
                                             foreach ($chaines as $chaine):?>
-                                                <option value="<?= $chaine['prod_line'] ?>"><?= $chaine['prod_line'] ?></option>
+                                                <option value="<?= $chaine['id'] ?>"><?= $chaine['location_name'] ?></option>
                                             <?php endforeach; ?>
                                             
                                         </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="maintainer_select" class="form-label">Mainteneur <span class="text-danger">*</span></label>
+                                        <?php
+                                        // Déterminer le rôle de l'utilisateur
+                                      
+                                        $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';                                        $connectedMaintainerId = $_SESSION['user']['id'] ?? '';
+                                        $connectedMaintainerName = ($_SESSION['user']['firstname'] ?? '') . ' ' . ($_SESSION['user']['lastname'] ?? '');
+                                        $connectedMaintainerId =$_SESSION['user']['id'] ?? '';
+                                   
+                                        if ($isAdmin) {
+                                            // Admin peut sélectionner n'importe quel mainteneur
+                                            echo '<select class="form-control" name="maintainer_select" id="maintainer_select" required>';
+                                            echo '<option value="">Sélectionner un mainteneur</option>';
+                                            
+                                            // Récupérer la liste des mainteneurs
+                                            $maintainers = \App\Models\Maintainer_model::findAll();
+                                            foreach ($maintainers as $maintainer) {
+                                                echo '<option value="' . $maintainer['id'] . '">' . 
+                                                     htmlspecialchars($maintainer['first_name'] . ' ' . $maintainer['last_name']) . '</option>';
+                                            }
+                                            echo '</select>';
+                                        } else {
+                                            // Mainteneur connecté - affichage en lecture seule
+                                            echo '<input type="hidden" name="maintainer_select" value="' . $connectedMaintainerId . '">';
+                                            echo '<input type="text" class="form-control" value="' . htmlspecialchars($connectedMaintainerName) . '" readonly>';
+                                        }
+                                        ?>
                                     </div>
                                 </div>
 
@@ -173,7 +201,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                                                         </button>
                                                     </div>
                                                     <input class="form-control" name="box_id" id="box_id"
-                                                        placeholder="Scannez ou saisissez manuellement" required>
+                                                        placeholder="Scannez ou saisissez manuellement" >
                                                 </div>
                                             </div>
                                         </div>
@@ -208,7 +236,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                                 <div class="mt-3 d-flex align-items-center justify-content-between">
                                     <div class="hint">Sélectionnez une chaîne, scannez le box et la machine.</div>
                                     <button id="submitBtn" type="submit" class="btn btn-success"
-                                        disabled>Affecter</button>
+                                        >Affecter</button>
                                 </div>
                             </form>
                         </div>
@@ -239,18 +267,11 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
             const btnMachPhoto = document.getElementById('btnMachPhoto');
             // Removed filename and preview elements for a cleaner UI
 
-            function updateSubmitState() {
-                const prodLine = document.getElementById('prod_line');
-                const ready = boxInput.value.trim() !== '' &&
-                    machineInput.value.trim() !== '' &&
-                    maintainer.value.trim() !== '' &&
-                    prodLine.value.trim() !== '';
-                submitBtn.disabled = !ready;
-            }
+           
 
-            boxInput.addEventListener('input', updateSubmitState);
-            machineInput.addEventListener('input', updateSubmitState);
-            document.getElementById('prod_line').addEventListener('change', updateSubmitState);
+            
+            
+           
 
             // Photo capture handlers (Python/OpenCV backend)
             btnBoxPhoto.addEventListener('click', () => boxPhotoInput.click());
@@ -331,7 +352,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                 const result = await uploadAndDecode(payload, 'box');
                 if (result && result.text) {
                     boxInput.value = result.text;
-                    updateSubmitState();
+                   
                 }
             });
 
@@ -345,10 +366,10 @@ if (isset($_SESSION['user']) && isset($_SESSION['user']['matricule'])) {
                 const result = await uploadAndDecode(payload, 'machine');
                 if (result && result.text) {
                     machineInput.value = result.text;
-                    updateSubmitState();
+                   
                 }
             });
-            updateSubmitState();
+            
         })();
     </script>
 </body>

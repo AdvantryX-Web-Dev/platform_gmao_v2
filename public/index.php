@@ -30,6 +30,8 @@ use App\Controllers\LocationController;
 use App\Controllers\ScanController;
 use App\Controllers\InventaireController;
 use App\Controllers\HistoriqueInventaireController;
+use App\Controllers\RejectionReasonsController;
+use App\Controllers\ImportInventaireController;
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -50,6 +52,8 @@ $locationController = new LocationController();
 $scanController = new ScanController();
 $inventaireController = new InventaireController();
 $historiqueInventaireController = new HistoriqueInventaireController();
+$rejection_reasonsController = new RejectionReasonsController();
+$ImportInventaireController = new ImportInventaireController();
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -101,25 +105,23 @@ switch ($route) {
         break;
 
     /** Inventaire des machines */
-   
+
     case 'importInventaire':
-        $inventaireController->importInventaire();
+        $ImportInventaireController->importInventaire();
         break;
-        case 'historyInventaire':
-            $historiqueInventaireController->index();
-            break;
+    case 'historyInventaire':
+        $historiqueInventaireController->index();
+        break;
     case 'ajouterInventaire':
         $inventaireController->AddInventaire();
         break;
-        case 'listInventaire':
-            $inventaireController->listInventaire();
-            break;
-    case 'maintenancier_machine':
-        $inventaireController->maintenancier_machine();
-        break;
-    case 'maintenance_default':
-        $inventaireController->maintenance_default();
-        break;
+ 
+    // case 'maintenancier_machine':
+    //     $inventaireController->maintenancier_machine();
+    //     break;
+    // case 'maintenance_default':
+    //     $inventaireController->maintenance_default();
+    //     break;
     /** Gestion initiale des machines */
 
     case 'machines':
@@ -184,6 +186,19 @@ switch ($route) {
         break;
     case 'intervention_type/delete':
         $intervention_typeController->delete();
+        break;
+    /** init rejection reasons */
+    case 'rejection_reasons/list':
+        $rejection_reasonsController->list();
+        break;
+    case 'rejection_reasons/create':
+        $rejection_reasonsController->create();
+        break;
+    case 'rejection_reasons/edit':
+        $rejection_reasonsController->edit();
+        break;
+    case 'rejection_reasons/delete':
+        $rejection_reasonsController->delete();
         break;
     /** init location */
     case 'location/list':
@@ -261,6 +276,9 @@ switch ($route) {
     /** Gestion des machines */
     case 'Gestion_machines/status':
         $machineController->machines_state();
+        break;
+    case 'Gestion_machines/export':
+        $machineController->export_machines_state();
         break;
     case 'machinesbox':
         require_once __DIR__ . '/../src/views/G_machines/Machine_box.php';

@@ -67,8 +67,23 @@
                         <div id="rejectEquipementsList" class="equipment-list-container" style="min-height: 60px; max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 10px; background: #f8f9fa;"></div>
                     </div>
                     <div class="form-group">
-                        <label for="reject_comment">Commentaire (raison du rejet) :</label>
-                        <textarea class="form-control" id="reject_comment" name="reject_comment" rows="3" placeholder="Décrivez la raison du rejet" required></textarea>
+                        <label for="reject_reason">Raison du rejet :</label>
+                        <select class="form-control" id="reject_reason" name="reject_reason" required>
+                            <option value="">--Sélectionner une raison de rejet--</option>
+                            <?php
+                            // Récupérer les raisons de rejet depuis la base de données
+
+                            $rejectionReasons = \App\Models\RejectionReasons_model::getAllRejectionReasons();
+
+                            if (!empty($rejectionReasons)) {
+                                foreach ($rejectionReasons as $reason) {
+                                    echo "<option value=\"{$reason['reason_name']}\" >{$reason['reason_name']}</option>";
+                                }
+                            } else {
+                                echo "<option value=\"\" disabled>Aucune raison de rejet trouvée</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     <div class="text-right mt-2">
                         <button type="submit" class="btn btn-danger">

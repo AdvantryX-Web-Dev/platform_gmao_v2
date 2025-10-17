@@ -61,7 +61,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
                                 <div class="form-group">
                                     <label>Numéro Facture</label>
-                                    <input type="text" name="billing_num" class="form-control" required>
+                                    <input type="text" name="billing_num" class="form-control" >
                                 </div>
                                 <div class="form-group">
                                     <label>Date Facture</label>

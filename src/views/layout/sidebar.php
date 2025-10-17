@@ -41,6 +41,8 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=intervention_type/list">Liste des interventions</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machines_status/list">Liste des statuts de machine</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=categories">Liste des motifs de mvt</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=rejection_reasons/list">Liste des raisons de rejet</a>
+
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=location/list">Liste des emplacements</a>
 
                 <!-- <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipementsCategory/list">Liste des catatgories</a> -->
@@ -65,7 +67,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 <?php endif; ?>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=ajouterInventaire">Ajouter Inventaire</a>
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=historyInventaire">Evaluation Inventaire</a>
-                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=maintenancier_machine">Maintenancier - machine</a>
+                <!-- <a class="collapse-item" href="../../platform_gmao/public/index.php?route=maintenancier_machine">Maintenancier - machine</a> -->
 
 
             </div>
@@ -81,14 +83,20 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
         <div id="collapseGestionMachine" class="collapse" aria-labelledby="headingGestionMachine" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=Gestion_machines/status">Etat des machines</a>
-                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machinesbox">Machine-Box</a>
+                <a class="collapse-item" href="../../platform_gmao/public/index.php?route=box_machine/affectation_scan"> affectation des machines </a>
+
+                <?php if ($isAdmin): ?>
+                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=machinesbox">Machine-Box</a>
+
+                <?php endif; ?>
+
                 <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvMachine" aria-expanded="false" aria-controls="collapseMouvMachine">Mouvement machine </a>
                 <div id="collapseMouvMachine" class="collapse ml-3" aria-labelledby="headingMouvMachine" data-parent="#collapseGestionMachine">
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/chaine_parc">Entrée parc</a>
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine">Sortie Parc</a>
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/inter_chaine">Inter - Chaine</a>
-
-
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/chaine_parc">Entrée parc</a>
+                        <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/parc_chaine">Sortie Parc</a>
+                        <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_machines/inter_chaine">Inter - Chaine</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,9 +116,11 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 <a class="collapse-item" href="../../platform_gmao/public/index.php?route=equipement_machine">Equipement-Machine</a>
                 <a class="collapse-item collapsed" href="#" data-toggle="collapse" data-target="#collapseMouvEquipement" aria-expanded="false" aria-controls="collapseMouvEquipement">Mouvement équipement </a>
                 <div id="collapseMouvEquipement" class="collapse ml-3" aria-labelledby="headingMouvEquipement" data-parent="#collapseGestionEquipement">
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/entre_magasin">Entrée magasin</a>
-                    <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/sortie_magasin">Sortie magasin</a>
+                    <div class="bg-white py-2 collapse-inner rounded">
 
+                        <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/entre_magasin">Entrée magasin</a>
+                        <a class="collapse-item" href="../../platform_gmao/public/index.php?route=mouvement_equipements/sortie_magasin">Sortie magasin</a>
+                    </div>
 
                 </div>
             </div>

@@ -235,19 +235,19 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                                 <td>
                                                     <?php
-                                                    $machineStatus = $comp['machine']['status_name'] ?? null;
-                                                    $historiqueStatus = $comp['historique']['status_name'] ?? null;
+                                                    $machineStatus = $comp['machine']['production_status'] ?? null;
+                                                  //  $historiqueStatus = $comp['historique']['status_name'] ?? null;
 
-                                                    $status = $machineStatus ?? $historiqueStatus;
+                                                    $status = $machineStatus ?? null;
 
                                                     if ($status):
                                                         $statusClass = 'secondary';
 
-                                                        if ($status === 'active') {
+                                                        if ($status === 'actif') {
                                                             $statusClass = 'success';
                                                         } elseif (in_array($status, ['en panne', 'ferraille'])) {
                                                             $statusClass = 'danger';
-                                                        } elseif ($status === 'inactive') {
+                                                        } elseif ($status === 'inactif') {
                                                             $statusClass = 'warning';
                                                         }
                                                     ?>
@@ -319,9 +319,18 @@ if (session_status() === PHP_SESSION_NONE) {
                                                             if ($comp['machine']['machines_location_id'] != $comp['historique']['location_id']) {
                                                                 $differences[] = '*Localisation modifiée: ' . ($comp['machine']['location_name'] ?? 'Non défini') . ' → ' . ($comp['historique']['location_name'] ?? 'Non défini');
                                                             }
-                                                            if ($comp['machine']['machines_status_id'] != $comp['historique']['status_id']) {
-                                                                $differences[] = '*Statut modifié: ' . ($comp['machine']['status_name'] ?? 'Non défini') . ' → ' . ($comp['historique']['status_name'] ?? 'Non défini');
+                                                            if(isset($comp['machine']['final_status_id']) && !empty($comp['machine']['final_status_id'])) {
+                                                                if ($comp['machine']['final_status_id'] != $comp['historique']['status_id']) {
+                                                                    $differences[] = '*Statut modifié: ' . ($comp['machine']['production_status'] ?? 'Non défini') . ' → ' . ($comp['historique']['status_name'] ?? 'Non défini');
+                                                                }
+                                                            } else {
+                                                                if ($comp['machine']['machines_status_id'] != $comp['historique']['status_id']) {
+                                                                    $differences[] = '*Statut modifié: ' . ($comp['machine']['production_status'] ?? 'Non défini') . ' → ' . ($comp['historique']['status_name'] ?? 'Non défini');
+                                                                }
                                                             }
+                                                            // if ($comp['machine']['final_status_id'] != $comp['historique']['status_id']) {
+                                                            //     $differences[] = '*Statut modifié: ' . ($comp['machine']['production_status'] ?? 'Non défini') . ' → ' . ($comp['historique']['status_name'] ?? 'Non défini');
+                                                            // }
                                                         }
                                                         echo implode('<br>', $differences);
                                                         ?>

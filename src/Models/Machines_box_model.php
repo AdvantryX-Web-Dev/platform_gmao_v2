@@ -65,7 +65,15 @@ class Machines_box_model
         return $resultats;
     }
 
-
+    public static function findAllLocations()
+    {
+        $dbDigitex = Database::getInstance('db_digitex');
+        $connDigitex = $dbDigitex->getConnection();
+        $req = $connDigitex->query("SELECT * FROM gmao__location ORDER BY location_name");
+        $req->execute();
+        $resultats = $req->fetchAll();
+        return $resultats;
+    }
     public static function findAllChaines()
     {
         $dbDigitex = Database::getInstance('db_digitex');

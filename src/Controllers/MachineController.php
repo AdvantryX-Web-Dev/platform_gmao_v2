@@ -43,9 +43,9 @@ class MachineController
                 $_POST['designation'],
                 $_POST['reference'],
                 $_POST['type'],
-                $_POST['brand'],
-                $_POST['billing_num'],
-                $_POST['bill_date'],
+                $_POST['brand'] ?? null,
+                $_POST['billing_num'] ?? null,
+                $_POST['bill_date'] ?? null,
                 $_POST['location_id'],
                 $_POST['status_id']
             );
@@ -61,8 +61,8 @@ class MachineController
                         'reference' => $_POST['reference'],
                         'type' => $_POST['type'],
                         'brand' => $_POST['brand'],
-                        'billing_num' => $_POST['billing_num'],
-                        'bill_date' => $_POST['bill_date'],
+                        'billing_num' => $_POST['billing_num'] ?? null,
+                        'bill_date' => $_POST['bill_date'] ?? null,
                         'machines_location_id' => $_POST['location_id'],
                         'machines_status_id' => $_POST['status_id']
                     ];
@@ -111,9 +111,9 @@ class MachineController
                 $_POST['designation'],
                 $_POST['reference'],
                 $_POST['type'],
-                $_POST['brand'],
-                $_POST['billing_num'],
-                $_POST['bill_date'],
+                $_POST['brand']??null,
+                $_POST['billing_num'] ?? null,
+                $_POST['bill_date'] ?? null,
                 $_POST['location_id'],
                 $_POST['status_id']
             );
@@ -128,8 +128,8 @@ class MachineController
                         'reference' => $_POST['reference'],
                         'type' => $_POST['type'],
                         'brand' => $_POST['brand'],
-                        'billing_num' => $_POST['billing_num'],
-                        'bill_date' => $_POST['bill_date'],
+                        'billing_num' => $_POST['billing_num'] ?? null,
+                        'bill_date' => $_POST['bill_date'] ?? null,
                         'machines_location_id' => $_POST['location_id'],
                         'machines_status_id' => $_POST['status_id']
                     ];
@@ -183,12 +183,59 @@ class MachineController
     {
         // Récupérer le matricule de l'utilisateur connecté
         $userMatricule = $_SESSION['user']['matricule'] ?? null;
-        
-        // Appeler le modèle avec le matricule de l'utilisateur
-        $machines = Machine_model::MachinesStateTable($userMatricule);
+
+        // Récupérer les filtres depuis GET
+        $filters = [
+            'matricule' => $_GET['matricule'] ?? null,
+            'machine_id' => $_GET['machine_id'] ?? null,
+            'location' => $_GET['location'] ?? null,
+            'status' => $_GET['status'] ?? null
+        ];
+
+        // Appeler le modèle avec le matricule de l'utilisateur et les filtres
+        $machinesData = Machine_model::MachinesStateTable($userMatricule, $filters);
+
+        // Récupérer les listes pour les filtres
+        $maintainers = Machine_model::getMaintainersList();
+        $machinesList = Machine_model::getMachinesList();
+        $locations = Machine_model::getLocationsList();
+        $statuses = Machine_model::getMachineStatus();
+
+        // Vérifier si l'utilisateur est admin
+        $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
 
         include(__DIR__ . '/../views/G_machines/G_machines_status/machineStatus.php');
     }
+
+    /**
+     * Export des données des machines en Excel
+     */
+    public function export_machines_state()
+    {
+        // Récupérer le matricule de l'utilisateur connecté
+        $userMatricule = $_SESSION['user']['matricule'] ?? null;
+
+        // Récupérer les filtres depuis GET
+        $filters = [
+            'matricule' => $_GET['matricule'] ?? null,
+            'machine_id' => $_GET['machine_id'] ?? null,
+            'location' => $_GET['location'] ?? null,
+            'status' => $_GET['status'] ?? null
+        ];
+
+        // Appeler le modèle avec le matricule de l'utilisateur et les filtres
+        $machinesData = Machine_model::MachinesStateTable($userMatricule, $filters);
+
+        // Vérifier si l'utilisateur est admin
+        $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+
+        // Inclure la classe d'export
+        require_once __DIR__ . '/../export/machineStatusExport.php';
+
+        // Générer le fichier Excel
+        call_user_func(['MachineStatusExport', 'generateExcelFile'], $machinesData, $isAdmin);
+    }
+
     public function history_machines_stateBYmachineID()
     {
         $machines = Machine_model::MachinesStateTable();

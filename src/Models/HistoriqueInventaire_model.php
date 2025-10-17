@@ -66,10 +66,30 @@ class HistoriqueInventaire_model
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         $params = [];
-        
+
         $sql = "SELECT DISTINCT m.*, l.location_name, l.location_category, s.status_name,
                 CONCAT(current_emp.first_name, ' ', current_emp.last_name) AS current_maintainer_name,
-                current_emp.matricule AS current_maintainer_matricule
+                current_emp.matricule AS current_maintainer_matricule,
+                -- Vérification du statut de production
+                CASE 
+                    WHEN l.location_category = 'prodline' THEN
+                        CASE 
+                            WHEN presence.id IS NOT NULL AND presence.p_state = 1 AND presence.cur_date = CURDATE() THEN 'actif'
+                            ELSE 'inactif'
+                        END
+                    ELSE s.status_name
+                END AS production_status,
+                -- Statut final : utiliser production_status si disponible, sinon machines_status_id
+                CASE 
+                    WHEN l.location_category = 'prodline' THEN
+                        CASE 
+                            WHEN presence.id IS NOT NULL AND presence.p_state = 1 AND presence.cur_date = CURDATE() THEN 
+                                (SELECT id FROM gmao__status WHERE status_name = 'actif' LIMIT 1)
+                            ELSE 
+                                (SELECT id FROM gmao__status WHERE status_name = 'inactif' LIMIT 1)
+                        END
+                    ELSE m.machines_status_id
+                END AS final_status_id
         FROM init__machine m
         LEFT JOIN gmao__location l ON l.id = m.machines_location_id
         LEFT JOIN gmao__status s ON s.id = m.machines_status_id
@@ -82,15 +102,27 @@ class HistoriqueInventaire_model
                 GROUP BY machine_id
             ) mm_latest ON mm.machine_id = mm_latest.machine_id AND mm.id = mm_latest.max_id
         ) current_maint ON current_maint.machine_id = m.id
-        LEFT JOIN init__employee current_emp ON current_emp.id = current_maint.maintener_id";
+        LEFT JOIN init__employee current_emp ON current_emp.id = current_maint.maintener_id
+        -- Jointure pour vérifier la présence en production (dernière entrée d'aujourd'hui)
+        LEFT JOIN (
+            SELECT p.*
+            FROM prod__presence p
+            INNER JOIN (
+                SELECT machine_id, MAX(id) AS max_id
+                FROM prod__presence
+                WHERE cur_date = CURDATE()
+                GROUP BY machine_id
+            ) p_latest ON p.machine_id = p_latest.machine_id AND p.id = p_latest.max_id
+            WHERE p.cur_date = CURDATE()
+        ) presence ON presence.machine_id = m.machine_id";
 
         if ($filterMaintainer) {
             $sql .= " WHERE current_emp.matricule = :matricule";
             $params['matricule'] = $filterMaintainer;
         }
-        
+
         $sql .= " ORDER BY m.id";
-        
+
         $stmt = $conn->prepare($sql);
         foreach ($params as $key => $value) {
             $stmt->bindParam(':' . $key, $value);

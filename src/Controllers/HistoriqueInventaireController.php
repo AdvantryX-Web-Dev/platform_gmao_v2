@@ -5,13 +5,12 @@ namespace App\Controllers;
 use App\Models\Database;
 use App\Models\HistoriqueInventaire_model;
 use App\Models\Maintainer_model;
+use App\Models\Machine_model;
 
 class HistoriqueInventaireController
 {
     public function index()
     {
-
-
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
 
@@ -29,7 +28,6 @@ class HistoriqueInventaireController
         // Récupérer tous les maintenanciers pour le filtre (seulement si admin)
         $allMaintainers = $isAdmin ? Maintainer_model::findAll() : [];
         $allmachine = HistoriqueInventaire_model::getAllMachines($isAdmin, $filterMaintainer);
-
         // Récupérer les machines selon les permissions utilisateur (même logique que maintenancier_machine)
         $Machines_maint = $this->getUserMachines($isAdmin, $connectedMatricule);
 
@@ -75,7 +73,11 @@ class HistoriqueInventaireController
 
                 // Comparer location et status pour voir si elle est conforme
                 $locationMatch = ($machine['machines_location_id'] == $historique['location_id']);
-                $statusMatch = ($machine['machines_status_id'] == $historique['status_id']);
+                if (isset($machine['final_status_id']) && !empty($machine['final_status_id'])) {
+                    $statusMatch = ($machine['final_status_id'] == $historique['status_id']);
+                } else {
+                    $statusMatch = ($machine['machines_status_id'] == $historique['status_id']);
+                }
                 $maintenancierMatch = ($machine['current_maintainer_matricule'] == $historique['maintainer_matricule']);
                 if ($locationMatch && $statusMatch && $maintenancierMatch) {
                     $comparison['status'] = 'conforme';  // Machine inventoriée et conforme
@@ -129,7 +131,7 @@ class HistoriqueInventaireController
                 // Filtrer par maintenancier
                 if ($filterMaintainer && $filterMaintainer !== '') {
                     $maintainerMatch = false;
-                    
+
                     // Pour les machines ajoutées, vérifier le maintenancier dans l'historique
                     if ($comp['status'] == 'ajouter') {
                         if ($comp['historique'] && $comp['historique']['maintainer_matricule'] == $filterMaintainer) {
@@ -141,7 +143,7 @@ class HistoriqueInventaireController
                             $maintainerMatch = true;
                         }
                     }
-                    
+
                     if (!$maintainerMatch) {
                         $showRow = false;
                     }
@@ -196,7 +198,7 @@ class HistoriqueInventaireController
         // Calculer les pourcentages
         $pourcentageConformite = $totalMachines > 0 ? round(($confirmes / $totalMachines) * 100, 1) : 0;
         $pourcentageinventoriees = $totalMachines > 0 ? round(($totalInventoriees / $totalMachines) * 100, 1) : 0;
-        $pourcentageNonConforme = $totalMachines > 0 ? round((($differences ) / $totalMachines) * 100, 1) : 0;
+        $pourcentageNonConforme = $totalMachines > 0 ? round((($differences) / $totalMachines) * 100, 1) : 0;
 
         include __DIR__ . '/../views/inventaire/historique_inventaire.php';
     }

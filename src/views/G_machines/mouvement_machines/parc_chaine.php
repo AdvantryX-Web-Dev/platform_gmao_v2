@@ -13,6 +13,7 @@ if (!isset($mouvements)) {
     $controller = new Mouvement_machinesController();
     $mouvements = $controller->getMouvementsByType('inter_chaine');
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -226,13 +227,13 @@ if (!isset($mouvements)) {
                                 <a href="#" class="btn btn-warning d-flex align-items-center">
                                     <i class="fas fa-bell mr-1"></i> Réception
                                     <?php
-                                    // Afficher le nombre de machines en attente de réception
-                                    $db = new App\Models\Database();
-                                    $conn = $db->getConnection();
-                                    $stmt = $conn->query("SELECT COUNT(*) FROM gmao__mouvement_machine WHERE type_Mouv = 'parc_chaine' AND idEmp_accepted IS NULL");
-                                    $count = $stmt->fetchColumn();
-                                    if ($count > 0) {
-                                        echo '<span class="badge badge-danger ml-1">' . $count . '</span>';
+                                   
+                                    if (!empty($mouvements)) {
+                                        $count = $mouvements[0]['count_machine'];
+
+                                        if ($count > 0) {
+                                            echo '<span class="badge badge-danger ml-1">' . $count . '</span>';
+                                        }
                                     }
                                     ?>
                                 </a>
@@ -247,7 +248,7 @@ if (!isset($mouvements)) {
                                             <th>Statut</th>
 
                                             <th>Machine ID</th>
-                                            <th>Référence</th>
+                                            <!-- <th>Référence</th> -->
                                             <th>Désignation</th>
                                             <th>Raisons</th>
                                             <th>Date mouvement</th>
@@ -262,7 +263,7 @@ if (!isset($mouvements)) {
                                             <?php foreach ($mouvements as $mouvement): ?>
                                                 <tr>
                                                     <td>
-                                                        <?php if (empty($mouvement['idEmp_accepted']) && empty($mouvement['status'])): ?>
+                                                        <?php if (empty($mouvement['status'])): ?>
                                                             <button class="action-icon accept  reception-btn" data-toggle="modal" data-target="#receptionModal"
                                                                 title="Réceptionner"
                                                                 data-id="<?= htmlspecialchars($mouvement['num_Mouv_Mach'] ?? '') ?>"
@@ -295,7 +296,7 @@ if (!isset($mouvements)) {
                                                         ?>
                                                     </td>
                                                     <td><?= htmlspecialchars($mouvement['id_machine'] ?? "") ?></td>
-                                                    <td><?= htmlspecialchars($mouvement['reference'] ?? "") ?></td>
+                                                    <!-- <td><?= htmlspecialchars($mouvement['reference'] ?? "") ?></td> -->
                                                     <td><?= htmlspecialchars($mouvement['designation'] ?? "") ?></td>
                                                     <td><?= htmlspecialchars($mouvement['raison_mouv'] ?? "") ?></td>
                                                     <td><?= htmlspecialchars($mouvement['date_mouvement'] ?? "") ?></td>
@@ -548,32 +549,33 @@ if (!isset($mouvements)) {
                 });
 
                 function initSelect2AlwaysSearch(sel) {
-               if (typeof $ !== 'undefined' && $.fn.select2) {
-                   $(sel).select2({
-                       width: '100%',
-                       placeholder: '-- Selectionner --',
-                       allowClear: true,
-                       minimumResultsForSearch: 0,
-                       dropdownParent: $('#mouvementModal')
-                   });
-                   console.log('Select2 initialisé pour:', sel);
-               } else {
-                   console.log('Select2 non disponible pour:', sel);
-                   // Fallback: activer la recherche native
-                   $(sel).attr('onfocus', 'this.size=10;');
-                   $(sel).attr('onblur', 'this.size=1;');
-                   $(sel).attr('onchange', 'this.size=1;');
-               }
-           }
+                    if (typeof $ !== 'undefined' && $.fn.select2) {
+                        $(sel).select2({
+                            width: '100%',
+                            placeholder: '-- Selectionner --',
+                            allowClear: true,
+                            minimumResultsForSearch: 0,
+                            dropdownParent: $('#mouvementModal')
+                        });
+                        console.log('Select2 initialisé pour:', sel);
+                    } else {
+                        console.log('Select2 non disponible pour:', sel);
+                        // Fallback: activer la recherche native
+                        $(sel).attr('onfocus', 'this.size=10;');
+                        $(sel).attr('onblur', 'this.size=1;');
+                        $(sel).attr('onchange', 'this.size=1;');
+                    }
+                }
 
-           // Initialiser Select2 avec un délai pour s'assurer que tout est chargé
-           setTimeout(function() {
-               initSelect2AlwaysSearch('#machine');
-           }, 500);
+                // Initialiser Select2 avec un délai pour s'assurer que tout est chargé
+                setTimeout(function() {
+                    initSelect2AlwaysSearch('#machine');
+                }, 500);
             });
         </script>
     </div>
 </body>
 
 </html>
+
 </html>

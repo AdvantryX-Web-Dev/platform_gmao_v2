@@ -22,7 +22,7 @@ $machineOptions = Machine_model::machineByLocation($location);
                 <div class="modal-body">
                     <input type="hidden" name="type_mouvement" value="<?= htmlspecialchars($type_mouvement ?? '') ?>">
                     <div class="form-group">
-                        <label for="maintenancier">Maintenancier :</label>
+                        <label for="maintenancier">déplacé par :</label>
                         <?php
                         // Récupérer l'ID du maintenancier connecté
                         $connectedMatricule = $_SESSION['user']['matricule'] ?? null;
@@ -62,6 +62,19 @@ $machineOptions = Machine_model::machineByLocation($location);
 
                         <?php endif; ?>
                     </div>
+                    <div class="form-group">
+                        <label for="idEmp_accepted">receptionné par :</label>
+                        <select class="form-control" id="idEmp_accepted" name="idEmp_accepted" required>
+                            <option value="">--Maintenancier--</option>
+                            <?php
+                            $controller = new \App\Controllers\Mouvement_machinesController();
+                            $maintenanciers = $controller->getMaintainers();
+                            foreach ($maintenanciers as $maintenancier) {
+                                echo "<option value=\"{$maintenancier['id']}\">{$maintenancier['first_name']} {$maintenancier['last_name']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
                     <!-- <div class="form-group">
                         <label for="typeMachine">Type de Machine :</label>
                         <select class="form-control" id="typeMachine" name="typeMachine" required>
@@ -91,7 +104,7 @@ $machineOptions = Machine_model::machineByLocation($location);
                         <?php
                         if (!empty($machineOptions)) {
                             foreach ($machineOptions as $machine) {
-                                echo "<option value=\"{$machine['machine_id']}\">{$machine['machine_id']} - {$machine['reference']}</option>";
+                                echo "<option value=\"{$machine['machine_id']}\">{$machine['machine_id']}</option>";
                             }
                         }
                         ?>
