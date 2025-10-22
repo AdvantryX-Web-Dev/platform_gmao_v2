@@ -2,276 +2,107 @@
 
 namespace App\Controllers;
 
-use App\Models\Database;
 use App\Models\HistoriqueInventaire_model;
 use App\Models\Maintainer_model;
-use App\Models\Machine_model;
+
+// Import manuel de la classe d'export
+require_once __DIR__ . '/../export/evaluationInventairExport.php';
 
 class HistoriqueInventaireController
 {
     public function index()
     {
-        $db = Database::getInstance('db_digitex');
-        $conn = $db->getConnection();
+        try {
+            // Vérifier si l'utilisateur est admin
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
 
-        // Vérifier si l'utilisateur connecté est admin
-        $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
-        $connectedMatricule = $_SESSION['user']['matricule'] ?? '';
-        // Récupérer les filtres depuis GET
-        $filterMaintainer = $_GET['filter_maintainer'] ?? '';
-        $filterStatus = $_GET['filter_status'] ?? '';
+            // Récupérer le matricule de l'utilisateur connecté
+            $connectedMatricule = $_SESSION['user']['matricule'] ?? null;
 
-        // Si l'utilisateur n'est pas admin, forcer le filtre sur son matricule
-        if (!$isAdmin && $connectedMatricule) {
-            $filterMaintainer = $connectedMatricule;
-        }
-        // Récupérer tous les maintenanciers pour le filtre (seulement si admin)
-        $allMaintainers = $isAdmin ? Maintainer_model::findAll() : [];
-        $allmachine = HistoriqueInventaire_model::getAllMachines($isAdmin, $filterMaintainer);
-        // Récupérer les machines selon les permissions utilisateur (même logique que maintenancier_machine)
-        $Machines_maint = $this->getUserMachines($isAdmin, $connectedMatricule);
+            // Récupérer les filtres
+            $filterMaintainer = $_GET['filter_maintainer'] ?? '';
+            $filterStatus = $_GET['filter_status'] ?? '';
+            $filterDateFrom = $_GET['filter_date_from'] ?? '';
+            $filterDateTo = $_GET['filter_date_to'] ?? '';
+            $export = $_GET['export'] ?? '';
 
-
-        // Récupérer l'historique d'inventaire le plus récent pour chaque machine
-        $historiqueData = HistoriqueInventaire_model::getLatestHistorique();
-        if ($isAdmin) {
-            $userMachines = $allmachine;
-        } else {
-            $userMachines = $Machines_maint;
-        }
-
-        // Créer des mappings
-        $historiqueMap = [];
-        foreach ($historiqueData as $item) {
-            $historiqueMap[$item['machine_id']] = $item;
-        }
-
-        $userMachinesMap = [];
-        foreach ($userMachines as $machine) {
-            $userMachinesMap[$machine['id']] = $machine;
-        }
-
-        // Préparer les données de comparaison
-        $comparisons = [];
-        $confirmes = 0;        // Machines inventoriées et conformes
-        $differences = 0;      // Machines inventoriées avec differences
-        $supprimer = 0;       //non_inventoriee : Machines pas inventoriées (dans init__machine mais pas dans historique)
-        $ajouter = 0;        // Machines supprimées (dans historique mais plus dans init__machine)
-
-        // 1. Traiter les machines accessibles à l'utilisateur (userMachines)
-        foreach ($userMachines as $machine) {
-            $machineId = $machine['id'];
-            $comparison = [
-                'machine' => $machine,
-                'historique' => isset($historiqueMap[$machineId]) ? $historiqueMap[$machineId] : null,
-                'status' => 'non_inventoriee' // par défaut
-            ];
-
-            if (isset($historiqueMap[$machineId])) {
-                // Machine trouvée dans l'historique = elle a été inventoriée
-                $historique = $historiqueMap[$machineId];
-
-                // Comparer location et status pour voir si elle est conforme
-                $locationMatch = ($machine['machines_location_id'] == $historique['location_id']);
-                if (isset($machine['final_status_id']) && !empty($machine['final_status_id'])) {
-                    $statusMatch = ($machine['final_status_id'] == $historique['status_id']);
-                } else {
-                    $statusMatch = ($machine['machines_status_id'] == $historique['status_id']);
-                }
-                $maintenancierMatch = ($machine['current_maintainer_matricule'] == $historique['maintainer_matricule']);
-                if ($locationMatch && $statusMatch && $maintenancierMatch) {
-                    $comparison['status'] = 'conforme';  // Machine inventoriée et conforme
-                    $confirmes++;
-                } else {
-                    $comparison['status'] = 'non_conforme';     // Machine inventoriée avec écart
-                    $differences++;
-                }
-            } else {
-                // Machine dans userMachines mais pas dans historique = pas inventoriée (manquante)
-                $comparison['status'] = 'non_inventoriee';
-                $supprimer++;
+            // Définir les dates par défaut du dernier mois si aucun filtre de date n'est appliqué
+            if (empty($filterDateFrom) && empty($filterDateTo)) {
+                $filterDateFrom = date('Y-m-d', strtotime('-30 days'));
+                $filterDateTo = date('Y-m-d'); // aujourd’hui
+            }
+            
+            // Gérer l'export
+            if ($export) {
+                $this->handleExport($export, $filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo);
+                return;
             }
 
-            $comparisons[] = $comparison;
-        }
-        // 2. Chercher les machines inventoriées par l'utilisateur mais plus assignées à lui(machine ajouter)
-        foreach ($historiqueData as $item) {
-            if (!isset($userMachinesMap[$item['machine_id']])) {
-                // Vérifier si cette machine a été inventoriée par l'utilisateur connecté
-                $shouldInclude = false;
+            // Récupérer les données d'évaluation d'inventaire avec filtres
+            $HistoriqueInventaire = HistoriqueInventaire_model::Evaluation_inventaire($filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo);
 
-                if ($isAdmin) {
-                    // Admin voit toutes les machines ajoutées/supprimées
-                    $shouldInclude = true;
-                } else {
-                    // Maintenancier voit seulement les machines qu'il a inventoriées
-                    if ($item['maintainer_matricule'] == $connectedMatricule) {
-                        $shouldInclude = true;
-                    }
-                }
-
-                if ($shouldInclude) {
-                    $comparison = [
-                        'machine' => null, // Pas de données machine actuelle pour cet utilisateur
-                        'historique' => $item,
-                        'status' => 'ajouter'
-                    ];
-                    $comparisons[] = $comparison;
-                    $ajouter++;
-                }
+            // Récupérer tous les maintenanciers pour les filtres (si admin)
+            $allMaintainers = [];
+            if ($isAdmin) {
+                $allMaintainers = Maintainer_model::findAll();
             }
-        }
 
-        // 3. Appliquer les filtres backend
-        if ($filterMaintainer || $filterStatus) {
-            $filteredComparisons = [];
-            foreach ($comparisons as $comp) {
-                $showRow = true;
-
-                // Filtrer par maintenancier
-                if ($filterMaintainer && $filterMaintainer !== '') {
-                    $maintainerMatch = false;
-
-                    // Pour les machines ajoutées, vérifier le maintenancier dans l'historique
-                    if ($comp['status'] == 'ajouter') {
-                        if ($comp['historique'] && $comp['historique']['maintainer_matricule'] == $filterMaintainer) {
-                            $maintainerMatch = true;
-                        }
-                    } else {
-                        // Pour les machines normales, vérifier le maintenancier actuel
-                        if ($comp['machine'] && $comp['machine']['current_maintainer_matricule'] == $filterMaintainer) {
-                            $maintainerMatch = true;
-                        }
-                    }
-
-                    if (!$maintainerMatch) {
-                        $showRow = false;
-                    }
-                }
-
-                // Filtrer par statut
-                if ($filterStatus && $filterStatus !== '') {
-                    if ($comp['status'] !== $filterStatus) {
-                        $showRow = false;
-                    }
-                }
-
-                if ($showRow) {
-                    $filteredComparisons[] = $comp;
-                }
-            }
-            $comparisons = $filteredComparisons;
-
-            // Recalculer les compteurs après filtrage
+            // Calculer les statistiques
+            $totalMachines = count($HistoriqueInventaire);
             $confirmes = 0;
-            $differences = 0;
-            $supprimer = 0;
-            $ajouter = 0;
+            $nonConformes = 0;
+            $nonInventoriees = 0;
 
-            foreach ($comparisons as $comp) {
-                switch ($comp['status']) {
+            foreach ($HistoriqueInventaire as $comp) {
+                switch ($comp['evaluation'] ?? '') {
                     case 'conforme':
                         $confirmes++;
                         break;
                     case 'non_conforme':
-                        $differences++;
+                        $nonConformes++;
                         break;
                     case 'non_inventoriee':
-                        $supprimer++;
+                        $nonInventoriees++;
                         break;
                     case 'ajouter':
-                        $ajouter++;
+                        $nonConformes++;
                         break;
                 }
             }
+
+            // Calculer les pourcentages
+            $tauxConformite = $totalMachines > 0 ? round(($confirmes / $totalMachines) * 100, 1) : 0;
+            $tauxNonConforme = $totalMachines > 0 ? round(($nonConformes / $totalMachines) * 100, 1) : 0;
+            $tauxCouverture = $totalMachines > 0 ? round((($confirmes + $nonConformes) / $totalMachines) * 100, 1) : 0;
+
+            // Construire les paramètres d'export
+            $exportParams = '';
+            if ($filterMaintainer) $exportParams .= '&filter_maintainer=' . urlencode($filterMaintainer);
+            if ($filterStatus) $exportParams .= '&filter_status=' . urlencode($filterStatus);
+            if ($filterDateFrom) $exportParams .= '&filter_date_from=' . urlencode($filterDateFrom);
+            if ($filterDateTo) $exportParams .= '&filter_date_to=' . urlencode($filterDateTo);
+
+            include __DIR__ . '/../views/inventaire/historique_inventaire.php';
+        } catch (\Exception $e) {
+            error_log("Erreur dans HistoriqueInventaireController: " . $e->getMessage());
+            $_SESSION['flash_error'] = 'Erreur lors du chargement de l\'historique d\'inventaire';
+            header('Location: index.php?route=dashboard');
         }
-
-        // Calculer le total de machines selon les permissions (même logique que maintenancier_machine)
-        // Utiliser le filtre maintenancier seulement si c'est un admin qui filtre
-        $totalMachinesFilter = ($isAdmin && $filterMaintainer) ? $filterMaintainer : '';
-        $totalMachinesAdmin = count(HistoriqueInventaire_model::getAllMachines($isAdmin, $totalMachinesFilter));
-        $totalMachinesNoAdmin = count($this->getUserMachines($isAdmin, $connectedMatricule));
-        $totalMachines = $isAdmin ? $totalMachinesAdmin : $totalMachinesNoAdmin;
-        $totalInventoriees = $confirmes + $differences; // Machines qui ont été inventoriées
-        $totalNonInventoriees = $supprimer; // Machines non inventoriées
-
-        // Calculer les pourcentages
-        $pourcentageConformite = $totalMachines > 0 ? round(($confirmes / $totalMachines) * 100, 1) : 0;
-        $pourcentageinventoriees = $totalMachines > 0 ? round(($totalInventoriees / $totalMachines) * 100, 1) : 0;
-        $pourcentageNonConforme = $totalMachines > 0 ? round((($differences) / $totalMachines) * 100, 1) : 0;
-
-        include __DIR__ . '/../views/inventaire/historique_inventaire.php';
     }
 
     /**
-     * Récupère les machines selon les permissions utilisateur
-     * (même logique que InventaireController::maintenancier_machine)
+     * Gère l'export des données
      */
-    private function getUserMachines($isAdmin, $connectedMatricule)
+    private function handleExport($format, $filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo)
     {
-        $db = Database::getInstance('db_digitex');
-        $conn = $db->getConnection();
-
-        // Construire la requête de base - une ligne par machine (même logique que maintenancier_machine)
-        $sql = "
-            SELECT DISTINCT
-                m.id,
-                m.machine_id,
-                m.reference,
-                m.designation,
-                m.type,
-                m.machines_location_id,
-                m.machines_status_id,
-                l.location_name,
-                l.location_category,
-                s.status_name,
-                -- Maintenancier actuel
-                current_maint.maintener_id AS current_maintainer_id,
-                current_emp.matricule AS current_maintainer_matricule,
-                CONCAT(current_emp.first_name, ' ', current_emp.last_name) AS current_maintainer_name
-            FROM (
-                SELECT mm.*
-                FROM gmao__machine_maint mm
-                INNER JOIN (
-                    SELECT MAX(id) AS id
-                    FROM gmao__machine_maint
-                    GROUP BY machine_id
-                ) last ON last.id = mm.id
-            ) mm
-            LEFT JOIN init__employee e ON e.id = mm.maintener_id
-            LEFT JOIN init__machine m ON m.id = mm.machine_id
-            LEFT JOIN gmao__location l ON l.id = m.machines_location_id
-            LEFT JOIN gmao__status s ON s.id = m.machines_status_id
-            -- Jointure pour le maintenancier actuel (dernier enregistrement dans gmao__machine_maint)
-            LEFT JOIN (
-                SELECT mm.*
-                FROM gmao__machine_maint mm
-                INNER JOIN (
-                    SELECT machine_id, MAX(id) AS max_id
-                    FROM gmao__machine_maint
-                    GROUP BY machine_id
-                ) mm_latest ON mm.machine_id = mm_latest.machine_id AND mm.id = mm_latest.max_id
-            ) current_maint ON current_maint.machine_id = m.id
-            LEFT JOIN init__employee current_emp ON current_emp.id = current_maint.maintener_id
-            WHERE 1=1
-        ";
-
-        $params = [];
-
-        // Si pas admin, filtrer par matricule connecté (même logique que maintenancier_machine)
-        if (!$isAdmin && $connectedMatricule) {
-            $sql .= " AND e.matricule = :matricule";
-            $params['matricule'] = $connectedMatricule;
+        try {
+            if ($format === 'excel') {
+                \App\Export\EvaluationInventaireExport::exportToExcel($filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo);
+            }
+        } catch (\Exception $e) {
+            error_log("Erreur export: " . $e->getMessage());
+            $_SESSION['flash_error'] = 'Erreur lors de l\'export: ' . $e->getMessage();
+            header('Location: index.php?route=historyInventaire');
         }
-
-        $sql .= " ORDER BY m.machine_id ASC";
-
-        $stmt = $conn->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindParam(':' . $key, $value);
-        }
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

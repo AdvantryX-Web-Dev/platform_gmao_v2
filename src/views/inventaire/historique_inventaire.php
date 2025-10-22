@@ -35,9 +35,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Taux de Conformité</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $pourcentageConformite ?>%</div>
-                                            <small class="text-muted"><?= $confirmes ?>/<?= $totalInventoriees ?> machines inventoriées</small>
-                                            <br> <small class="text-muted"><?= $confirmes ?>/<?= $totalMachines ?> machines </small>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $tauxConformite ?>%</div>
+                                            <small class="text-muted">machines inventoriées</small>
+                                            <br> <small class="text-muted">
+                                                <?= $confirmes ?>/<?= $totalMachines ?> machines </small>
 
                                         </div>
                                         <div class="col-auto">
@@ -54,9 +55,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">machines inventoriées</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $pourcentageinventoriees ?>%</div>
-                                            <small class="text-muted"><?= $totalInventoriees ?>/<?= $totalMachines ?> machines inventoriées</small>
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Couverture d'Inventaire</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $tauxCouverture ?>%</div>
+                                            <small class="text-muted"><?= ($confirmes + $nonConformes) ?>/<?= $totalMachines ?> machines inventoriées</small>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-clipboard-list fa-2x text-primary"></i>
@@ -73,8 +74,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Non Conforme</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $pourcentageNonConforme ?>%</div>
-                                            <small class="text-muted"><?= $differences ?> Non conforme</small>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $tauxNonConforme ?>%</div>
+                                            <small class="text-muted"><?= $nonConformes ?> machines non conformes</small>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
@@ -93,11 +94,13 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                                 <?= $isAdmin ? 'Total Machines' : 'Mes Machines' ?>
                                             </div>
-                                          
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $totalMachines ?></div>
+
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                <?= $totalMachines ?>
+                                            </div>
                                             <small class="text-muted">
-                                                <?php if ($totalNonInventoriees > 0): ?>
-                                                    <span class="text-danger"><?= $totalNonInventoriees ?> non inventoriées</span>
+                                                <?php if ($nonInventoriees > 0): ?>
+                                                    <span class="text-danger"><?= $nonInventoriees ?> non inventoriées</span>
                                                 <?php else: ?>
                                                     <span class="text-success">Toutes inventoriées</span>
                                                 <?php endif; ?>
@@ -144,17 +147,30 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMatricule) ?> - Vous" readonly disabled>
                                         </div>
                                     <?php endif; ?>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label for="filter_status" class="form-label">Evaluation</label>
                                         <select name="filter_status" id="filter_status" class="form-control">
                                             <option value="">Toutes les évaluations</option>
                                             <option value="conforme" <?= ($filterStatus == 'conforme') ? 'selected' : '' ?>>Conforme</option>
                                             <option value="non_conforme" <?= ($filterStatus == 'non_conforme') ? 'selected' : '' ?>>Non Conforme</option>
                                             <option value="non_inventoriee" <?= ($filterStatus == 'non_inventoriee') ? 'selected' : '' ?>>Non Inventoriée</option>
-                                            <!-- <option value="supprimer" <?= ($filterStatus == 'supprimer') ? 'selected' : '' ?>>Machine Supprimée</option> -->
                                             <option value="ajouter" <?= ($filterStatus == 'ajouter') ? 'selected' : '' ?>>Machine Ajoutée</option>
                                         </select>
                                     </div>
+
+                                    <div class="col-md-2">
+                                        <label for="filter_date_from" class="form-label">Date Début</label>
+                                        <input type="date" name="filter_date_from" id="filter_date_from" class="form-control"
+                                            value="<?= htmlspecialchars($filterDateFrom ?? '') ?>">
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label for="filter_date_to" class="form-label">Date Fin</label>
+                                        <input type="date" name="filter_date_to" id="filter_date_to" class="form-control"
+                                            value="<?= htmlspecialchars($filterDateTo ?? '') ?>">
+                                    </div>
+
+
 
                                 </div>
                             </form>
@@ -163,8 +179,14 @@ if (session_status() === PHP_SESSION_NONE) {
 
                     <!-- Tableau de comparaison -->
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"> Evaluation Inventaire</h6>
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Evaluation Inventaire</h6>
+                            <div class="btn-group">
+                                <a href="index.php?route=historyInventaire&export=excel<?= $exportParams ?>"
+                                    class="btn btn-success btn-sm">
+                                    <i class="fas fa-file-excel"></i> Exporter Excel
+                                </a>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -186,68 +208,40 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($comparisons as $comp): ?>
+                                        <?php foreach ($HistoriqueInventaire as $comp):  ?>
+
                                             <tr>
                                                 <td>
-                                                    <?php if ($comp['machine']): ?>
-                                                        <?= htmlspecialchars($comp['machine']['machine_id'] ?? '') ?>
-                                                    <?php elseif ($comp['historique']): ?>
-                                                        <?= htmlspecialchars($comp['historique']['machine_code'] ?? '') ?>
-                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($comp['machine_id'] ?? '') ?>
                                                 </td>
                                                 <td class="d-none d-md-table-cell">
-                                                    <?php if ($comp['machine']): ?>
-                                                            <?= htmlspecialchars($comp['machine']['reference'] ?? '') ?>
-                                                    <?php elseif ($comp['historique']): ?>
-                                                        <?= htmlspecialchars($comp['historique']['machine_reference'] ?? '') ?>
-                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($comp['reference'] ?? '') ?>
                                                 </td>
                                                 <td class="d-none d-md-table-cell">
-                                                    <?php if (($comp['machine']) || ($comp['historique'])): ?>
-                                                        <?= htmlspecialchars($comp['machine']['type'] ?? $comp['historique']['type'] ?? '') ?>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">Non défini ajoutée</span>
-                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($comp['type'] ?? '') ?>
                                                 </td>
                                                 <!-- emplacement machine -->
                                                 <td>
-                                                    <?php
-                                                    $machineLocationName = $comp['machine']['location_name'] ?? null;
-                                                    $historiqueLocationName = $comp['historique']['location_name'] ?? null;
-
-                                                    $machineCategory = $comp['machine']['location_category'] ?? null;
-                                                    $historiqueCategory = $comp['historique']['location_category'] ?? null;
-
-                                                    $locationName = $machineLocationName ?? $historiqueLocationName;
-                                                    $locationCategory = $machineCategory ?? $historiqueCategory;
-                                                    ?>
-
-                                                    <?php if ($locationName): ?>
-                                                        <span class="badge badge-<?= ($locationCategory === 'prodline') ? 'success' : 'primary' ?>">
-                                                            <?= htmlspecialchars($locationName) ?>
-                                                        </span>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">Non défini </span>
-                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($comp['current_location'] ?? 'Non défini') ?>
                                                 </td>
 
                                                 <!-- statut machine -->
 
                                                 <td>
                                                     <?php
-                                                    $machineStatus = $comp['machine']['production_status'] ?? null;
-                                                  //  $historiqueStatus = $comp['historique']['status_name'] ?? null;
+                                                    $machineStatus = $comp['current_status'] ?? null;
+                                                    //  $historiqueStatus = $comp['historique']['status_name'] ?? null;
 
                                                     $status = $machineStatus ?? null;
 
                                                     if ($status):
                                                         $statusClass = 'secondary';
 
-                                                        if ($status === 'actif') {
+                                                        if ($status === 'active') {
                                                             $statusClass = 'success';
                                                         } elseif (in_array($status, ['en panne', 'ferraille'])) {
                                                             $statusClass = 'danger';
-                                                        } elseif ($status === 'inactif') {
+                                                        } elseif ($status === 'inactive') {
                                                             $statusClass = 'warning';
                                                         }
                                                     ?>
@@ -263,10 +257,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                                 <?php if ($isAdmin): ?>
                                                     <!-- Maintenancier Inventaire -->
                                                     <td>
-                                                        <?php if ($comp['historique']): ?>
-                                                            <?= htmlspecialchars($comp['historique']['maintainer_matricule'] ?? '') ?>
-                                                            <?php if ($comp['historique']['maintainer_name']): ?>
-                                                                <br><small class="text-muted"><?= htmlspecialchars($comp['historique']['maintainer_name']) ?></small>
+                                                        <?php if ($comp['inventory_maintainer']): ?>
+                                                            <?= htmlspecialchars($comp['inventory_maintainer'] ?? '') ?>
+                                                            <?php if ($comp['inventory_maintainer_matricule']): ?>
+                                                                <br><small class="text-muted"><?= htmlspecialchars($comp['inventory_maintainer_matricule']) ?></small>
                                                             <?php endif; ?>
                                                         <?php else: ?>
                                                             <span class="text-muted">-</span>
@@ -276,86 +270,44 @@ if (session_status() === PHP_SESSION_NONE) {
                                                 <?php if ($isAdmin): ?>
                                                     <!-- Maintenancier Actuel -->
                                                     <td>
-                                                        <?php if ($comp['machine'] && $comp['machine']['current_maintainer_matricule']): ?>
-                                                            <?= htmlspecialchars($comp['machine']['current_maintainer_matricule']) ?>
-                                                            <?php if ($comp['machine']['current_maintainer_name']): ?>
-                                                                <br><small class="text-muted"><?= htmlspecialchars($comp['machine']['current_maintainer_name']) ?></small>
+                                                        <?php if ($comp['current_maintainer']): ?>
+                                                            <?= htmlspecialchars($comp['current_maintainer']) ?>
+                                                            <?php if ($comp['current_maintainer_matricule']): ?>
+                                                                <br><small class="text-muted"><?= htmlspecialchars($comp['current_maintainer_matricule']) ?></small>
                                                             <?php endif; ?>
-                                                        <?php elseif (!$comp['machine']): ?>
-                                                            <span class="text-muted">Machine ajoutée</span>
                                                         <?php else: ?>
-                                                            <span class="text-muted">Non assigné</span>
+                                                            <span class="text-muted">-</span>
                                                         <?php endif; ?>
                                                     </td>
                                                 <?php endif; ?>
                                                 <!--  inventaire evaluation  -->
                                                 <td class="text-center">
-                                                    <?php if ($comp['status'] == 'conforme'): ?>
+                                                    <?php if ($comp['evaluation'] == 'conforme'): ?>
                                                         <span class="badge badge-success">Conforme</span>
-                                                    <?php elseif ($comp['status'] == 'non_conforme'): ?>
+                                                    <?php elseif ($comp['evaluation'] == 'non_conforme'): ?>
                                                         <span class="badge badge-danger">Non Conforme</span>
-                                                    <?php elseif ($comp['status'] == 'non_inventoriee'): ?>
+                                                    <?php elseif ($comp['evaluation'] == 'non_inventoriee'): ?>
                                                         <span class="badge badge-light">Non Inventoriée</span>
-                                                    <?php elseif ($comp['status'] == 'supprimer'): ?>
+                                                    <?php elseif ($comp['evaluation'] == 'supprimer'): ?>
                                                         <span class="badge badge-warning">Machine Supprimée</span>
                                                     <?php else: ?>
-                                                        <span class="badge badge-secondary"><?= $comp['status'] ?></span>
+                                                        <span class="badge badge-secondary"><?= $comp['evaluation'] ?></span>
                                                     <?php endif; ?>
                                                 </td>
 
                                                 <!-- Différence/Non-conformité -->
                                                 <td>
-                                                    <?php if ($comp['status'] == 'non_conforme' && $comp['machine'] && $comp['historique'] && $comp['machine']['current_maintainer_matricule'] != $comp['historique']['maintainer_matricule']): ?>
-                                                        <span class="text-danger">Machine ajoutée à ce maintenancier:
-                                                            <?= htmlspecialchars($comp['historique']['maintainer_matricule'] ?? '') ?>
-                                                            <?php if ($comp['historique']['maintainer_name']): ?>
-                                                                <br><small class="text-muted"><?= htmlspecialchars($comp['historique']['maintainer_name']) ?></small>
-                                                            <?php endif; ?>
-                                                        </span>
-                                                    <?php elseif ($comp['status'] == 'non_conforme'): ?>
-                                                        <?php
-                                                        $differences = [];
-                                                        if ($comp['machine'] && $comp['historique']) {
-                                                            if ($comp['machine']['machines_location_id'] != $comp['historique']['location_id']) {
-                                                                $differences[] = '*Localisation modifiée: ' . ($comp['machine']['location_name'] ?? 'Non défini') . ' → ' . ($comp['historique']['location_name'] ?? 'Non défini');
-                                                            }
-                                                            if(isset($comp['machine']['final_status_id']) && !empty($comp['machine']['final_status_id'])) {
-                                                                if ($comp['machine']['final_status_id'] != $comp['historique']['status_id']) {
-                                                                    $differences[] = '*Statut modifié: ' . ($comp['machine']['production_status'] ?? 'Non défini') . ' → ' . ($comp['historique']['status_name'] ?? 'Non défini');
-                                                                }
-                                                            } else {
-                                                                if ($comp['machine']['machines_status_id'] != $comp['historique']['status_id']) {
-                                                                    $differences[] = '*Statut modifié: ' . ($comp['machine']['production_status'] ?? 'Non défini') . ' → ' . ($comp['historique']['status_name'] ?? 'Non défini');
-                                                                }
-                                                            }
-                                                            // if ($comp['machine']['final_status_id'] != $comp['historique']['status_id']) {
-                                                            //     $differences[] = '*Statut modifié: ' . ($comp['machine']['production_status'] ?? 'Non défini') . ' → ' . ($comp['historique']['status_name'] ?? 'Non défini');
-                                                            // }
-                                                        }
-                                                        echo implode('<br>', $differences);
-                                                        ?>
-
-                                                    <?php
-                                                    elseif ($comp['status'] == 'non_inventoriee'): ?>
-                                                        <span class="text-muted">Non inventoriée</span>
-                                                    <?php
-                                                    elseif ($comp['status'] == 'supprimer'): ?>
-                                                        <span class="text-muted">Non inventoriée ou supprimée</span>
-                                                    <?php elseif ($comp['status'] == 'ajouter'): ?>
-                                                        <span class="text-muted">Machine ajoutée</span>
-                                                    <?php elseif ($comp['status'] == 'conforme'): ?>
-                                                        <span class="text-success">Données conformes </span>
+                                                    <?php if (!empty($comp['difference']) && $comp['difference'] !== 'non defini'): ?>
+                                                        <div class="text-danger">
+                                                            <?= $comp['difference'] ?>
+                                                        </div>
                                                     <?php else: ?>
-                                                        <span class="text-muted">-</span>
+                                                        <span class="text-muted">Aucune différence</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <!-- Date Inventaire -->
                                                 <td>
-                                                    <?php if ($comp['historique'] && $comp['historique']['created_at']): ?>
-                                                        <?= date('Y-m-d H:i', strtotime($comp['historique']['created_at'])) ?>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">-</span>
-                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($comp['inventory_date']) ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -399,7 +351,7 @@ if (session_status() === PHP_SESSION_NONE) {
             });
 
             // Filtrage automatique
-            $('#filter_maintainer:not(:disabled), #filter_status').on('change', function() {
+            $('#filter_maintainer:not(:disabled), #filter_status, #filter_date_from, #filter_date_to').on('change', function() {
                 // Soumettre automatiquement le formulaire
                 $(this).closest('form').submit();
             });

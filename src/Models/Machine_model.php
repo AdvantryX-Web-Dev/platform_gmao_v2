@@ -365,7 +365,7 @@ class Machine_model
                         GROUP BY machine_id
                     ) mm_last 
                     ON mm_last.machine_id = mm.machine_id AND mm_last.last_id = mm.id
-                ) maint ON maint.machine_id = m.machine_id
+                ) maint ON maint.machine_id = m.id
     
                 LEFT JOIN init__employee e ON e.id = maint.maintener_id
             ";

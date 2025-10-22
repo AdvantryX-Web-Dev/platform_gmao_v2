@@ -67,7 +67,6 @@ class Auth_model
             $stmt->execute();
             return $stmt->fetchColumn() > 0;
         } catch (\PDOException $e) {
-            print_r("model:".$e->getMessage());die;
 
             // Log error
             error_log("Erreur lors de la vérification du matricule dans gmao__compte: " . $e->getMessage());

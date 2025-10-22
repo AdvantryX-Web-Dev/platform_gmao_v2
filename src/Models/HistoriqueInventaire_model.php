@@ -3,131 +3,192 @@
 namespace App\Models;
 
 use App\Models\Database;
+use App\Models\AuditTrail_model;
 
 class HistoriqueInventaire_model
 {
-
-    /**
-     * Récupère l'historique d'inventaire le plus récent pour chaque machine
-     */
-    public static function getLatestHistorique()
+    public static function Evaluation_inventaire($filterMaintainer = '', $filterStatus = '', $filterDateFrom = '', $filterDateTo = '')
     {
-        $db = Database::getInstance('db_digitex');
-        $conn = $db->getConnection();
+        try {
+            $db = Database::getInstance('db_digitex');
+            $conn = $db->getConnection();
 
-        $sql = "
-            SELECT 
-                hi.machine_id,
-                hi.maintainer_id,
-                hi.location_id,
-                hi.status_id,
-                hi.created_at,
-                e.matricule AS maintainer_matricule,
-                CONCAT(e.first_name, ' ', e.last_name) AS maintainer_name,
-                l.location_name,
-                l.location_category,
-                s.status_name,
-                m.machine_id AS machine_code,
-                m.reference AS machine_reference,
-                -- Maintenancier actuel depuis gmao__machine_maint
-                current_maint.maintener_id AS current_maintainer_id,
-                current_emp.matricule AS current_maintainer_matricule,
-                CONCAT(current_emp.first_name, ' ', current_emp.last_name) AS current_maintainer_name
-            FROM gmao__historique_inventaire hi
-            INNER JOIN (
-                SELECT machine_id, MAX(id) AS max_id
-                FROM gmao__historique_inventaire
-                GROUP BY machine_id
-            ) latest ON hi.machine_id = latest.machine_id AND hi.id = latest.max_id
-            LEFT JOIN init__employee e ON e.id = hi.maintainer_id
-            LEFT JOIN gmao__location l ON l.id = hi.location_id
-            LEFT JOIN gmao__status s ON s.id = hi.status_id
-            LEFT JOIN init__machine m ON m.id = hi.machine_id
-            -- Jointure pour le maintenancier actuel (dernier enregistrement dans gmao__machine_maint)
-            LEFT JOIN (
-                SELECT mm.*
-                FROM gmao__machine_maint mm
+            // Vérifier si l'utilisateur est admin
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+
+            // Construire la requête de base
+            $sql = "
+                SELECT 
+                    gei.*,
+                    CONCAT(inv_emp.last_name, ' ', inv_emp.first_name) AS inventory_maintainer,
+                    inv_emp.matricule AS inventory_maintainer_matricule,
+                    CONCAT(cur_emp.last_name, ' ', cur_emp.first_name) AS current_maintainer,
+                    cur_emp.matricule AS current_maintainer_matricule
+                FROM gmao__evaluation_inventaire gei
                 INNER JOIN (
                     SELECT machine_id, MAX(id) AS max_id
-                    FROM gmao__machine_maint
+                    FROM gmao__evaluation_inventaire
                     GROUP BY machine_id
-                ) mm_latest ON mm.machine_id = mm_latest.machine_id AND mm.id = mm_latest.max_id
-            ) current_maint ON current_maint.machine_id = m.id
-            LEFT JOIN init__employee current_emp ON current_emp.id = current_maint.maintener_id
-            ORDER BY hi.id DESC
-        ";
+                ) latest ON gei.id = latest.max_id
+                LEFT JOIN init__employee inv_emp ON inv_emp.id = gei.inventory_maintainer
+                LEFT JOIN init__employee cur_emp ON cur_emp.id = gei.current_maintainer
+            ";
 
-        $stmt = $conn->query($sql);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $params = [];
+            $whereConditions = [];
+
+            // Filtrage par maintenancier
+            if ($isAdmin && $filterMaintainer) {
+                // Filtrer par maintenancier fourni (peut être l'inventoriste ou le maintenancier courant)
+                $whereConditions[] = "(inv_emp.matricule = :filter_maintainer )";
+                $params[':filter_maintainer'] = $filterMaintainer;
+            } elseif (!$isAdmin) {
+                // Pour les non-admins : afficher seulement les machines associées à l'utilisateur connecté
+                $userMatricule = $_SESSION['user']['matricule'] ?? null;
+
+                if (!$userMatricule) {
+                    return []; // Retourner un tableau vide si pas de matricule
+                }
+                // Conditions combinées correctement avec OR
+                $whereConditions[] = "(
+                    inv_emp.matricule = :user_matricule_inv
+                    OR cur_emp.matricule = :user_matricule_cur
+                )";
+
+                $params[':user_matricule_inv'] = $userMatricule;
+                $params[':user_matricule_cur'] = $userMatricule;
+            }
+
+            // Filtrage par statut d'évaluation
+            if ($filterStatus) {
+                $whereConditions[] = "gei.evaluation = :filter_status";
+                $params[':filter_status'] = $filterStatus;
+            }
+
+            // Filtrage par date
+            if ($filterDateFrom) {
+                $whereConditions[] = "gei.inventory_date >= :filter_date_from";
+                $params[':filter_date_from'] = $filterDateFrom;
+            }
+
+            if ($filterDateTo) {
+                $whereConditions[] = "gei.inventory_date <= :filter_date_to";
+                $params[':filter_date_to'] = $filterDateTo;
+            }
+
+            // Ajouter les conditions WHERE
+            if (!empty($whereConditions)) {
+                $sql .= " WHERE " . implode(' AND ', $whereConditions);
+            }
+
+            $sql .= " ORDER BY gei.inventory_date DESC";
+
+            // Exécuter la requête
+            if (!empty($params)) {
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($params);
+            } else {
+                $stmt = $conn->query($sql);
+            }
+
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            // Log l'erreur pour le debugging
+            error_log("Erreur dans Evaluation_inventaire: " . $e->getMessage());
+
+            // Retourner un tableau vide en cas d'erreur
+            return [];
+        }
+    }
+    public static function insert_Evaluation_inventaire($comparisons)
+    {
+        try {
+            $db = Database::getInstance('db_digitex');
+            $conn = $db->getConnection();
+
+            $sql = "INSERT INTO gmao__evaluation_inventaire (
+                machine_id,
+                reference,
+                type,
+                current_location,
+                current_status,
+                inventory_maintainer,
+                current_maintainer,
+                evaluation,
+                difference,
+                inventory_date
+            ) VALUES (
+                :machine_id,
+                :reference,
+                :type,
+                :current_location,
+                :current_status,
+                :inventory_maintainer,
+                :current_maintainer,
+                :evaluation,
+                :difference,
+                :inventory_date
+            )";
+
+            $stmt = $conn->prepare($sql);
+
+            $machine_id = $comparisons['machine_id'] ?? 'non defini';
+            $reference = $comparisons['reference'] ?? 'non defini';
+            $type = $comparisons['type'] ?? 'non defini';
+            $current_location = $comparisons['current_location_name'] ?? 'non defini';
+            $current_status = $comparisons['current_status'] ?? 'non defini';
+            $inventory_maintainer = $comparisons['inventory_maintainer_name'] ?? 'non defini';
+            $current_maintainer = $comparisons['current_maintainer_name'] ?? 'non defini';
+            $evaluation = $comparisons['status'] ?? 'non defini';
+            $difference = $comparisons['differences'] ?? 'non defini';
+            $inventory_date = date('Y-m-d');
+
+            $stmt->bindParam(':machine_id', $machine_id);
+            $stmt->bindParam(':reference', $reference);
+            $stmt->bindParam(':type', $type);
+            $stmt->bindParam(':current_location', $current_location);
+            $stmt->bindParam(':current_status', $current_status);
+            $stmt->bindParam(':inventory_maintainer', $inventory_maintainer);
+            $stmt->bindParam(':current_maintainer', $current_maintainer);
+            $stmt->bindParam(':evaluation', $evaluation);
+            $stmt->bindParam(':difference', $difference);
+            $stmt->bindParam(':inventory_date', $inventory_date);
+
+            $stmt->execute();
+
+            // Audit trail pour l'insertion d'évaluation
+            self::logAuditEvaluation($machine_id, $reference, $type, $current_location, $current_status, $inventory_maintainer, $current_maintainer, $evaluation, $difference, $inventory_date);
+
+            return true;
+        } catch (\Throwable $e) {
+            
+
+            error_log('Erreur insert_Evaluation_inventaire: ' . $e->getMessage());
+            return false;
+        }
     }
 
-    public static function getAllMachines($isAdmin, $filterMaintainer)
+    private static function logAuditEvaluation($machine_id, $reference, $type, $current_location, $current_status, $inventory_maintainer, $current_maintainer, $evaluation, $difference, $inventory_date)
     {
-        $db = Database::getInstance('db_digitex');
-        $conn = $db->getConnection();
-        $params = [];
+        try {
+            $userMatricule = $_SESSION['user']['matricule'] ?? null;
+            if (!$userMatricule) return;
 
-        $sql = "SELECT DISTINCT m.*, l.location_name, l.location_category, s.status_name,
-                CONCAT(current_emp.first_name, ' ', current_emp.last_name) AS current_maintainer_name,
-                current_emp.matricule AS current_maintainer_matricule,
-                -- Vérification du statut de production
-                CASE 
-                    WHEN l.location_category = 'prodline' THEN
-                        CASE 
-                            WHEN presence.id IS NOT NULL AND presence.p_state = 1 AND presence.cur_date = CURDATE() THEN 'actif'
-                            ELSE 'inactif'
-                        END
-                    ELSE s.status_name
-                END AS production_status,
-                -- Statut final : utiliser production_status si disponible, sinon machines_status_id
-                CASE 
-                    WHEN l.location_category = 'prodline' THEN
-                        CASE 
-                            WHEN presence.id IS NOT NULL AND presence.p_state = 1 AND presence.cur_date = CURDATE() THEN 
-                                (SELECT id FROM gmao__status WHERE status_name = 'actif' LIMIT 1)
-                            ELSE 
-                                (SELECT id FROM gmao__status WHERE status_name = 'inactif' LIMIT 1)
-                        END
-                    ELSE m.machines_status_id
-                END AS final_status_id
-        FROM init__machine m
-        LEFT JOIN gmao__location l ON l.id = m.machines_location_id
-        LEFT JOIN gmao__status s ON s.id = m.machines_status_id
-        LEFT JOIN (
-            SELECT mm.*
-            FROM gmao__machine_maint mm
-            INNER JOIN (
-                SELECT machine_id, MAX(id) AS max_id
-                FROM gmao__machine_maint
-                GROUP BY machine_id
-            ) mm_latest ON mm.machine_id = mm_latest.machine_id AND mm.id = mm_latest.max_id
-        ) current_maint ON current_maint.machine_id = m.id
-        LEFT JOIN init__employee current_emp ON current_emp.id = current_maint.maintener_id
-        -- Jointure pour vérifier la présence en production (dernière entrée d'aujourd'hui)
-        LEFT JOIN (
-            SELECT p.*
-            FROM prod__presence p
-            INNER JOIN (
-                SELECT machine_id, MAX(id) AS max_id
-                FROM prod__presence
-                WHERE cur_date = CURDATE()
-                GROUP BY machine_id
-            ) p_latest ON p.machine_id = p_latest.machine_id AND p.id = p_latest.max_id
-            WHERE p.cur_date = CURDATE()
-        ) presence ON presence.machine_id = m.machine_id";
-
-        if ($filterMaintainer) {
-            $sql .= " WHERE current_emp.matricule = :matricule";
-            $params['matricule'] = $filterMaintainer;
+            $newValue = [
+                'machine_id' => $machine_id,
+                'reference' => $reference,
+                'type' => $type,
+                'current_location' => $current_location,
+                'current_status' => $current_status,
+                'inventory_maintainer' => $inventory_maintainer,
+                'current_maintainer' => $current_maintainer,
+                'evaluation' => $evaluation,
+                'difference' => $difference,
+                'inventory_date' => $inventory_date
+            ];
+            AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__evaluation_inventaire', null, $newValue);
+        } catch (\Throwable $e) {
+            error_log("Erreur audit evaluation: " . $e->getMessage());
         }
-
-        $sql .= " ORDER BY m.id";
-
-        $stmt = $conn->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindParam(':' . $key, $value);
-        }
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
