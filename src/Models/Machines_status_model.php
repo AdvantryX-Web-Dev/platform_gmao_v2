@@ -30,7 +30,6 @@ class Machines_status_model
         $this->$attr = $value;
     }
 
-
     public static function findAll()
     {
         $db =  Database::getInstance('db_digitex');
@@ -118,10 +117,6 @@ class Machines_status_model
             return false;
         }
     }
-
-
-
-
     public static function deleteById($id)
     {
         $db = Database::getInstance('db_digitex');

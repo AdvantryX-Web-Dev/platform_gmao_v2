@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 use App\Models\Machine_model;
 
-$machines = Machine_model::findAll();
+$machines = Machine_model::findAllMachine();
 
 // Vérifie si l'utilisateur est un administrateur
 $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';

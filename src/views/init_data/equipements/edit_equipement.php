@@ -89,7 +89,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                         ?>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-success">Modifier</button>
+                                <button type="submit" class="btn btn-success">Enregistrer</button>
                                 <a href="/platform_gmao/public/index.php?route=equipement/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>

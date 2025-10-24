@@ -25,11 +25,7 @@ class Motif_mvtController
                 header('Location: /platform_gmao/public/index.php?route=category/create');
                 exit;
             }
-            if (Categories_model::existsByTypeR($_POST['typeR'] ?? null)) {
-                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Code de motif (typeR) déjà existant.'];
-                header('Location: /platform_gmao/public/index.php?route=category/create');
-                exit;
-            }
+           
             $category = new Categories_model(
                 null,
                 $_POST['raison_mouv_mach'],
@@ -76,11 +72,7 @@ class Motif_mvtController
                 header('Location: ../../platform_gmao/public/index.php?route=category/edit&id=' . urlencode($id));
                 exit;
             }
-            if (Categories_model::existsByTypeR($_POST['typeR'] ?? null, $id)) {
-                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Code de motif (typeR) déjà utilisé par un autre enregistrement.'];
-                header('Location: ../../platform_gmao/public/index.php?route=category/edit&id=' . urlencode($id));
-                exit;
-            }
+            
             $category = new Categories_model(
                 $id,
                 $_POST['raison_mouv_mach'],

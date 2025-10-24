@@ -51,7 +51,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <label>Code</label>
                                     <input type="text" name="code" class="form-control" value="<?= htmlspecialchars($intervention_type['code'] ?? '') ?>" required>
                                 </div>
-                                <button type="submit" class="btn btn-success">Modifier</button>
+                                <button type="submit" class="btn btn-success">Enregistrer</button>
                                 <a href="/platform_gmao/public/index.php?route=intervention_type/list" class="btn btn-secondary ml-2">Annuler</a>
                             </form>
                         </div>

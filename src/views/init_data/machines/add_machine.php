@@ -45,11 +45,11 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
                                 <div class="form-group">
                                     <label>Référence</label>
-                                    <input type="text" name="reference" class="form-control">
+                                    <input type="text" name="reference" class="form-control" maxlength="16">
                                 </div>
                                 <div class="form-group">
                                     <label>Marque</label>
-                                    <input type="text" name="brand" class="form-control" required>
+                                    <input type="text" name="brand" class="form-control" maxlength="24">
                                 </div>
                                 <div class="form-group">
                                     <label>Type</label>
@@ -61,15 +61,20 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
                                 <div class="form-group">
                                     <label>Numéro Facture</label>
-                                    <input type="text" name="billing_num" class="form-control" >
+                                    <input type="text" name="billing_num" class="form-control" maxlength="10">
                                 </div>
                                 <div class="form-group">
                                     <label>Date Facture</label>
                                     <input type="date" name="bill_date" class="form-control">
                                 </div>
                                 <div class="form-group">
+                                    <label>Prix</label>
+                                    <input type="text" name="price" class="form-control" maxlength="11">
+                                </div>
+                                <div class="form-group">
                                     <label>Location</label>
                                     <select name="location_id" class="form-control" required>
+                                        <option value="">-- Sélectionner une localisation --</option>
                                         <?php
                                         $locations = Equipement_model::AllLocations();
                                         foreach ($locations as $location) {
@@ -85,10 +90,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <label>Statut</label>
                                     <select name="status_id" class="form-control" required>
                                         <?php
-
                                         $statuses =  Equipement_model::AllStatus();
                                         foreach ($statuses as $status) {
-                                            if ( ($status['status_name'] !== 'non fonctionnelle') && ($status['status_name'] !== 'fonctionnelle')) {
+                                            if (($status['status_name'] !== 'implanté') && ($status['status_name'] !== 'disponible')) {
                                                 echo '<option value="' . $status['id'] . '">' . $status['status_name'] . '</option>';
                                             }
                                         }

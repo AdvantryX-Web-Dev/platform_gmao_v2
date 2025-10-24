@@ -32,6 +32,8 @@ use App\Controllers\InventaireController;
 use App\Controllers\HistoriqueInventaireController;
 use App\Controllers\RejectionReasonsController;
 use App\Controllers\ImportInventaireController;
+use App\Controllers\Gestion_machines_statusController;
+
 // Créer les instances des contrôleurs
 $authController = new AuthController();
 $machineController = new MachineController();
@@ -54,6 +56,8 @@ $inventaireController = new InventaireController();
 $historiqueInventaireController = new HistoriqueInventaireController();
 $rejection_reasonsController = new RejectionReasonsController();
 $ImportInventaireController = new ImportInventaireController();
+$Gestion_machine_statusController = new Gestion_machines_statusController();
+
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
 
@@ -115,13 +119,13 @@ switch ($route) {
     case 'ajouterInventaire':
         $inventaireController->AddInventaire();
         break;
- 
-    // case 'maintenancier_machine':
-    //     $inventaireController->maintenancier_machine();
-    //     break;
-    // case 'maintenance_default':
-    //     $inventaireController->maintenance_default();
-    //     break;
+
+        // case 'maintenancier_machine':
+        //     $inventaireController->maintenancier_machine();
+        //     break;
+        // case 'maintenance_default':
+        //     $inventaireController->maintenance_default();
+        //     break;
     /** Gestion initiale des machines */
 
     case 'machines':
@@ -129,8 +133,7 @@ switch ($route) {
         break;
 
     case 'machines/state':
-        $controller = new MachineController();
-        $controller->machines_state();
+        $Gestion_machine_statusController->machines_state();
         break;
     case 'machine/create':
         $machineController->create();
@@ -275,10 +278,10 @@ switch ($route) {
 
     /** Gestion des machines */
     case 'Gestion_machines/status':
-        $machineController->machines_state();
+        $Gestion_machine_statusController->machines_state();
         break;
     case 'Gestion_machines/export':
-        $machineController->export_machines_state();
+        $Gestion_machine_statusController->export_machines_state();
         break;
     case 'machinesbox':
         require_once __DIR__ . '/../src/views/G_machines/Machine_box.php';

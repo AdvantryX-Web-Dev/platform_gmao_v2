@@ -15,7 +15,7 @@ $dbGMAO = Database::getInstance('db_digitex');
 $connGMAO = $dbGMAO->getConnection();
 
 // Récupérer le nombre total de machines
-$totalMachines = is_array(Machine_model::findAll()) ? count(Machine_model::findAll()) : 0;
+$totalMachines = is_array(Machine_model::findAllMachine()) ? count(Machine_model::findAllMachine()) : 0;
 
 // Récupérer le nombre d'interventions préventives
 $stmtPrev = $connGMAO->prepare("

@@ -45,11 +45,11 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
                                 <div class="form-group">
                                     <label>Référence</label>
-                                    <input type="text" name="reference" class="form-control" value="<?= htmlspecialchars($machine['reference'] ?? '') ?>">
+                                    <input type="text" name="reference" class="form-control" value="<?= htmlspecialchars($machine['reference'] ?? '') ?>" maxlength="16">
                                 </div>
                                 <div class="form-group">
                                     <label>Marque</label>
-                                    <input type="text" name="brand" class="form-control" value="<?= htmlspecialchars($machine['brand'] ?? '') ?>" required>
+                                    <input type="text" name="brand" class="form-control" value="<?= htmlspecialchars($machine['brand'] ?? '') ?>" maxlength="24">
                                 </div>
                                 <div class="form-group">
                                     <label>Type</label>
@@ -61,11 +61,15 @@ if (session_status() === PHP_SESSION_NONE) {
                                 </div>
                                 <div class="form-group">
                                     <label>Numéro Facture</label>
-                                    <input type="text" name="billing_num" class="form-control" value="<?= htmlspecialchars($machine['billing_num'] ?? '') ?>" >
+                                    <input type="text" name="billing_num" class="form-control" value="<?= htmlspecialchars($machine['billing_num'] ?? '') ?>" maxlength="10">
                                 </div>
                                 <div class="form-group">
                                     <label>Date Facture</label>
                                     <input type="date" name="bill_date" class="form-control" value="<?= htmlspecialchars($machine['bill_date'] ?? '') ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label>Prix</label>
+                                    <input type="text" name="price" class="form-control" value="<?= htmlspecialchars($machine['price'] ?? '') ?>" maxlength="11">
                                 </div>
                                 <div class="form-group">
                                     <label>Localisation</label>
@@ -87,11 +91,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                         <?php
                                         $status = Equipement_model::AllStatus();
                                         foreach ($status as $status) {
-                                            if ( ($status['status_name'] !== 'non fonctionnelle') && ($status['status_name'] !== 'fonctionnelle')) {
+                                            if (($status['status_name'] !== 'implanté') && ($status['status_name'] !== 'disponible')) {
                                                 echo '<option value="' . $status['id'] . '" ' . (isset($machine['machines_status_id']) && $machine['machines_status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
                                             }
                                         }
-                                       
                                         ?>
                                     </select>
                                 </div>

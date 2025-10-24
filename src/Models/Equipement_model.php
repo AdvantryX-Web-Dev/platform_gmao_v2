@@ -142,9 +142,6 @@ class Equipement_model
         }
     }
 
-
-
-
     public static function deleteById($id)
     {
         $db = new Database();

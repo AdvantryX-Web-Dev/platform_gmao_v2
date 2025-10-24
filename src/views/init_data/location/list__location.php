@@ -47,7 +47,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             <?php if ($isAdmin): ?>
                                 <div>
                                     <a href="../../platform_gmao/public/index.php?route=location/create" class="btn btn-success mr-2">
-                                        <i class="fas fa-plus"></i> Ajouter emplacement
+                                        <i class="fas fa-plus"></i> Ajouter un emplacement
                                     </a>
                                 </div>
                             <?php endif; ?>
