@@ -91,7 +91,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                         <?php
                                         $status = Equipement_model::AllStatus();
                                         foreach ($status as $status) {
-                                            if (($status['status_name'] !== 'implanté') && ($status['status_name'] !== 'disponible')) {
+                                            if (($status['status_name'] == 'active') || ($status['status_name'] == 'inactive') || ($status['status_name'] == 'ferraille') || ($status['status_name'] == 'en panne')) {
                                                 echo '<option value="' . $status['id'] . '" ' . (isset($machine['machines_status_id']) && $machine['machines_status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
                                             }
                                         }

@@ -152,7 +152,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <select class="form-control" id="status_id" name="status_id">
                                                     <option value="">-- Sélectionner --</option>
                                                     <?php if (!empty($statusOptions)): foreach ($statusOptions as $opt): ?>
-                                                            <?php if ($opt['status_name'] !== 'non fonctionnelle' && $opt['status_name'] !== 'fonctionnelle'): ?>
+                                                            <?php if ($opt['status_name'] !== 'non disponible' && $opt['status_name'] !== 'disponible'): ?>
                                                                 <option value="<?= (int)$opt['id'] ?>"><?= htmlspecialchars($opt['status_name']) ?></option>
                                                             <?php endif; ?>
                                                     <?php endforeach;

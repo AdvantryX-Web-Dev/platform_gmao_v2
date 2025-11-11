@@ -1,9 +1,17 @@
 <?php
-// Variables requises:
-// - $type_mouvement: string ('chaine_parc' | 'parc_chaine' | 'inter_chaine')
-// - $location: string (ex: 'prodline' | 'parc')
 
 use App\Models\Machine_model;
+use App\Models\Location_model;
+
+if (isset($type_mouvement) && $type_mouvement === 'chaine_parc') {
+    $locationcategory = 'parc';
+} elseif (isset($type_mouvement) && $type_mouvement === 'parc_chaine') {
+    $locationcategory = 'prodline';
+} elseif (isset($type_mouvement) && $type_mouvement === 'inter_chaine') {
+    $locationcategory = 'prodline';
+} else {
+    $locationcategory = '';
+}
 
 $machineOptions = Machine_model::machineByLocation($location);
 ?>
@@ -75,27 +83,20 @@ $machineOptions = Machine_model::machineByLocation($location);
                             ?>
                         </select>
                     </div>
-                    <!-- <div class="form-group">
-                        <label for="typeMachine">Type de Machine :</label>
-                        <select class="form-control" id="typeMachine" name="typeMachine" required>
-                            <option value="">-- Sélectionner un type de machine --</option>
-                           <?php
-                            $controller = new \App\Controllers\Mouvement_machinesController();
-                            $types = $controller->getTypes($location ?? '');
-                            foreach ($types as $type) {
-                                echo "<option value=\"{$type['type']}\" data-reference=\"{$type['type']}\">{$type['type']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div> -->
 
-                    <!-- <div class="form-group">
-                        <label for="machine">Machine :</label>
-                        <select class="form-control" id="machine" name="machine" required>
-                            <option value="">--Sélectionnez une machine--</option>
-                        </select>
-                    </div> -->
 
+                    <label for="location_id">deplacement vers :</label>
+                    <select class="form-control" id="location_id" name="location_id" required>
+                        <option value="">--Deplacement vers--</option>
+                        <?php
+
+
+                        $emplacements = Location_model::getLocationsByCategory($locationcategory);
+                        foreach ($emplacements as $emplacement) {
+                            echo "<option value=\"{$emplacement['id']}\">{$emplacement['location_name']}</option>";
+                        }
+                        ?>
+                    </select>
 
 
                     <label for="machine" class="mb-1">Machine</label>

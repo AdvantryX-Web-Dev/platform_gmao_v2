@@ -65,7 +65,7 @@
                              <?php
                                 foreach ($all_machines as $machine) {
                                     echo '<option value="' . htmlspecialchars($machine['id']) . '" data-reference="' . htmlspecialchars($machine['reference']) . '">' .
-                                        htmlspecialchars($machine['machine_id'] . ' - ' . $machine['reference']) .  '</option>';
+                                        htmlspecialchars($machine['machine_id'] . ' - ' . $machine['designation']) .  '</option>';
                                 }
                                 ?>
                          </select>
@@ -100,7 +100,8 @@
                          <select class="form-control" id="machine_status" name="machine_status" required>
                              <option value="">-- Sélectionner un statut --</option>
                              <?php foreach ($machineStatuses as $status): ?>
-                                 <?php if ($status['status_name'] != 'non fonctionnelle' && $status['status_name'] != 'fonctionnelle'): ?>
+                                 <?php 
+                                 if (($status['status_name'] == 'active') || ($status['status_name'] == 'inactive') || ($status['status_name'] == 'ferraille') || ($status['status_name'] == 'en panne')): ?> 
                                      <option value="<?php echo htmlspecialchars($status['id']); ?>"><?php echo htmlspecialchars($status['status_name']); ?></option>
                                  <?php endif; ?>
                              <?php endforeach; ?>

@@ -22,24 +22,29 @@ class HistoriqueInventaireController
             // Récupérer les filtres
             $filterMaintainer = $_GET['filter_maintainer'] ?? '';
             $filterStatus = $_GET['filter_status'] ?? '';
-            $filterDateFrom = $_GET['filter_date_from'] ?? '';
-            $filterDateTo = $_GET['filter_date_to'] ?? '';
+
+            // Récupérer l'identifiant du maintenancier connecté
+            $connectedMaintainerId = $_SESSION['user']['id'] ?? null;
+
+            // Pour un utilisateur non administrateur, forcer le filtre sur son propre identifiant
+            if (!$isAdmin && $connectedMaintainerId) {
+                if ($filterMaintainer === '' || (int)$filterMaintainer !== (int)$connectedMaintainerId) {
+                    $filterMaintainer = (string)$connectedMaintainerId;
+                }
+            }
+
             $export = $_GET['export'] ?? '';
 
-            // Définir les dates par défaut du dernier mois si aucun filtre de date n'est appliqué
-            if (empty($filterDateFrom) && empty($filterDateTo)) {
-                $filterDateFrom = date('Y-m-d', strtotime('-30 days'));
-                $filterDateTo = date('Y-m-d'); // aujourd’hui
-            }
-            
+
+
             // Gérer l'export
             if ($export) {
-                $this->handleExport($export, $filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo);
+                $this->handleExport($export, $filterMaintainer, $filterStatus);
                 return;
             }
 
             // Récupérer les données d'évaluation d'inventaire avec filtres
-            $HistoriqueInventaire = HistoriqueInventaire_model::Evaluation_inventaire($filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo);
+            $HistoriqueInventaire = HistoriqueInventaire_model::Evaluation_inventaire($filterMaintainer, $filterStatus);
 
             // Récupérer tous les maintenanciers pour les filtres (si admin)
             $allMaintainers = [];
@@ -51,36 +56,35 @@ class HistoriqueInventaireController
             $totalMachines = count($HistoriqueInventaire);
             $confirmes = 0;
             $nonConformes = 0;
+            $inventoriees = 0;
             $nonInventoriees = 0;
 
             foreach ($HistoriqueInventaire as $comp) {
                 switch ($comp['evaluation'] ?? '') {
                     case 'conforme':
                         $confirmes++;
+                        $inventoriees++;
                         break;
                     case 'non_conforme':
-                        $nonConformes++;
-                        break;
-                    case 'non_inventoriee':
-                        $nonInventoriees++;
-                        break;
-                    case 'ajouter':
-                        $nonConformes++;
+                        if (!empty($comp['differences']) && strpos($comp['differences'], 'Machine non inventoriée') !== false) {
+                            $nonInventoriees++;
+                        } else {
+                            $nonConformes++;
+                            $inventoriees++;
+                        }
                         break;
                 }
             }
-
             // Calculer les pourcentages
             $tauxConformite = $totalMachines > 0 ? round(($confirmes / $totalMachines) * 100, 1) : 0;
             $tauxNonConforme = $totalMachines > 0 ? round(($nonConformes / $totalMachines) * 100, 1) : 0;
-            $tauxCouverture = $totalMachines > 0 ? round((($confirmes + $nonConformes) / $totalMachines) * 100, 1) : 0;
+            $tauxCouverture = $totalMachines > 0 ? round(($inventoriees / $totalMachines) * 100, 1) : 0;
+            $nonInventoriees = $nonInventoriees > 0 ? $nonInventoriees : max(0, $totalMachines - $inventoriees);
 
             // Construire les paramètres d'export
             $exportParams = '';
             if ($filterMaintainer) $exportParams .= '&filter_maintainer=' . urlencode($filterMaintainer);
             if ($filterStatus) $exportParams .= '&filter_status=' . urlencode($filterStatus);
-            if ($filterDateFrom) $exportParams .= '&filter_date_from=' . urlencode($filterDateFrom);
-            if ($filterDateTo) $exportParams .= '&filter_date_to=' . urlencode($filterDateTo);
 
             include __DIR__ . '/../views/inventaire/historique_inventaire.php';
         } catch (\Exception $e) {
@@ -90,14 +94,15 @@ class HistoriqueInventaireController
         }
     }
 
+
     /**
      * Gère l'export des données
      */
-    private function handleExport($format, $filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo)
+    private function handleExport($format, $filterMaintainer, $filterStatus)
     {
         try {
             if ($format === 'excel') {
-                \App\Export\EvaluationInventaireExport::exportToExcel($filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo);
+                \App\Export\EvaluationInventaireExport::exportToExcel($filterMaintainer, $filterStatus);
             }
         } catch (\Exception $e) {
             error_log("Erreur export: " . $e->getMessage());

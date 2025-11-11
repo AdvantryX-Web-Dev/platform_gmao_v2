@@ -9,11 +9,11 @@ class EvaluationInventaireExport
     /**
      * Export vers Excel (format XLSX compatible)
      */
-    public static function exportToExcel($filterMaintainer = '', $filterStatus = '', $filterDateFrom = '', $filterDateTo = '')
+    public static function exportToExcel($filterMaintainer = '', $filterStatus = '')
     {
         try {
             // Récupérer les données avec filtres
-            $data = HistoriqueInventaire_model::Evaluation_inventaire($filterMaintainer, $filterStatus, $filterDateFrom, $filterDateTo);
+            $data = HistoriqueInventaire_model::Evaluation_inventaire($filterMaintainer, $filterStatus);
 
             $filename = 'evaluation_inventaire_' . date('Y-m-d_H-i-s') . '.xlsx';
 
@@ -47,7 +47,7 @@ class EvaluationInventaireExport
                 $evaluation = self::formatEvaluation($row['evaluation'] ?? '');
 
                 // Formater les différences
-                $differences = self::formatDifferences($row['difference'] ?? '');
+                $differences = self::formatDifferences($row['differences'] ?? '');
 
                 fputcsv($output, [
                     $row['machine_id'] ?? 'N/A',
@@ -76,15 +76,12 @@ class EvaluationInventaireExport
      */
     private static function formatEvaluation($evaluation)
     {
-        switch ($evaluation) {
+
+        switch ($evaluation ?? '') {
             case 'conforme':
                 return 'Conforme';
             case 'non_conforme':
                 return 'Non Conforme';
-            case 'non_inventoriee':
-                return 'Non Inventoriée';
-            case 'ajouter':
-                return 'Machine Ajoutée';
             default:
                 return ucfirst($evaluation);
         }

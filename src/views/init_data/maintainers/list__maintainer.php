@@ -76,7 +76,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                     <?php if ($isAdmin): ?>
                                                         <td>
                                                             <a href="../../platform_gmao/public/index.php?route=maintainer/edit&id=<?= urlencode($maintainer['id']) ?>"><i class="fas fa-edit m-2"></i></a>
-                                                            <a href="../../platform_gmao/public/index.php?route=maintainer/delete&id=<?= urlencode($maintainer['id']) ?>" onclick="return confirm('Supprimer ce mainteneur ?');"><i class="fas fa-trash text-danger"></i></a>
+                                                            <!-- <a href="../../platform_gmao/public/index.php?route=maintainer/delete&id=<?= urlencode($maintainer['id']) ?>" onclick="return confirm('Supprimer ce mainteneur ?');"><i class="fas fa-trash text-danger"></i></a> -->
                                                         </td>
                                                     <?php endif; ?>
                                                     <td><?= htmlspecialchars($maintainer['matricule'] ?? '') ?></td>

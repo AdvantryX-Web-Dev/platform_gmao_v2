@@ -12,6 +12,10 @@ class InventaireController
 {
     public function AddInventaire()
     {
+        // Préparer les données pour le formulaire
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+
 
         $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
         $connectedMaintenerId = null;
@@ -19,11 +23,6 @@ class InventaireController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->handleAddInventaire($isAdmin);
         }
-        // Préparer les données pour le formulaire
-        $db = Database::getInstance('db_digitex');
-        $conn = $db->getConnection();
-
-
 
         // Options maintenanciqualificationer (si admin)
         if ($isAdmin) {
@@ -33,11 +32,17 @@ class InventaireController
             $connectedMatricule = $_SESSION['user']['matricule'];
         }
         // Options location
-        $stmt = $conn->query("SELECT id, location_name FROM gmao__location ORDER BY location_name ASC");
+        $stmt = $conn->query("SELECT id, location_name FROM gmao__location  ORDER BY location_name ASC");
         $locationOptions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        // Options status
-        $stmt = $conn->query("SELECT id, status_name FROM gmao__status ORDER BY status_name ASC");
+        // Options status (restricted to active, inactive, en panne, ferraille in this order)
+        $stmt = $conn->prepare(
+            "SELECT id, status_name
+             FROM gmao__status
+             WHERE status_name IN ('active','inactive','en panne','ferraille')
+             ORDER BY FIELD(status_name,'active','inactive','en panne','ferraille')"
+        );
+        $stmt->execute();
         $statusOptions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
 
@@ -64,6 +69,7 @@ class InventaireController
             }
             $machineNotfound = [];
             $ok = 0;
+            $inventory_data = [];
             $conn->beginTransaction();
             $resolveStmt = $conn->prepare("SELECT id FROM init__machine WHERE machine_id = :mid LIMIT 1");
             foreach ($machineIds as $displayMid) {
@@ -77,19 +83,16 @@ class InventaireController
                     $machineNotfound[] = $displayMid;
                     continue;
                 }
-                $inventory_date[] = [
+                $inventory_data[] = [
                     'machine_id' => (int)$resolvedId,
                     'maintainer_id' => (int)$maintener_id,
                     'location_id' => $location_id !== '' ? (int)$location_id : null,
                     'status_id' => $status_id !== '' ? (int)$status_id : null
                 ];
 
+                $HistoriqueInventaire = $this->insert_HistoriqueInventaire([$inventory_data[count($inventory_data) - 1]], $ok);
+                $ok += (int)$HistoriqueInventaire;
 
-                $comparison_result = $this->comparisons($conn, $resolvedId, $maintener_id, $location_id, $status_id, $inventory_date);
-                if ($comparison_result) {
-                    HistoriqueInventaire_model::insert_Evaluation_inventaire($comparison_result);
-                    $ok++;
-                }
 
                 if (!$isAdmin) {
                     //insert into gmao__machine_maint
@@ -106,9 +109,10 @@ class InventaireController
 
             $conn->commit();
             if ($ok > 0) {
-                $_SESSION['flash_success'] = "Machine ajoutée avec succès: $ok";
-                if (count($machineNotfound) > 0) {
-                    $_SESSION['flash_success'] .= ", Machines introuvables: " . implode(', ', $machineNotfound);
+                if (count($machineNotfound) == 0) {
+                    $_SESSION['flash_success'] = "Machine ajoutée avec succès: $ok";
+                } else {
+                    $_SESSION['flash_error'] .= "Machine ajoutée avec succès: $ok ,Machines introuvables: " . implode(', ', $machineNotfound);
                 }
             } else {
                 $_SESSION['flash_error'] = "Aucune machine n'a été traitée. Machines introuvables: " . implode(', ', $machineNotfound);
@@ -123,149 +127,34 @@ class InventaireController
         header('Location: index.php?route=ajouterInventaire');
         exit;
     }
-    /**
-     * Compare les données actuelles avec les données d'inventaire
-     */
-    private function comparisons($conn, $resolvedId, $maintener_id, $location_id, $status_id, $inventory_date)
+
+
+    private function insert_HistoriqueInventaire(array $inventoryRows, $ok)
     {
-        $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
-        $userMatricule = $_SESSION['user']['matricule'] ?? null;
-        // Récupérer les données actuelles de la machine
-        $current_data = "
-            SELECT
-                m.id as id_machine,
-                m.machine_id,
-                m.reference,
-                m.type,
-                m.machines_location_id,
-                m.machines_status_id,
-                mm.maintener_id,
-                l.location_name,
-                l.location_category,
-                s.status_name,
-                CONCAT(e.first_name, ' ', e.last_name) as maintainer_name,
-                -- Statut de production basé sur la présence (seulement si status est active)
-                CASE 
-                    WHEN s.status_name = 'active' THEN
-                        CASE 
-                            WHEN pp_today.id IS NOT NULL THEN 'active'
-                            ELSE 'inactive'
-                        END
-                    ELSE s.status_name
-                END AS production_status
-            FROM init__machine m
-            LEFT JOIN gmao__location l ON l.id = m.machines_location_id
-            LEFT JOIN gmao__status s ON s.id = m.machines_status_id
-            LEFT JOIN (
-                SELECT mm.*
-                FROM gmao__machine_maint mm
-                INNER JOIN (
-                    SELECT machine_id, max(id) as max_id
-                    FROM gmao__machine_maint
-                    GROUP BY machine_id
-                ) latest ON mm.machine_id = latest.machine_id AND mm.id = latest.max_id
-            ) mm ON mm.machine_id = m.id
-            LEFT JOIN init__employee e ON e.id = mm.maintener_id
-            -- Dernière présence du jour
-            LEFT JOIN (
-                SELECT p1.*
-                FROM prod__presence p1
-                INNER JOIN (
-                    SELECT machine_id, MAX(id) AS last_id
-                    FROM prod__presence
-                    WHERE cur_date = CURDATE()
-                    GROUP BY machine_id
-                ) t ON t.machine_id = p1.machine_id AND t.last_id = p1.id
-            ) pp_today ON pp_today.machine_id = m.machine_id
-            WHERE m.id = :machine_id
-        ";
-
-        // Récupérer les noms pour l'inventaire
-        $inventory_names = "
-            SELECT 
-                l.location_name as inventory_location_name,
-                s.status_name as inventory_status_name,
-                CONCAT(e.first_name, ' ', e.last_name) as inventory_maintainer_name
-            FROM gmao__location l, gmao__status s, init__employee e
-            WHERE l.id = :location_id 
-            AND s.id = :status_id 
-            AND e.id = :maintainer_id
-        ";
-
-        $current_dataStmt = $conn->prepare($current_data);
-        $current_dataStmt->execute([':machine_id' => $resolvedId]);
-        $current_data_result = $current_dataStmt->fetchAll(\PDO::FETCH_ASSOC);
-        // Récupérer les noms pour l'inventaire
-        $inventory_namesStmt = $conn->prepare($inventory_names);
-        $inventory_namesStmt->execute([
-            ':location_id' => $location_id,
-            ':status_id' => $status_id,
-            ':maintainer_id' => $maintener_id
-        ]);
-        $inventory_names_data = $inventory_namesStmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        // Comparaison entre current_data et inventory_date
-        $current = $current_data_result[0] ?? null;
-        $inventory = $inventory_date[0] ?? null;
-        $inventory_names = $inventory_names_data[0] ?? null;
-
-        if ($current && $inventory) {
-            $differences = [];
-            $status = 'conforme';
-
-            // Comparer location
-            if ($current['machines_location_id'] != $inventory['location_id']) {
-                $differences[] = '*Localisation modifiée: ' . ($current['location_name'] ?? 'Non défini') . ' → ' . ($inventory_names['inventory_location_name'] ?? 'Non défini');
-                $status = 'non_conforme';
-            }
-            //production_status
-            // Comparer status (utiliser production_status)
-            $currentStatusName = $current['production_status'];
-            $inventoryStatusName = $inventory_names['inventory_status_name'];
-
-            // if ($current['machines_status_id'] != $inventory['status_id']) {
-            if ($currentStatusName != $inventoryStatusName) {
-                $differences[] = '*Statut modifié: ' . ($currentStatusName ?? 'Non défini') . ' → ' . ($inventory_names['inventory_status_name'] ?? 'Non défini');
-                $status = 'non_conforme';
-            }
-
-
-            // Comparer maintainer
-
-            if ($current['maintener_id'] != $inventory['maintainer_id']) {
-                if (!$isAdmin && $userMatricule != $current['maintener_id']) {
-                    // Pour les non-admins qui n'étaient pas le maintenancier actuel
-                    $differences[] = '*Machine ajoutée : '
-                        . ($current['maintainer_name'] ?? 'Non défini')
-                        . ' → '
-                        . ($inventory_names['inventory_maintainer_name'] ?? 'Non défini');
-                    $status = 'ajoute';
-                } else {
-                    // Pour les admins ou si l'utilisateur était le maintenancier actuel
-                    $differences[] = '*Maintenancier modifié : '
-                        . ($current['maintainer_name'] ?? 'Non défini')
-                        . ' → '
-                        . ($inventory_names['inventory_maintainer_name'] ?? 'Non défini');
-                    $status = 'non_conforme';
-                }
-            }
-
-
-            return [
-                'machine_id' => $current['machine_id'],
-                'reference' => $current['reference'],
-                'type' => $current['type'],
-                'status' => $status,
-                'differences' => implode('<br>', $differences),
-                'current_location_name' => $current['location_name'] ?? 'non defini',
-                'current_status' => $currentStatusName ?? 'non defini',
-                'current_maintainer_name' => $current['maintener_id'] ?? 'non defini',
-                'inventory_maintainer_name' => $inventory['maintainer_id'] ?? 'non defini',
-            ];
+        if (empty($inventoryRows)) {
+            return 0;
         }
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        $sql = "INSERT INTO gmao__historique_inventaire (maintainer_id, machine_id, location_id, status_id, created_at) VALUES (:maintainer_id, :machine_id, :location_id, :status_id, CURRENT_TIMESTAMP)";
+        $stmt = $conn->prepare($sql);
+        $ok = 0;
+        foreach ($inventoryRows as $row) {
+            $stmt->execute([
+                ':maintainer_id' => $row['maintainer_id'] ?? null,
+                ':machine_id' => $row['machine_id'] ?? null,
+                ':location_id' => $row['location_id'] ?? null,
+                ':status_id' => $row['status_id'] ?? null,
+            ]);
+            $ok += (int)$stmt->rowCount();
 
-        return null;
+            // Audit trail pour chaque insertion dans historique inventaire
+            $this->logAudithistoriqueInventaire($row);
+        }
+        return $ok;
     }
+
+
     //audit trails
     private function logAuditNonAdmin($machineId, $maintenerId, $locationId, $statusId)
     {
@@ -302,6 +191,23 @@ class InventaireController
             AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__machine_maint', null, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit non-admin: " . $e->getMessage());
+        }
+    }
+    private function logAudithistoriqueInventaire(array $row)
+    {
+        try {
+            $userMatricule = $_SESSION['user']['matricule'] ?? null;
+            if (!$userMatricule) return;
+            $newValue = [
+                'maintainer_id' => $row['maintainer_id'] ?? null,
+                'machine_id' => $row['machine_id'] ?? null,
+                'location_id' => $row['location_id'] ?? null,
+                'status_id' => $row['status_id'] ?? null,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__historique_inventaire', null, $newValue);
+        } catch (\Throwable $e) {
+            error_log("Erreur audit historique inventaire: " . $e->getMessage());
         }
     }
 }

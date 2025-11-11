@@ -108,7 +108,7 @@ $all_machines = \App\Models\Machine_model::findAllMachine();
                                 foreach ($all_machines as $machine) {
                                     echo '<option value="' . htmlspecialchars($machine['id']) . '" data-reference="' . htmlspecialchars($machine['reference']) . '">' .
 
-                                        htmlspecialchars($machine['machine_id'] . ' - ' . $machine['reference']) .  '</option>';
+                                        htmlspecialchars($machine['machine_id'] . ' - ' . $machine['designation']) .  '</option>';
                                 }
                             }
                             ?>

@@ -49,10 +49,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                     $countNonFonctionnel = 0;
                                     $countnondefini = 0;
                                     $countTotal = is_array($equipements) ? count($equipements) : 0;
-                                   
+
                                     if (is_array($equipements)) {
                                         foreach ($equipements as $m) {
-                                            if (!empty($m['location_category']) && $m['location_category'] == 'prodline' ) {
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'prodline') {
                                                 $countProduction++;
                                             }
                                             if (!empty($m['location_category']) && $m['location_category'] == 'magasin') {
@@ -205,23 +205,26 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         if (empty($equipement['location_category'])) {
                                                             echo '<span class="badge badge-secondary">Non défini</span>';
                                                         } elseif ($equipement['location_category'] == 'prodline') {
-                                                            echo '<span class="badge badge-success">'.htmlspecialchars($equipement['location_name']).'</span>';
+                                                            echo '<span class="badge badge-success">' . htmlspecialchars($equipement['location_name']) . '</span>';
                                                         } else {
                                                             echo '<span class="badge badge-primary">' . htmlspecialchars($equipement['location_name']) . '</span>';
                                                         }
                                                         ?>
                                                     </td>
                                                     <td class="text-center">
+                                                        
                                                         <?php
                                                         $status = $equipement['etat_equipement'] ?? 'Non défini';
                                                         if (empty($equipement['etat_equipement'])) {
                                                             echo '<span class="badge badge-secondary ">' . 'non défini' . '</span>';
-                                                        } elseif ($status == 'fonctionnelle' && $equipement['location_category'] == 'prodline') {
-                                                            echo '<span class="badge badge-success ">' . 'En production' . '</span>';
-                                                        } elseif ($status == 'fonctionnelle' && $equipement['location_category'] == 'magasin') {
-                                                        echo '<span class="badge badge-warning ">' . 'Disponible' . '</span>';
-                                                    } else {
-                                                            echo '<span class="badge badge-danger ">' . 'feraille' . '</span>';
+                                                        } elseif ($status == 'disponible' ) {
+                                                            echo '<span class="badge badge-success ">' . 'Disponible' . '</span>';
+                                                        } elseif ($status == 'non disponible') {
+                                                            echo '<span class="badge badge-warning ">' . 'Non disponible' . '</span>';
+                                                        } elseif ($status == 'ferraille' ) {
+                                                            echo '<span class="badge badge-danger ">' . 'Ferraille' . '</span>';
+                                                        }else{
+                                                            echo '<span class="badge badge-secondary ">' .   $status . '</span>';
                                                         }
                                                         ?>
                                                     </td>

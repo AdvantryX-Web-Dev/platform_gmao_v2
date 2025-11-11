@@ -57,7 +57,7 @@
                                             echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
                                         }
                                     } else {
-                                        if ($etat['status_name'] == 'inactive' || $etat['status_name'] == 'ferraille' ||  $etat['status_name'] == 'en panne' || $etat['status_name'] == 'active') {
+                                        if ($etat['status_name'] == 'active' || $etat['status_name'] == 'ferraille' ||  $etat['status_name'] == 'en panne') {
 
                                             echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
                                         }

@@ -236,47 +236,45 @@ class Equipement_model
     {
         $db = new Database();
         $conn = $db->getConnection();
-
-        $req = $conn->query("
-        
-            SELECT 
-                gie.*, 
-                ec.status_name AS etat_equipement,
-                ie.*, 
-                im.machine_id AS machine_id,
-                il.location_name AS location_name,
-                il.location_category AS location_category
-            FROM gmao__init_equipment gie
+        try {
+            $req = $conn->query("
             
-            LEFT JOIN (
-                SELECT accessory_ref, MAX(id) AS max_id
-                FROM gmao__prod_implementation_equipment
-                GROUP BY accessory_ref
-            ) latest 
-                ON gie.equipment_id = latest.accessory_ref
-            
-            LEFT JOIN gmao__prod_implementation_equipment ie 
-                ON ie.id = latest.max_id
-            
-            -- Machine liée à l’implémentation
-            LEFT JOIN init__machine im 
-                ON ie.machine_id = im.machine_id
-            
-            -- Localisation de l’équipement
-            LEFT JOIN gmao__location il 
-                ON gie.location_id = il.id
-            
-            -- Statut de l’équipement
-            LEFT JOIN gmao__status ec 
-                ON gie.status_id = ec.id
-        ");
-
-
-
-
-        $equipements = $req->fetchAll();
-
-        return $equipements;
+                SELECT 
+                    gie.*, 
+                    ec.status_name AS etat_equipement,
+                    ie.*, 
+                    im.machine_id AS machine_id,
+                    il.location_name AS location_name,
+                    il.location_category AS location_category
+                FROM gmao__init_equipment gie
+                
+                LEFT JOIN (
+                    SELECT accessory_ref, MAX(id) AS max_id
+                    FROM gmao__prod_implementation_equipment
+                    GROUP BY accessory_ref
+                ) latest 
+                    ON gie.equipment_id = latest.accessory_ref
+                
+                LEFT JOIN gmao__prod_implementation_equipment ie 
+                    ON ie.id = latest.max_id
+                
+                -- Machine liée à l’implémentation
+                LEFT JOIN init__machine im 
+                    ON ie.machine_id = im.machine_id
+                
+                -- Localisation de l’équipement
+                LEFT JOIN gmao__location il 
+                    ON gie.location_id = il.id
+                
+                -- Statut de l’équipement
+                LEFT JOIN gmao__status ec 
+                    ON gie.status_id = ec.id
+            ");
+            $equipements = $req->fetchAll();
+            return $equipements;
+        } catch (PDOException $e) {
+            return [];
+        }
     }
     public static function affectationEquipementsMachines()
     {

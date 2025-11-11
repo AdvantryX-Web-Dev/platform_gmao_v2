@@ -84,7 +84,6 @@ class Maintainer_model
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
-            die($e->getMessage());
             return false;
         }
     }

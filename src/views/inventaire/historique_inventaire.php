@@ -126,13 +126,13 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <div class="row justify-content-end">
                                     <?php if ($isAdmin): ?>
                                         <div class="col-md-3">
-                                            <label for="filter_maintainer" class="form-label">Maintenancier d'inventaire</label>
+                                            <label for="filter_maintainer" class="form-label">Maintenancier </label>
                                             <select name="filter_maintainer" id="filter_maintainer" class="form-control">
                                                 <option value="">Tous les maintenanciers</option>
                                                 <?php foreach ($allMaintainers as $maintainer): ?>
-                                                    <option value="<?= htmlspecialchars($maintainer['matricule']) ?>"
+                                                    <option value="<?= htmlspecialchars($maintainer['id']) ?>"
 
-                                                        <?= ($filterMaintainer == $maintainer['matricule']) ? 'selected' : '' ?>>
+                                                        <?= ($filterMaintainer == $maintainer['id']) ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($maintainer['matricule']) ?> - <?= htmlspecialchars($maintainer['first_name']) ?> <?= htmlspecialchars($maintainer['last_name']) ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -141,7 +141,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                     <?php else: ?>
                                         <!-- Champ caché pour maintenir le filtre du maintenancier connecté -->
-                                        <input type="hidden" name="filter_maintainer" value="<?= htmlspecialchars($connectedMatricule) ?>">
+                                        <input type="hidden" name="filter_maintainer" value="<?= htmlspecialchars($connectedMaintainerId ?? '') ?>">
                                         <div class="col-md-3">
                                             <label class="form-label">Maintenancier d'inventaire</label>
                                             <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMatricule) ?> - Vous" readonly disabled>
@@ -153,23 +153,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <option value="">Toutes les évaluations</option>
                                             <option value="conforme" <?= ($filterStatus == 'conforme') ? 'selected' : '' ?>>Conforme</option>
                                             <option value="non_conforme" <?= ($filterStatus == 'non_conforme') ? 'selected' : '' ?>>Non Conforme</option>
-                                            <option value="non_inventoriee" <?= ($filterStatus == 'non_inventoriee') ? 'selected' : '' ?>>Non Inventoriée</option>
-                                            <option value="ajouter" <?= ($filterStatus == 'ajouter') ? 'selected' : '' ?>>Machine Ajoutée</option>
+
                                         </select>
                                     </div>
-
-                                    <div class="col-md-2">
-                                        <label for="filter_date_from" class="form-label">Date Début</label>
-                                        <input type="date" name="filter_date_from" id="filter_date_from" class="form-control"
-                                            value="<?= htmlspecialchars($filterDateFrom ?? '') ?>">
-                                    </div>
-
-                                    <div class="col-md-2">
-                                        <label for="filter_date_to" class="form-label">Date Fin</label>
-                                        <input type="date" name="filter_date_to" id="filter_date_to" class="form-control"
-                                            value="<?= htmlspecialchars($filterDateTo ?? '') ?>">
-                                    </div>
-
 
 
                                 </div>
@@ -230,8 +216,6 @@ if (session_status() === PHP_SESSION_NONE) {
                                                 <td>
                                                     <?php
                                                     $machineStatus = $comp['current_status'] ?? null;
-                                                    //  $historiqueStatus = $comp['historique']['status_name'] ?? null;
-
                                                     $status = $machineStatus ?? null;
 
                                                     if ($status):
@@ -259,9 +243,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     <td>
                                                         <?php if ($comp['inventory_maintainer']): ?>
                                                             <?= htmlspecialchars($comp['inventory_maintainer'] ?? '') ?>
-                                                            <?php if ($comp['inventory_maintainer_matricule']): ?>
+                                                            <!-- <?php if ($comp['inventory_maintainer_matricule']): ?>
                                                                 <br><small class="text-muted"><?= htmlspecialchars($comp['inventory_maintainer_matricule']) ?></small>
-                                                            <?php endif; ?>
+                                                            <?php endif; ?> -->
                                                         <?php else: ?>
                                                             <span class="text-muted">-</span>
                                                         <?php endif; ?>
@@ -272,9 +256,9 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     <td>
                                                         <?php if ($comp['current_maintainer']): ?>
                                                             <?= htmlspecialchars($comp['current_maintainer']) ?>
-                                                            <?php if ($comp['current_maintainer_matricule']): ?>
+                                                            <!-- <?php if ($comp['current_maintainer_matricule']): ?>
                                                                 <br><small class="text-muted"><?= htmlspecialchars($comp['current_maintainer_matricule']) ?></small>
-                                                            <?php endif; ?>
+                                                            <?php endif; ?> -->
                                                         <?php else: ?>
                                                             <span class="text-muted">-</span>
                                                         <?php endif; ?>
@@ -286,10 +270,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         <span class="badge badge-success">Conforme</span>
                                                     <?php elseif ($comp['evaluation'] == 'non_conforme'): ?>
                                                         <span class="badge badge-danger">Non Conforme</span>
-                                                    <?php elseif ($comp['evaluation'] == 'non_inventoriee'): ?>
-                                                        <span class="badge badge-light">Non Inventoriée</span>
-                                                    <?php elseif ($comp['evaluation'] == 'supprimer'): ?>
-                                                        <span class="badge badge-warning">Machine Supprimée</span>
+
                                                     <?php else: ?>
                                                         <span class="badge badge-secondary"><?= $comp['evaluation'] ?></span>
                                                     <?php endif; ?>
@@ -297,9 +278,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                                 <!-- Différence/Non-conformité -->
                                                 <td>
-                                                    <?php if (!empty($comp['difference']) && $comp['difference'] !== 'non defini'): ?>
+                                                    <?php if (!empty($comp['differences']) && $comp['differences'] !== 'non defini'): ?>
                                                         <div class="text-danger">
-                                                            <?= $comp['difference'] ?>
+                                                            <?= $comp['differences'] ?>
                                                         </div>
                                                     <?php else: ?>
                                                         <span class="text-muted">Aucune différence</span>

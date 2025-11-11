@@ -544,9 +544,7 @@ if (!isset($mouvements)) {
                             minimumResultsForSearch: 0,
                             dropdownParent: $('#mouvementModal')
                         });
-                        console.log('Select2 initialisé pour:', sel);
                     } else {
-                        console.log('Select2 non disponible pour:', sel);
                         // Fallback: activer la recherche native
                         $(sel).attr('onfocus', 'this.size=10;');
                         $(sel).attr('onblur', 'this.size=1;');

@@ -340,7 +340,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                         $etat_equipement = $controller->getEquipementStatus();
                                     }
                                     foreach ($etat_equipement as $etat) {
-                                        if (in_array($etat['status_name'], ['disponible', 'implanté', 'ferraille'])) {
+                                        if (in_array($etat['status_name'], ['disponible', 'non disponible', 'ferraille'])) {
                                             echo "<option value=\"{$etat['id']}\">{$etat['status_name']}</option>";
                                         }
                                     }

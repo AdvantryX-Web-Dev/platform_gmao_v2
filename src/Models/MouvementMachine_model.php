@@ -13,8 +13,9 @@ class MouvementMachine_model
     private $id_Rais;
     private $idEmp;
     private $type_Mouv;
+    private $id_location;
 
-    public function __construct($num_Mouv_Mach = null, $date_mouvement = null, $id_machine = null, $id_Rais = null, $idEmp = null, $type_Mouv = null)
+    public function __construct($num_Mouv_Mach = null, $date_mouvement = null, $id_machine = null, $id_Rais = null, $idEmp = null, $type_Mouv = null, $id_location = null)
     {
         $this->num_Mouv_Mach = $num_Mouv_Mach;
         $this->date_mouvement = $date_mouvement;
@@ -22,6 +23,7 @@ class MouvementMachine_model
         $this->id_Rais = $id_Rais;
         $this->idEmp = $idEmp;
         $this->type_Mouv = $type_Mouv;
+        $this->id_location = $id_location;
     }
 
     public function __get($attr)

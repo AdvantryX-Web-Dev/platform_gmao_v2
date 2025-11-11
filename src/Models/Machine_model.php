@@ -241,6 +241,7 @@ class Machine_model
             $filterMachineId = $filters['machine_id'] ?? null;
             $filterLocation = $filters['location'] ?? null;
             $filterStatus = $filters['status'] ?? null;
+			$filterDesignation = $filters['designation'] ?? null;
 
             $query = "
                 SELECT 
@@ -368,6 +369,12 @@ class Machine_model
                 }
             }
 
+			// Filtre par désignation (recherche partielle)
+			if ($filterDesignation) {
+				$whereConditions[] = "m.designation LIKE :filterDesignation";
+				$params[':filterDesignation'] = '%' . $filterDesignation . '%';
+			}
+
             // Ajouter les conditions WHERE si elles existent
             if (!empty($whereConditions)) {
                 $query .= " WHERE " . implode(" AND ", $whereConditions);
@@ -395,7 +402,19 @@ class Machine_model
             return [];
         }
     }
+    public static function getDesignationMachine()
+    {
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        try {
+            $stmt = $conn->prepare("SELECT DISTINCT designation FROM init__machine order by designation ASC");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
 
+            return [];
+        }
+    }
     /**
      * Récupère la liste des mainteneurs pour le filtre
      */

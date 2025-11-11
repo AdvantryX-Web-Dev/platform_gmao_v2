@@ -180,7 +180,7 @@ class Mouvement_equipmentController
 
     public function getMachines()
     {
-        $machines = Machine_model::findAll();
+        $machines = Machine_model::findAllMachine();
         return $machines;
     }
 

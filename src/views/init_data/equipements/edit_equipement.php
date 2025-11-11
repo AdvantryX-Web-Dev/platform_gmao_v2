@@ -82,7 +82,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                         <?php
                                         $status = Equipement_model::AllStatus();
                                         foreach ($status as $status) {
-                                            if ($status['status_name'] === 'disponible' || $status['status_name'] === 'implanté' || $status['status_name'] === 'ferraille') {
+                                            if ($status['status_name'] === 'disponible' || $status['status_name'] === 'non disponible' || $status['status_name'] === 'ferraille') {
                                                 echo '<option value="' . $status['id'] . '" ' . (isset($equipement['status_id']) && $equipement['status_id'] == $status['id'] ? 'selected' : '') . '>' . $status['status_name'] . '</option>';
                                             }
                                         }

@@ -126,7 +126,7 @@ class MaintainerController
                     AuditTrail_model::logAudit($_SESSION['user']['matricule'], 'delete', 'init__employee', $oldMaintainer, null);
                 }
             } else {
-                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors de la suppression du mainteneur.'];
+                $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Suppression impossible : ce mainteneur est référencé dans d’autres fonctions.'];
             }
         } else {
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'ID du mainteneur non spécifié.'];

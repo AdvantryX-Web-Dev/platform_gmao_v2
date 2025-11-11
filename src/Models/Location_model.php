@@ -22,6 +22,24 @@ class Location_model
             return [];
         }
     }
+
+
+    public static function getLocationsByCategory($locationcategory)
+    {
+        if ($locationcategory === null || $locationcategory === '') {
+            return false;
+        }
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->prepare("SELECT id, location_name, location_category, location_type FROM gmao__location WHERE location_category = ? ORDER BY location_name");
+            $stmt->bindParam(1, $locationcategory);
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
     public static function existsByLocationName($locationName, $excludeLocationId = null)
     {
         if ($locationName === null || $locationName === '') {

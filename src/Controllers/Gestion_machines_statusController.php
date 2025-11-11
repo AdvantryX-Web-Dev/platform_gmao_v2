@@ -19,7 +19,8 @@ class Gestion_machines_statusController
                 'matricule' => $_GET['matricule'] ?? null,
                 'machine_id' => $_GET['machine_id'] ?? null,
                 'location' => $_GET['location'] ?? null,
-                'status' => $_GET['status'] ?? null
+                'status' => $_GET['status'] ?? null,
+                'designation' => $_GET['designation'] ?? null
             ];
 
             // Appeler le modèle avec le matricule de l'utilisateur et les filtres
@@ -30,6 +31,7 @@ class Gestion_machines_statusController
             $machinesList = Machine_model::getMachinesList();
             $locations = Machine_model::getLocationsList();
             $statuses = Machine_model::getMachineStatus();
+            $designationMachine = Machine_model::getDesignationMachine();
 
             // Vérifier si l'utilisateur est admin
             $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
@@ -56,7 +58,8 @@ class Gestion_machines_statusController
                 'matricule' => $_GET['matricule'] ?? null,
                 'machine_id' => $_GET['machine_id'] ?? null,
                 'location' => $_GET['location'] ?? null,
-                'status' => $_GET['status'] ?? null
+                'status' => $_GET['status'] ?? null,
+                'designation' => $_GET['designation'] ?? null
             ];
 
             // Appeler le modèle avec le matricule de l'utilisateur et les filtres
@@ -94,7 +97,7 @@ class Gestion_machines_statusController
             include(__DIR__ . '/../views/G_machines/G_machines_status/history_machineStatus.php');
         }
     }
-   
+
 
     /**
      * API pour récupérer les statistiques d'interventions d'une machine spécifique

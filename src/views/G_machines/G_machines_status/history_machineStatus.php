@@ -115,8 +115,8 @@ if (!empty($machine_id)) {
                                     <div class="col-md-3">
                                         <p><strong>Statut actuel:</strong>
                                             <?php
-                                            if (!empty($mouvements) && isset($mouvements[0]['status_name'])) {
-                                                echo htmlspecialchars($mouvements[0]['status_name']);
+                                            if (!empty($machineInfo) && isset($machineInfo['status_final'])) {
+                                                echo htmlspecialchars($machineInfo['status_final']);
                                             } else {
                                                 echo 'Non défini';
                                             }

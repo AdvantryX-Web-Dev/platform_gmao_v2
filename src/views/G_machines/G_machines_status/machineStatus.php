@@ -229,15 +229,16 @@ if (session_status() === PHP_SESSION_NONE) {
 
                             <!-- Section des filtres -->
                             <div class="card shadow mb-4">
-                                <div class="card-header py-3">
+                                <div class="card-header py-3 text-star">
                                     <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
                                 </div>
                                 <div class="card-body">
                                     <form method="GET" action="" id="filterForm">
                                         <input type="hidden" name="route" value="Gestion_machines/status">
-                                        <div class="row align-items-end filter-row">
+                                        <div class="row align-items-end filter-row justify-content-end">
                                             <!-- Filtre par mainteneur -->
-                                            <div class="col-md-2 mb-3">
+                                            
+                                            <div class="col-md-3 mb-3">
                                                 <label for="matricule" class="form-label small text-muted mb-1">Mainteneur</label>
                                                 <select name="matricule" id="matricule" class="form-control form-control-sm" <?= !$isAdmin ? 'disabled' : '' ?>>
                                                     <option value="">Tous les mainteneurs</option>
@@ -252,7 +253,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </div>
 
                                             <!-- Filtre par machine ID -->
-                                            <div class="col-md-2 mb-3">
+                                            <div class="col-md-3 mb-3">
                                                 <label for="machine_id" class="form-label small text-muted mb-1">Machine ID</label>
                                                 <select name="machine_id" id="machine_id" class="form-control form-control-sm">
                                                     <option value="">Toutes les machines</option>
@@ -266,7 +267,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </div>
 
                                             <!-- Filtre par emplacement -->
-                                            <div class="col-md-2 mb-3">
+                                            <div class="col-md-3 mb-3">
                                                 <label for="location" class="form-label small text-muted mb-1">Emplacement</label>
                                                 <select name="location" id="location" class="form-control form-control-sm">
                                                     <option value="">Tous les emplacements</option>
@@ -280,8 +281,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </div>
 
                                             <!-- Filtre par état -->
-                                            <div class="col-md-2 mb-3">
-                                                <label for="status" class="form-label small text-muted mb-1">État</label>
+                                            <div class="col-md-3 mb-3">
+                                                <label for="status" class="form-label small text-muted mb-1">Etat</label>
                                                 <select name="status" id="status" class="form-control form-control-sm">
                                                     <option value="">Tous les états</option>
                                                     <?php foreach ($statuses as $status): ?>
@@ -297,19 +298,25 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
+                                             <!-- Filtre par désignation -->
+                                             <div class="col-md-3 mb-3">
+                                              
+                                                <label for="designation" class="form-label small text-muted mb-1">Désignation</label>
+                                                <select name="designation" id="designation" class="form-control form-control-sm">
+                                                    <option value="">Tous les désignations</option>
+                                                    <?php foreach ($designationMachine as $designation): ?>
+                                                        <option value="<?= htmlspecialchars($designation['designation']) ?>"
+                                                            <?= (isset($_GET['designation']) && $_GET['designation'] == $designation['designation']) ? 'selected' : '' ?>>
+                                                            <?php
+                                                                echo htmlspecialchars($designation['designation']);
+                                                            
+                                                            ?>
 
-                                            <!-- Boutons pour filtrer et réinitialiser -->
-                                            <div class="col-md-2 mb-3">
-                                                <label class="form-label small text-muted mb-1">&nbsp;</label>
-                                                <div>
-                                                    <button type="submit" class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-filter"></i> Filtrer
-                                                    </button>
-                                                    <a href="?route=Gestion_machines/status" class="btn btn-secondary btn-sm ml-1">
-                                                        <i class="fas fa-undo"></i> Réinitialiser
-                                                    </a>
-                                                </div>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
+
                                         </div>
                                     </form>
                                 </div>
@@ -332,7 +339,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (is_array($machinesData) && count($machinesData) > 0): ?>
+                                        <?php if (is_array($machinesData) && count($machinesData) > 0):
+                                        ?>
                                             <?php foreach ($machinesData as $machine):
 
                                             ?>
@@ -428,7 +436,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <script>
             $(document).ready(function() {
                 // Init Select2 for better search/UX
-                $('#matricule, #machine_id, #location, #status').select2({
+                $('#matricule, #machine_id, #location, #status, #designation').select2({
                     width: '100%',
                     placeholder: 'Sélectionner...',
                     allowClear: true,
@@ -440,6 +448,11 @@ if (session_status() === PHP_SESSION_NONE) {
                             return "Recherche en cours...";
                         }
                     }
+                });
+
+                // Filtrage automatique après chaque sélection
+                $('#matricule, #machine_id, #location, #status, #designation').on('change', function() {
+                    $('#filterForm').submit();
                 });
                 var table = $('#dataTable').DataTable({
                     language: {
@@ -482,6 +495,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 const machine_id = urlParams.get('machine_id') || '';
                 const location = urlParams.get('location') || '';
                 const status = urlParams.get('status') || '';
+                const designation = urlParams.get('designation') || '';
 
                 // Construire l'URL d'export avec les mêmes filtres
                 let exportUrl = '?route=Gestion_machines/export&';
@@ -489,6 +503,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 if (machine_id) exportUrl += 'machine_id=' + encodeURIComponent(machine_id) + '&';
                 if (location) exportUrl += 'location=' + encodeURIComponent(location) + '&';
                 if (status) exportUrl += 'status=' + encodeURIComponent(status) + '&';
+                if (designation) exportUrl += 'designation=' + encodeURIComponent(designation) + '&';
 
                 // Supprimer le dernier & si présent
                 exportUrl = exportUrl.replace(/&$/, '');

@@ -32,7 +32,7 @@ class Mouvement_machinesController
 
     public function afficherMachines()
     {
-        $machines = Machine_model::findAll();
+        $machines = Machine_model::findAllMachine();
         return $machines;
     }
 
@@ -88,6 +88,7 @@ class Mouvement_machinesController
             $raison = $_POST['raisonMouvement'] ?? '';
             $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine';
             $idEmp_accepted = $_POST['idEmp_accepted'] ?? '';
+            $location_id = $_POST['location_id'] ?? '';
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
                 $_SESSION['flash_message'] = [
@@ -113,14 +114,15 @@ class Mouvement_machinesController
 
             try {
                 $stmt = $conn->prepare("INSERT INTO gmao__mouvement_machine 
-                    (date_mouvement, id_machine, id_Rais, idEmp_moved, type_Mouv, idEmp_accepted) 
-                    VALUES (NOW(), :machine, :raison, :maintenancier, :type_mouvement, :idEmp_accepted)");
+                    (date_mouvement, id_machine, id_Rais, idEmp_moved, type_Mouv, idEmp_accepted, location_id) 
+                    VALUES (NOW(), :machine, :raison, :maintenancier, :type_mouvement, :idEmp_accepted, :location_id)");
 
                 $stmt->bindParam(':machine', $machine);
                 $stmt->bindParam(':raison', $raison);
                 $stmt->bindParam(':maintenancier', $maintenancier);
                 $stmt->bindParam(':type_mouvement', $type_mouvement);
                 $stmt->bindParam(':idEmp_accepted', $idEmp_accepted);
+                $stmt->bindParam(':location_id', $location_id);
                 $stmt->execute();
 
                 if ($stmt->rowCount() > 0) {
@@ -158,10 +160,8 @@ class Mouvement_machinesController
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mouvement_id'])) {
             $mouvementId = $_POST['mouvement_id'];
             $type_mouvement = $_POST['type_mouvement'] ?? 'parc_chaine'; // Valeur par défaut
-            $machineId = $_POST['machine_id'] ?? null;
             $etat_machine = $_POST['etat_machine'] ?? null;
             $equipment_ids = $_POST['equipment_ids'] ?? '[]';
-
             // Valider le type de mouvement
             if (!in_array($type_mouvement, ['inter_chaine', 'parc_chaine', 'chaine_parc'])) {
                 $type_mouvement = 'parc_chaine'; // Valeur par défaut si invalide
@@ -204,28 +204,22 @@ class Mouvement_machinesController
                 $stmt->bindParam(':equipment_ids', $equipment_ids);
                 $stmt->execute();
 
-                // 2. Récupérer l'ID de la machine associée au mouvement si non fourni
-                if (!$machineId) {
-                    $stmt = $conn->prepare("SELECT id_machine FROM gmao__mouvement_machine WHERE num_Mouv_Mach = :mouvement_id");
-                    $stmt->bindParam(':mouvement_id', $mouvementId);
-                    $stmt->execute();
-                    $machineId = $stmt->fetchColumn();
+                // 2. Récupérer l'ID de la machine et l'ID de l'emplacement associés au mouvement si non fournis
+                $stmt = $conn->prepare("SELECT id_machine, location_id FROM gmao__mouvement_machine WHERE num_Mouv_Mach = :mouvement_id");
+                $stmt->bindParam(':mouvement_id', $mouvementId);
+                $stmt->execute();
+
+                // Récupérer la ligne entière
+                $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+                if ($row) {
+                    $machineId = $row['id_machine'];
+                    $locationId = $row['location_id'];
                 }
 
+
+
                 if ($machineId) {
-                    // 3. Déterminer l'ID de l'emplacement en fonction du type de mouvement
-                    $locationId = null;
-                    if ($type_mouvement === 'chaine_parc') {
-                        // Trouver l'ID pour "parc"
-                        $stmt = $conn->prepare("SELECT id FROM gmao__location WHERE location_category = 'parc' LIMIT 1");
-                        $stmt->execute();
-                        $locationId = $stmt->fetchColumn();
-                    } else { //  inter_chaine ou parc_chaine
-                        // Trouver l'ID pour "chaine"
-                        $stmt = $conn->prepare("SELECT id FROM gmao__location WHERE location_category = 'prodline' LIMIT 1");
-                        $stmt->execute();
-                        $locationId = $stmt->fetchColumn();
-                    }
+
 
                     // 4. Mettre à jour la machine avec le nouvel emplacement et état
                     $updateQuery = "UPDATE init__machine SET ";
@@ -370,7 +364,7 @@ class Mouvement_machinesController
                 ];
             }
             // Audit trails
-            $this->logAuditReject($mouvementId, $userId, $reject_comment,$status='rejeté');
+            $this->logAuditReject($mouvementId, $userId, $reject_comment, $status = 'rejeté');
             // Rediriger vers la page d'où provient la demande
             header('Location: ../../platform_gmao/public/index.php?route=mouvement_machines/' . $type_mouvement);
             exit;
@@ -381,10 +375,10 @@ class Mouvement_machinesController
         exit;
     }
 
-    public function getTypes($location)
-    {
-        return Machine_model::findAllTypes($location);
-    }
+    // public function getTypes($location)
+    // {
+    //     return Machine_model::findAllTypes($location);
+    // }
     public function getMachinesByType()
     {
         header('Content-Type: application/json');
@@ -542,7 +536,7 @@ class Mouvement_machinesController
             error_log("Erreur audit saveMouvement: " . $e->getMessage());
         }
     }
-    private function logAuditReject($mouvementId, $userId, $reject_comment,$status)
+    private function logAuditReject($mouvementId, $userId, $reject_comment, $status)
     {
         try {
             $userMatricule = $_SESSION['user']['matricule'] ?? null;
@@ -557,7 +551,7 @@ class Mouvement_machinesController
             $stmt->execute([':mouvement_id' => $mouvementId]);
             $oldValues = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-           
+
             $oldValue = [
                 'id' => $mouvementId,
                 'status' => $oldValues['status'],
@@ -574,7 +568,8 @@ class Mouvement_machinesController
             AuditTrail_model::logAudit($userMatricule, 'update', 'gmao__mouvement_machine', $oldValue, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit reject: " . $e->getMessage());
-            print_r($e->getMessage());die;
+            print_r($e->getMessage());
+            die;
         }
     }
 }
