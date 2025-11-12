@@ -182,11 +182,11 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <th>Machine ID</th>
                                             <th class="d-none d-md-table-cell">Référence</th>
                                             <th class="d-none d-md-table-cell">Type</th>
-                                            <th>Emplacement Actuel</th>
-                                            <th>Statut Actuel</th>
+                                            <th>Emplacement </th>
+                                            <th>Statut </th>
                                             <?php if ($isAdmin): ?>
                                                 <th>Maintenancier Inventaire</th>
-                                                <th>Maintenancier Actuel</th>
+                                                <th>Maintenancier </th>
                                             <?php endif; ?>
                                             <th>Evaluation</th>
                                             <th>Différence</th>
