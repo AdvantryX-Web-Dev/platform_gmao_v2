@@ -119,6 +119,10 @@ switch ($route) {
     case 'ajouterInventaire':
         $inventaireController->AddInventaire();
         break;
+    case 'ajouterEvaluationInventaire':
+        $inventaireController->ajouterEvaluationInventaire();
+
+        break;
 
         // case 'maintenancier_machine':
         //     $inventaireController->maintenancier_machine();

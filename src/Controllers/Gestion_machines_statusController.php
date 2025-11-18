@@ -24,7 +24,7 @@ class Gestion_machines_statusController
             ];
 
             // Appeler le modèle avec le matricule de l'utilisateur et les filtres
-            $machinesData = Machine_model::MachinesStateTable($userMatricule, $filters);
+            $machinesData = Machine_model::GMachinesStateTable($userMatricule, $filters);
 
             // Récupérer les listes pour les filtres
             $maintainers = Machine_model::getMaintainersList();

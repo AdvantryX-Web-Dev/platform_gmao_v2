@@ -215,8 +215,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                                 <td>
                                                     <?php
-                                                    $machineStatus = $comp['current_status'] ?? null;
+                                                    $machineStatus = $comp['current_status_name'] ?? null;
+
                                                     $status = $machineStatus ?? null;
+
 
                                                     if ($status):
                                                         $statusClass = 'secondary';

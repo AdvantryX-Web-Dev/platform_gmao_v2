@@ -117,7 +117,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                             </h6>
                         </div>
                         <form method="post" action="/platform_gmao/public/index.php?route=ajouterInventaire">
-                     
+
                             <div class="row mt-3 justify-content-center px-3">
                                 <div class="col-12 col-md-6 col-lg-5 mb-3">
                                     <div class="scanner-box m-0 h-100">
@@ -199,10 +199,49 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                     </div>
                                 </div>
                             </div>
+
                         </form>
 
                     </div>
-
+                    <div class="card shadow mb-4">
+                       
+                        <div class="card-body">
+                            <form method="post" action="/platform_gmao/public/index.php?route=ajouterEvaluationInventaire">
+                                <div class="row justify-content-center">
+                                    <div class="col-12 col-md-10">
+                                        <div class="scanner-box m-0 h-100">
+                                            <div class="row align-items-end">
+                                                <div class="col-12 col-md-10">
+                                                    <div class="form-group mb-3">
+                                                        <label for="evaluation_maintener_id" class="mb-1">Maintenancier</label>
+                                                        <?php if (!$isAdmin && isset($connectedMaintenerId) && $connectedMaintenerId): ?>
+                                                            <input type="hidden" name="evaluation_maintener_id" value="<?= htmlspecialchars($connectedMaintenerId) ?>">
+                                                            <input type="text" class="form-control" value="<?= htmlspecialchars($connectedMatricule) ?>" readonly>
+                                                        <?php else: ?>
+                                                            <select class="form-control" id="evaluation_maintener_id" name="evaluation_maintener_id">
+                                                                <option value="">-- Sélectionner --</option>
+                                                                <?php if (!empty($maintenancier)): foreach ($maintenancier as $opt): ?>
+                                                                        <option value="<?= (int)$opt['id'] ?>"><?= htmlspecialchars($opt['first_name']) ?> <?= htmlspecialchars($opt['last_name']) ?></option>
+                                                                <?php endforeach;
+                                                                endif; ?>
+                                                            </select>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-2">
+                                                    <div class="d-flex justify-content-md-end mb-3 mt-md-0">
+                                                        <button id="submitBtnEvaluation" name="evaluationInventaire" type="submit" class="btn btn-success btn-block">
+                                                            Résultat inventaire
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -235,6 +274,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 initSelect2AlwaysSearch('#maintener_id');
                 initSelect2AlwaysSearch('#location_id');
                 initSelect2AlwaysSearch('#status_id');
+                initSelect2AlwaysSearch('#evaluation_maintener_id');
                 // QR scan for machine_id
                 const $btnMachPhoto = $('#btnMachPhoto');
                 const $machinePhoto = $('#machine_photo');
@@ -341,7 +381,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 });
                 $machinesList.on('click', '.remove-machine', function(e) {
                     e.preventDefault();
-                    const mid = $(this).data('mid');
+                    const mid = $(this).attr('data-mid');
                     machineSet.delete(mid);
                     $('input[type="hidden"][name="machines_ids[]"]').filter(function() {
                         return $(this).val() === mid;

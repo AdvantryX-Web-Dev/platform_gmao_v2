@@ -215,18 +215,53 @@ class Machine_model
 
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
+
+        $userID = $_SESSION['user']['id'] ?? null;
+        $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+
         try {
-            $req = $conn->query("SELECT * FROM init__machine 
-            left join gmao__location ml on ml.id=init__machine.machines_location_id
-             where ml.location_category='$location'
-            ORDER BY machine_id");
-            return $req->fetchAll();
+            $sql = "
+                SELECT init__machine.*, ml.*
+                FROM init__machine
+                LEFT JOIN gmao__location ml ON ml.id = init__machine.machines_location_id
+                WHERE ml.location_category = :location
+            ";
+
+            if (!$isAdmin && $userID) {
+                $sql .= "
+                    AND EXISTS (
+                        SELECT 1
+                        FROM (
+                            SELECT mm.machine_id, mm.maintener_id
+                            FROM gmao__machine_maint mm
+                            INNER JOIN (
+                                SELECT machine_id, MAX(id) AS last_id
+                                FROM gmao__machine_maint
+                                GROUP BY machine_id
+                            ) mm_last ON mm_last.machine_id = mm.machine_id AND mm_last.last_id = mm.id
+                        ) maint
+                        WHERE maint.machine_id = init__machine.id AND maint.maintener_id = :userID
+                    )
+                ";
+            }
+
+            $sql .= " ORDER BY init__machine.machine_id";
+
+            $stmt = $conn->prepare($sql);
+            $stmt->bindValue(':location', $location);
+
+            if (!$isAdmin && $userID) {
+                $stmt->bindValue(':userID', $userID, PDO::PARAM_INT);
+            }
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             return false;
         }
     }
 
-    public static function MachinesStateTable($userMatricule = null, $filters = [])
+    public static function GMachinesStateTable($userMatricule = null, $filters = [])
     {
         try {
             $db = new Database();
@@ -241,7 +276,7 @@ class Machine_model
             $filterMachineId = $filters['machine_id'] ?? null;
             $filterLocation = $filters['location'] ?? null;
             $filterStatus = $filters['status'] ?? null;
-			$filterDesignation = $filters['designation'] ?? null;
+            $filterDesignation = $filters['designation'] ?? null;
 
             $query = "
                 SELECT 
@@ -369,11 +404,11 @@ class Machine_model
                 }
             }
 
-			// Filtre par désignation (recherche partielle)
-			if ($filterDesignation) {
-				$whereConditions[] = "m.designation LIKE :filterDesignation";
-				$params[':filterDesignation'] = '%' . $filterDesignation . '%';
-			}
+            // Filtre par désignation (recherche partielle)
+            if ($filterDesignation) {
+                $whereConditions[] = "m.designation LIKE :filterDesignation";
+                $params[':filterDesignation'] = '%' . $filterDesignation . '%';
+            }
 
             // Ajouter les conditions WHERE si elles existent
             if (!empty($whereConditions)) {

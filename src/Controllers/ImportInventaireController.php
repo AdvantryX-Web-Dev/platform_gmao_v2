@@ -363,7 +363,7 @@ class ImportInventaireController
                     $locationStmt->execute([$location['location_name'], $location['location_category']]);
 
                     // Audit trail pour chaque nouvelle location
-                    //   $this->logAuditLocation($location['location_name'], $location['location_category']);
+                     $this->logAuditLocation($location['location_name'], $location['location_category']);
                 }
             }
 
@@ -402,7 +402,7 @@ class ImportInventaireController
                     ]);
 
                     // Audit trail pour chaque nouvelle machine
-                    //  $this->logAuditNewMachine($machine);
+                    $this->logAuditNewMachine($machine);
                 }
             }
 
@@ -425,7 +425,7 @@ class ImportInventaireController
                     ]);
 
                     // Audit trail pour chaque mise à jour de machine
-                    // $this->logAuditMachineUpdate($update['machine_id'], $update['status_id'], $update['location_id']);
+                  //  $this->logAuditMachineUpdate($update['machine_id'], $update['status_id'], $update['location_id']);
                 }
             }
 
@@ -447,7 +447,7 @@ class ImportInventaireController
                     ]);
 
                     // Audit trail pour chaque inventaire
-                    // $this->logAuditInventaire($inventaire['machine_id'], $inventaire['maintener_id'], $inventaire['location_id'], $inventaire['status_id']);
+                    $this->logAuditInventaire($inventaire['machine_id'], $inventaire['maintener_id'], $inventaire['location_id'], $inventaire['status_id']);
                 }
             }
 
@@ -509,7 +509,7 @@ class ImportInventaireController
         if (strpos($location_idxl, 'CH') === 0 || strpos($location_idxl, 'ECH') === 0 || strpos($location_idxl, 'ch') === 0) {
             return 'prodline';
         } elseif ($location_idxl === "FERAILLE") {
-            return null; // Ignorer FERAILLE
+            return 'ferraille' ; // Ignorer FERAILLE
         } else {
             return 'parc';
         }
@@ -525,7 +525,7 @@ class ImportInventaireController
         if ($status_idxl === "NON OK" && $location_category === "parc") {
             return "en panne";
             // } elseif ($status_idxl === "NON OK" && $location_idxl === "ANNEX CHIBA") {
-        } elseif ($location_idxl === "ANNEX CHIBA") {
+        } elseif ($location_idxl === "ANNEX CHIBA" ||$location_idxl === "FERAILLE") {
 
 
             return "ferraille";
@@ -673,7 +673,7 @@ class ImportInventaireController
                 'location_category' => $locationCategory,
                 'created_at' => date('Y-m-d H:i:s')
             ];
-            // AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__location', null, $newValue);
+             AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__location', null, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit location: " . $e->getMessage());
         }
@@ -698,7 +698,7 @@ class ImportInventaireController
                 'machines_status_id' => $machineData['machines_status_id'],
                 'created_at' => date('Y-m-d H:i:s')
             ];
-            // AuditTrail_model::logAudit($userMatricule, 'add', 'init__machine', null, $newValue);
+             AuditTrail_model::logAudit($userMatricule, 'add', 'init__machine', null, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit nouvelle machine: " . $e->getMessage());
         }
@@ -727,7 +727,7 @@ class ImportInventaireController
                 'machines_status_id' => $statusId,
                 'machines_location_id' => $locationId
             ];
-            //     AuditTrail_model::logAudit($userMatricule, 'update', 'init__machine', $oldValue, $newValue);
+              AuditTrail_model::logAudit($userMatricule, 'update', 'init__machine', $oldValue, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit mise à jour machine: " . $e->getMessage());
         }
@@ -744,7 +744,7 @@ class ImportInventaireController
                 'location_id' => $locationId,
                 'created_at' => date('Y-m-d H:i:s')
             ];
-            //  AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__machine_maint', null, $newValue);
+            AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__machine_maint', null, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit maintenance: " . $e->getMessage());
         }
@@ -763,7 +763,7 @@ class ImportInventaireController
                 'status_id' => $statusId,
                 'created_at' => date('Y-m-d H:i:s')
             ];
-            // AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__inventaire_machine', null, $newValue);
+            AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__inventaire_machine', null, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit import: " . $e->getMessage());
         }
