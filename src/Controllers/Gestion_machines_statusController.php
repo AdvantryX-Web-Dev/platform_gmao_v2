@@ -20,18 +20,21 @@ class Gestion_machines_statusController
                 'machine_id' => $_GET['machine_id'] ?? null,
                 'location' => $_GET['location'] ?? null,
                 'status' => $_GET['status'] ?? null,
-                'designation' => $_GET['designation'] ?? null
+                'type' => $_GET['type'] ?? null
             ];
 
             // Appeler le modèle avec le matricule de l'utilisateur et les filtres
             $machinesData = Machine_model::GMachinesStateTable($userMatricule, $filters);
+            if (!is_array($machinesData)) {
+                $machinesData = [];
+            }
 
             // Récupérer les listes pour les filtres
             $maintainers = Machine_model::getMaintainersList();
             $machinesList = Machine_model::getMachinesList();
             $locations = Machine_model::getLocationsList();
             $statuses = Machine_model::getMachineStatus();
-            $designationMachine = Machine_model::getDesignationMachine();
+            $typeMachine = Machine_model::getTypeMachine();
 
             // Vérifier si l'utilisateur est admin
             $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
@@ -41,6 +44,119 @@ class Gestion_machines_statusController
             error_log('Erreur dans machines_state: ' . $e->getMessage());
             $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors du chargement des données des machines.'];
             include(__DIR__ . '/../views/G_machines/G_machines_status/machineStatus.php');
+        }
+    }
+
+    /**
+     * Vue filtrée suite à un clic sur une carte
+     */
+    public function machines_state_filtered()
+    {
+        try {
+            $userMatricule = $_SESSION['user']['matricule'] ?? null;
+            $cardKey = $_GET['card'] ?? null;
+
+            $filters = [
+                'matricule' => $_GET['matricule'] ?? null,
+                'machine_id' => $_GET['machine_id'] ?? null,
+                'location' => $_GET['location'] ?? null,
+                'status' => $_GET['status'] ?? null,
+                'type' => $_GET['type'] ?? null
+            ];
+
+            $machinesData = Machine_model::GMachinesStateTable($userMatricule, $filters);
+
+            $cardFilters = [
+                'undefined' => [
+                    'label' => 'Machines sans emplacement',
+                    'predicate' => function ($machine) {
+                        return empty($machine['location']) && empty($machine['location_category']);
+                    }
+                ],
+                'breakdown' => [
+                    'label' => 'Machines en panne',
+                    'predicate' => function ($machine) {
+                        $status = strtolower($machine['status_name_final'] ?? $machine['etat_machine'] ?? '');
+                        return $status === 'en panne';
+                    },
+                    'preset' => ['status_label' => 'en panne']
+                ],
+                'scrap' => [
+                    'label' => 'Machines ferraillées',
+                    'predicate' => function ($machine) {
+                        $status = strtolower($machine['status_name_final'] ?? $machine['etat_machine'] ?? '');
+                        return $status === 'ferraille';
+                    },
+                    'preset' => ['status_label' => 'ferraille']
+                ],
+                'inactive' => [
+                    'label' => 'Machines inactives',
+                    'predicate' => function ($machine) {
+                        $status = strtolower($machine['status_name_final'] ?? $machine['etat_machine'] ?? '');
+                        return $status === 'inactive';
+                    },
+                    'preset' => ['status_label' => 'inactive']
+                ],
+                'inactive_delayed' => [
+                    'label' => 'Machines inactives (+3 jours)',
+                    'predicate' => function ($machine) {
+                        $status = strtolower($machine['status_name_final'] ?? $machine['etat_machine'] ?? '');
+                        $lastPresenceDate = $machine['cur_date_time'] ?? null;
+                        if ($status === 'inactive' && !empty($lastPresenceDate)) {
+                            try {
+                                $presenceDate = new \DateTime($lastPresenceDate);
+                                $thresholdDate = new \DateTime('-3 days');
+                                return $presenceDate <= $thresholdDate;
+                            } catch (\Exception $e) {
+                                return false;
+                            }
+                        }
+                        return false;
+                    }
+                ]
+            ];
+
+            $filtersLocked = false;
+            $cardFilterLabel = null;
+            $lockedFilterValues = [];
+
+            if ($cardKey && isset($cardFilters[$cardKey])) {
+                $filtersLocked = true;
+                $cardFilterLabel = $cardFilters[$cardKey]['label'];
+                $machinesData = array_values(array_filter(
+                    $machinesData,
+                    $cardFilters[$cardKey]['predicate']
+                ));
+                $lockedFilterValues = $cardFilters[$cardKey]['preset'] ?? [];
+            }
+
+            $maintainers = Machine_model::getMaintainersList();
+            $machinesList = Machine_model::getMachinesList();
+            $locations = Machine_model::getLocationsList();
+            $statuses = Machine_model::getMachineStatus();
+            $typeMachine = Machine_model::getTypeMachine();
+
+            if (!empty($lockedFilterValues['status_label'])) {
+                foreach ($statuses as $status) {
+                    if (strcasecmp($status['status_name'], $lockedFilterValues['status_label']) === 0) {
+                        $lockedFilterValues['status'] = $status['id'];
+                        break;
+                    }
+                }
+            }
+
+            $currentFilters = $_GET;
+            if (isset($lockedFilterValues['status'])) {
+                $currentFilters['status'] = $lockedFilterValues['status'];
+            }
+
+            $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
+
+            include(__DIR__ . '/../views/G_machines/G_machines_status/machineStatusFiltre.php');
+        } catch (\Exception $e) {
+            error_log('Erreur dans machines_state_filtered: ' . $e->getMessage());
+            $_SESSION['flash_message'] = ['type' => 'error', 'text' => 'Erreur lors du chargement du filtre.'];
+            include(__DIR__ . '/../views/G_machines/G_machines_status/machineStatusFiltre.php');
         }
     }
 
@@ -59,11 +175,11 @@ class Gestion_machines_statusController
                 'machine_id' => $_GET['machine_id'] ?? null,
                 'location' => $_GET['location'] ?? null,
                 'status' => $_GET['status'] ?? null,
-                'designation' => $_GET['designation'] ?? null
+                'type' => $_GET['type'] ?? null
             ];
 
             // Appeler le modèle avec le matricule de l'utilisateur et les filtres
-            $machinesData = Machine_model::MachinesStateTable($userMatricule, $filters);
+            // $machinesData = Machine_model::MachinesStateTable($userMatricule, $filters);
 
             // Vérifier si l'utilisateur est admin
             $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === 'ADMINISTRATEUR';
@@ -88,7 +204,7 @@ class Gestion_machines_statusController
     public function history_machines_stateBYmachineID()
     {
         try {
-            $machines = Machine_model::MachinesStateTable();
+            // $machines = Machine_model::MachinesStateTable();
 
             include(__DIR__ . '/../views/G_machines/G_machines_status/history_machineStatus.php');
         } catch (\Exception $e) {

@@ -46,20 +46,6 @@ if (session_status() === PHP_SESSION_NONE) {
             border-radius: 0.35rem !important;
         }
 
-        .card-link-wrapper {
-            text-decoration: none;
-            display: block;
-        }
-
-        .card-link-wrapper .card {
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .card-link-wrapper:hover .card {
-            transform: translateY(-2px);
-            box-shadow: 0 0.5rem 1rem rgba(58, 59, 69, 0.25);
-        }
-
         /* Espacement uniforme pour les filtres */
         .filter-row .col-md-2 {
             padding-left: 8px;
@@ -92,15 +78,20 @@ if (session_status() === PHP_SESSION_NONE) {
                         <?php unset($_SESSION['flash_message']); ?>
                     <?php endif; ?>
 
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Etat des machines</h6>
+                    <?php if ($cardFilterLabel): ?>
+                        <div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
                             <div>
-                                <button type="button" class="btn btn-success btn-sm" onclick="exportToExcel()">
-                                    <i class="fas fa-file-excel"></i> Exporter Excel
-                                </button>
+                                <strong>Filtre appliqué :</strong>
+                                <?= htmlspecialchars($cardFilterLabel); ?>
                             </div>
+                            <a href="?route=Gestion_machines/status" class="btn btn-outline-info btn-sm">
+                                Retour à la vue complète
+                            </a>
                         </div>
+                    <?php endif; ?>
+
+                    <div class="card shadow mb-4">
+
                         <div class="card-body">
                             <div class="mb-4">
                                 <!-- card de statistiques -->
@@ -113,17 +104,19 @@ if (session_status() === PHP_SESSION_NONE) {
                                     $countFerraille = 0;
                                     $countEmpty = 0;
                                     $countInactive = 0;
-                                    $countInactiveDelayed = 0;
                                     $countTotal = is_array($machinesData) ? count($machinesData) : 0;
 
                                     if (is_array($machinesData)) {
                                         foreach ($machinesData as $m) {
                                             if (!empty($m['location_category']) && $m['location_category'] == 'prodline') {
                                                 $countProduction++;
-                                            } elseif (!empty($m['location_category']) && $m['location_category'] == 'parc' || $m['location_category'] == 'ferraille') {
+                                            }
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'parc') {
                                                 $countParc++;
                                             }
-                                          
+                                            if (!empty($m['location_category']) && $m['location_category'] == 'ferraille') {
+                                                $countFerraille++;
+                                            }
                                             if (!empty($m['etat_machine'])) {
                                                 $etatMachine = strtolower($m['etat_machine']);
                                                 if ($etatMachine === 'en panne') {
@@ -132,37 +125,15 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     $countFerraille++;
                                                 }
                                             }
-
-
-
-                                            $status = $m['status_name_final'] ?? $m['etat_machine'];
-                                            $lastPresenceDate = $m['cur_date_time'] ?? null;
-                                            $highlightInactiveRow = false;
-
-                                            if ($status === 'inactive' ) {
+                                             $status = $m['status_name_final'] ?? $m['etat_machine'];
+                                             if ($status === 'inactive') {
                                                 $countInactive++;
-                                                try {
-                                                    
-                                                    if (!empty($lastPresenceDate)) {
-                                                    $presenceDate = new DateTime($lastPresenceDate);
-                                                    $thresholdDate = new DateTime('-3 days');
-                                                    $highlightInactiveRow = $presenceDate <= $thresholdDate;
-                                                    if ($highlightInactiveRow) {
-                                                        $countInactiveDelayed++;
-                                                    }
-                                                    }
-                                                } catch (Exception $e) {
-                                                    // Ignore parsing issues, simply skip highlighting
-                                                    $highlightInactiveRow = false;
-                                                }
                                             }
-
                                             if (empty($m['location'])) {
                                                 $countEmpty++;
                                             }
                                         }
                                     }
-
 
                                     // Code du filtre supprimé
                                     ?>
@@ -216,193 +187,8 @@ if (session_status() === PHP_SESSION_NONE) {
                                         </div>
                                     </div>
 
-
-
-
-                                </div>
-
-                                <div class="row justify-content-center mb-4">
-                                    <!-- No Status Card -->
-                                    <div class="col-xl-3 col-md-4 mb-4">
-                                        <a href="?route=Gestion_machines/statusFiltre&card=undefined" class="card-link-wrapper">
-                                            <div class="card border-left-warning shadow h-100 py-3">
-                                                <div class="card-body">
-                                                    <div class="row no-gutters align-items-center">
-                                                        <div class="col mr-2">
-                                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Machines sont emplacement non définis</div>
-                                                            <div class="status-count text-gray-800" id="count-empty-status"><?php echo $countEmpty; ?></div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <i class="fas fa-question-circle fa-2x status-card-icon text-warning"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-
-                                    <!-- Panne Card -->
-                                    <div class="col-xl-3 col-md-4 mb-4">
-                                        <a href="?route=Gestion_machines/statusFiltre&card=breakdown" class="card-link-wrapper">
-                                            <div class="card border-left-danger shadow h-100 py-3">
-                                                <div class="card-body">
-                                                    <div class="row no-gutters align-items-center">
-                                                        <div class="col mr-2">
-                                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">En panne</div>
-                                                            <div class="status-count text-gray-800" id="count-panne"><?php echo $countPanne; ?></div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <i class="fas fa-exclamation-triangle fa-2x status-card-icon text-danger"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-
-                                    <!-- Ferraille Card -->
-                                    <div class="col-xl-3 col-md-4 mb-4">
-                                        <a href="?route=Gestion_machines/statusFiltre&card=scrap" class="card-link-wrapper">
-                                            <div class="card border-left-dark shadow h-100 py-3">
-                                                <div class="card-body">
-                                                    <div class="row no-gutters align-items-center">
-                                                        <div class="col mr-2">
-                                                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">Ferraille</div>
-                                                            <div class="status-count text-gray-800" id="count-ferraille"><?php echo $countFerraille; ?></div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <i class="fas fa-trash-alt fa-2x status-card-icon text-dark"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-
-                                    <!-- Inactive Card -->
-                                    <div class="col-xl-3 col-md-4 mb-4">
-                                        <a href="?route=Gestion_machines/statusFiltre&card=inactive" class="card-link-wrapper">
-                                            <div class="card border-left-warning shadow h-100 py-1">
-                                                <div class="card-body">
-                                                    <div class="row no-gutters align-items-center">
-                                                        <div class="col mr-2">
-                                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Inactives</div>
-                                                            <div class="status-count text-gray-800" id="count-inactive"><?php echo $countInactive; ?>
-                                                                <br>
-                                                                <a href="?route=Gestion_machines/statusFiltre&card=inactive_delayed" class="text-xs text-secondary-800 font-weight-bold">
-                                                                    + 3j inactive: <?php echo $countInactiveDelayed; ?>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <i class="fas fa-pause-circle fa-2x status-card-icon text-warning"></i>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-
-
                                 </div>
                             </div>
-
-                            <!-- Section des filtres -->
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3 text-star">
-                                    <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
-                                </div>
-                                <div class="card-body">
-                                    <form method="GET" action="" id="filterForm">
-                                        <input type="hidden" name="route" value="Gestion_machines/status">
-                                        <div class="row align-items-end filter-row justify-content-end">
-                                            <!-- Filtre par mainteneur -->
-
-                                            <div class="col-md-3 mb-3">
-                                                <label for="matricule" class="form-label small text-muted mb-1">Mainteneur</label>
-                                                <select name="matricule" id="matricule" class="form-control form-control-sm" <?= !$isAdmin ? 'disabled' : '' ?>>
-                                                    <option value="">Tous les mainteneurs</option>
-                                                    <?php foreach ($maintainers as $maintainer): ?>
-                                                        <option value="<?= htmlspecialchars($maintainer['matricule']) ?>"
-                                                            <?= (isset($_GET['matricule']) && $_GET['matricule'] == $maintainer['matricule']) ? 'selected' : '' ?>>
-                                                            <?= htmlspecialchars($maintainer['matricule'] . ' - ' . $maintainer['full_name']) ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-
-                                            </div>
-
-                                            <!-- Filtre par machine ID -->
-                                            <div class="col-md-3 mb-3">
-                                                <label for="machine_id" class="form-label small text-muted mb-1">Machine ID</label>
-                                                <select name="machine_id" id="machine_id" class="form-control form-control-sm">
-                                                    <option value="">Toutes les machines</option>
-                                                    <?php foreach ($machinesList as $machine): ?>
-                                                        <option value="<?= htmlspecialchars($machine['machine_id']) ?>"
-                                                            <?= (isset($_GET['machine_id']) && $_GET['machine_id'] == $machine['machine_id']) ? 'selected' : '' ?>>
-                                                            <?= htmlspecialchars($machine['machine_id']) ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-
-                                            <!-- Filtre par emplacement -->
-                                            <div class="col-md-3 mb-3">
-                                                <label for="location" class="form-label small text-muted mb-1">Emplacement</label>
-                                                <select name="location" id="location" class="form-control form-control-sm">
-                                                    <option value="">Tous les emplacements</option>
-                                                    <?php foreach ($locations as $location): ?>
-                                                        <option value="<?= htmlspecialchars($location['location_name']) ?>"
-                                                            <?= (isset($_GET['location']) && $_GET['location'] == $location['location_name']) ? 'selected' : '' ?>>
-                                                            <?= htmlspecialchars($location['location_name']) ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-
-                                            <!-- Filtre par état -->
-                                            <!-- <div class="col-md-3 mb-3">
-                                                <label for="status" class="form-label small text-muted mb-1">Etat</label>
-                                                <select name="status" id="status" class="form-control form-control-sm">
-                                                    <option value="">Tous les états</option>
-                                                    <?php foreach ($statuses as $status): ?>
-                                                        <option value="<?= htmlspecialchars($status['id']) ?>"
-                                                            <?= (isset($_GET['status']) && $_GET['status'] == $status['id']) ? 'selected' : '' ?>>
-                                                            <?php
-                                                            if ($status['status_category'] !== 'equipment') {
-                                                                echo htmlspecialchars($status['status_name']);
-                                                            }
-                                                            ?>
-
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div> -->
-                                            <!-- Filtre par type de machine -->
-                                            <div class="col-md-3 mb-3">
-
-                                                <label for="type" class="form-label small text-muted mb-1">Type de machine</label>
-                                                <select name="type" id="type" class="form-control form-control-sm">
-                                                    <option value="">Tous les types</option>
-                                                    <?php foreach ($typeMachine as $type): ?>
-                                                        <option value="<?= htmlspecialchars($type['type']) ?>"
-                                                            <?= (isset($_GET['type']) && $_GET['type'] == $type['type']) ? 'selected' : '' ?>>
-                                                            <?php
-                                                            echo htmlspecialchars($type['type']);
-
-                                                            ?>
-
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
@@ -413,8 +199,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <th>Maintenancier</th>
                                             <!-- <th>Référence</th> -->
                                             <th>Désignation</th>
-                                            <!-- <th>Catégorie</th> -->
-                                            <th>Type</th>
+                                            <!-- <th>Type</th> -->
                                             <th>Emplacement</th>
                                             <th>Etat</th>
                                             <th>Date de la dernière présence</th>
@@ -456,8 +241,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                                     <!-- <td><?= isset($machine['reference']) ? htmlspecialchars($machine['reference']) : 'Non défini' ?></td> -->
                                                     <td><?= isset($machine['designation']) ? htmlspecialchars($machine['designation']) : 'Non défini' ?></td>
-                                                    <!-- <td><?= isset($machine['category']) ? htmlspecialchars($machine['category']) : 'Non défini' ?></td> -->
-                                                    <td><?= isset($machine['type']) ? htmlspecialchars($machine['type']) : 'Non défini' ?></td>
+
+                                                    <!-- <td><?= isset($machine['type']) ? htmlspecialchars($machine['type']) : 'Non défini' ?></td> -->
                                                     <td>
                                                         <?php
                                                         if (empty($machine['location_category'])) {
@@ -580,31 +365,6 @@ if (session_status() === PHP_SESSION_NONE) {
                 }, 4000);
 
             });
-
-            // Fonction d'export Excel
-            window.exportToExcel = function() {
-                // Récupérer les paramètres de filtrage actuels
-                const urlParams = new URLSearchParams(window.location.search);
-                const matricule = urlParams.get('matricule') || '';
-                const machine_id = urlParams.get('machine_id') || '';
-                const location = urlParams.get('location') || '';
-                const status = urlParams.get('status') || '';
-                const type = urlParams.get('type') || '';
-
-                // Construire l'URL d'export avec les mêmes filtres
-                let exportUrl = '?route=Gestion_machines/export&';
-                if (matricule) exportUrl += 'matricule=' + encodeURIComponent(matricule) + '&';
-                if (machine_id) exportUrl += 'machine_id=' + encodeURIComponent(machine_id) + '&';
-                if (location) exportUrl += 'location=' + encodeURIComponent(location) + '&';
-                if (status) exportUrl += 'status=' + encodeURIComponent(status) + '&';
-                if (type) exportUrl += 'type=' + encodeURIComponent(type) + '&';
-
-                // Supprimer le dernier & si présent
-                exportUrl = exportUrl.replace(/&$/, '');
-
-                // Rediriger vers l'URL d'export
-                window.location.href = exportUrl;
-            };
         </script>
     </div>
 </body>

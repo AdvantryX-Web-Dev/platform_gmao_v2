@@ -56,6 +56,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <input type="text" name="type" class="form-control" required>
                                 </div>
                                 <div class="form-group">
+                                    <label>Catégorie</label>
+                                    <input type="text" name="category" class="form-control" required>
+                                </div>
+                                <div class="form-group">
                                     <label>Désignation</label>
                                     <input type="text" name="designation" class="form-control" required>
                                 </div>

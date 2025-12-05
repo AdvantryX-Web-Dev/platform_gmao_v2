@@ -33,6 +33,7 @@ use App\Controllers\HistoriqueInventaireController;
 use App\Controllers\RejectionReasonsController;
 use App\Controllers\ImportInventaireController;
 use App\Controllers\Gestion_machines_statusController;
+use App\Controllers\HistoriquePresenceMachinController;
 
 // Créer les instances des contrôleurs
 $authController = new AuthController();
@@ -57,6 +58,7 @@ $historiqueInventaireController = new HistoriqueInventaireController();
 $rejection_reasonsController = new RejectionReasonsController();
 $ImportInventaireController = new ImportInventaireController();
 $Gestion_machine_statusController = new Gestion_machines_statusController();
+$historiquePresenceMachinController = new HistoriquePresenceMachinController();
 
 // Récupérer la route demandée
 $route = $_GET['route'] ?? 'login';
@@ -284,6 +286,9 @@ switch ($route) {
     case 'Gestion_machines/status':
         $Gestion_machine_statusController->machines_state();
         break;
+    case 'Gestion_machines/statusFiltre':
+        $Gestion_machine_statusController->machines_state_filtered();
+        break;
     case 'Gestion_machines/export':
         $Gestion_machine_statusController->export_machines_state();
         break;
@@ -396,6 +401,9 @@ switch ($route) {
         break;
     case 'mouvement_machines/history':
         $mouvement_machinesController->showHistoryMachineStatus();
+        break;
+    case 'machines/presence/history':
+        $historiquePresenceMachinController->index();
         break;
     case 'compte/update_compte':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

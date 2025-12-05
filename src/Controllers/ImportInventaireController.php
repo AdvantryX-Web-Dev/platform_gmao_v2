@@ -303,13 +303,16 @@ class ImportInventaireController
             // 3. Détermination du statut
             $status = $this->determineStatus($row, $location_idxl, $location_category);
             $statusId = $status ? ($referenceData['statuses'][$status] ?? null) : null;
+          
 
             // 4. PRIORITÉ: Toujours mettre à jour init__machine si on a location ou status
+            $category = trim((string)($row[1] ?? ''));
             if ($locationId !== null || $statusId !== null) {
                 $validatedData['machine_updates'][] = [
                     'machine_id' => $machineId,
                     'status_id' => $statusId,
-                    'location_id' => $locationId
+                    'location_id' => $locationId,
+                    'category' => $category
                 ];
                 $validatedData['stats']['rows_processed']++;
             }
@@ -363,7 +366,7 @@ class ImportInventaireController
                     $locationStmt->execute([$location['location_name'], $location['location_category']]);
 
                     // Audit trail pour chaque nouvelle location
-                     $this->logAuditLocation($location['location_name'], $location['location_category']);
+                    $this->logAuditLocation($location['location_name'], $location['location_category']);
                 }
             }
 
@@ -374,8 +377,8 @@ class ImportInventaireController
                     INSERT IGNORE INTO init__machine (
                         machine_id, reference, brand, type, designation, 
                         billing_num, bill_date, cur_date, 
-                        machines_location_id, machines_status_id, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                        machines_location_id, machines_status_id,category, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
                 ");
                 foreach ($validatedData['new_machines'] as $index => $machine) {
                     // Log des données avant insertion pour debug
@@ -398,7 +401,8 @@ class ImportInventaireController
                         $machine['bill_date'],
                         $machine['cur_date'],
                         $machine['machines_location_id'],
-                        $machine['machines_status_id']
+                        $machine['machines_status_id'],
+                        $machine['category'],
                     ]);
 
                     // Audit trail pour chaque nouvelle machine
@@ -414,18 +418,20 @@ class ImportInventaireController
                 error_log("Mise à jour de " . count($validatedData['machine_updates']) . " machines (PRIORITÉ)");
                 $updateStmt = $conn->prepare("
                     UPDATE init__machine 
-                    SET machines_status_id = ?, machines_location_id = ? 
+                    SET machines_status_id = ?, machines_location_id = ?, category = ? 
                     WHERE id = ?
                 ");
                 foreach ($validatedData['machine_updates'] as $update) {
                     $updateStmt->execute([
                         $update['status_id'],
                         $update['location_id'],
-                        $update['machine_id']
+                        $update['category'],
+
+                        $update['machine_id'],
                     ]);
 
                     // Audit trail pour chaque mise à jour de machine
-                  //  $this->logAuditMachineUpdate($update['machine_id'], $update['status_id'], $update['location_id']);
+                    //  $this->logAuditMachineUpdate($update['machine_id'], $update['status_id'], $update['location_id']);
                 }
             }
 
@@ -447,7 +453,7 @@ class ImportInventaireController
                     ]);
 
                     // Audit trail pour chaque inventaire
-                    $this->logAuditInventaire($inventaire['machine_id'], $inventaire['maintener_id'], $inventaire['location_id'], $inventaire['status_id']);
+                    // $this->logAuditInventaire($inventaire['machine_id'], $inventaire['maintener_id'], $inventaire['location_id'], $inventaire['status_id']);
                 }
             }
 
@@ -474,6 +480,9 @@ class ImportInventaireController
             return true;
         } catch (\Throwable $e) {
             error_log("Erreur lors de l'insertion des données: " . $e->getMessage());
+            print_r($e->getMessage());
+            print_r('<pre>');
+            die();
             return false;
         }
     }
@@ -492,7 +501,8 @@ class ImportInventaireController
             'bill_date' => $this->parseDate($row[20] ?? ''),
             'cur_date' => date('Y-m-d'),
             'machines_location_id' => null,
-            'machines_status_id' => null
+            'machines_status_id' => null,
+            'category' => trim((string)($row[1] ?? ''))
         ];
 
         if (empty($machineData['machine_id'])) {
@@ -509,7 +519,7 @@ class ImportInventaireController
         if (strpos($location_idxl, 'CH') === 0 || strpos($location_idxl, 'ECH') === 0 || strpos($location_idxl, 'ch') === 0) {
             return 'prodline';
         } elseif ($location_idxl === "FERAILLE") {
-            return 'ferraille' ; // Ignorer FERAILLE
+            return 'ferraille'; // Ignorer FERAILLE
         } else {
             return 'parc';
         }
@@ -517,28 +527,27 @@ class ImportInventaireController
     private function determineStatus($row, $location_idxl, $location_category)
     {
         $status_idxl = trim((string)$row[18]);
-
-        if ($status_idxl === '') {
+        if ($location_idxl === 'ECH' || $location_idxl === 'CH FOR' || $location_idxl === 'ch14') {
             return null;
-        }
-
-        if ($status_idxl === "NON OK" && $location_category === "parc") {
-            return "en panne";
-            // } elseif ($status_idxl === "NON OK" && $location_idxl === "ANNEX CHIBA") {
-        } elseif ($location_idxl === "ANNEX CHIBA" ||$location_idxl === "FERAILLE") {
-
-
+        } elseif ($location_idxl === "ANNEX CHIBA" || $location_idxl === "FERAILLE" || $status_idxl === "ferraille" || $status_idxl === "feraille") {
             return "ferraille";
-        } elseif ($status_idxl === "ferraille") {
-
-            return "ferraille";
-        } elseif ($status_idxl === "OK" && $location_category === "parc") {
-            return "inactive";
         } elseif ($status_idxl === "NON OK" && $location_category === "prodline") {
             return "inactive";
-        } elseif ($status_idxl === "OK" && $location_category === "prodline") {
+        } elseif ($status_idxl === "NON OK" && $location_category === "parc") {
+            return "en panne";
+        } elseif ($status_idxl === "OK") {
             return "active";
         }
+
+        // if ($location_idxl === "NON OK" ) {
+        //     return "en panne";
+        //     // } elseif ($status_idxl === "NON OK" && $location_idxl === "ANNEX CHIBA") {
+        // }
+
+        // } elseif ($status_idxl === "NON OK" && $location_idxl === "ANNEX CHIBA") {
+        //  elseif ($status_idxl === "OK" && $location_category === "prodline") {
+        //     return "active";
+        // }
 
         return null;
     }
@@ -673,7 +682,7 @@ class ImportInventaireController
                 'location_category' => $locationCategory,
                 'created_at' => date('Y-m-d H:i:s')
             ];
-             AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__location', null, $newValue);
+            AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__location', null, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit location: " . $e->getMessage());
         }
@@ -696,14 +705,15 @@ class ImportInventaireController
                 'cur_date' => $machineData['cur_date'],
                 'machines_location_id' => $machineData['machines_location_id'],
                 'machines_status_id' => $machineData['machines_status_id'],
+                'category' => $machineData['category'],
                 'created_at' => date('Y-m-d H:i:s')
             ];
-             AuditTrail_model::logAudit($userMatricule, 'add', 'init__machine', null, $newValue);
+            AuditTrail_model::logAudit($userMatricule, 'add', 'init__machine', null, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit nouvelle machine: " . $e->getMessage());
         }
     }
-    private function logAuditMachineUpdate($machineId, $statusId, $locationId)
+    private function logAuditMachineUpdate($machineId, $statusId, $locationId, $category)
     {
         try {
             $userMatricule = $_SESSION['user']['matricule'] ?? null;
@@ -719,15 +729,17 @@ class ImportInventaireController
             $oldValue = [
                 'id' => $machineId,
                 'machines_status_id' => $oldValues['machines_status_id'],
-                'machines_location_id' => $oldValues['machines_location_id']
+                'machines_location_id' => $oldValues['machines_location_id'],
+                'category' => $oldValues['category']
             ];
 
             $newValue = [
                 'id' => $machineId,
                 'machines_status_id' => $statusId,
-                'machines_location_id' => $locationId
+                'machines_location_id' => $locationId,
+                'category' => $category,
             ];
-              AuditTrail_model::logAudit($userMatricule, 'update', 'init__machine', $oldValue, $newValue);
+            AuditTrail_model::logAudit($userMatricule, 'update', 'init__machine', $oldValue, $newValue);
         } catch (\Throwable $e) {
             error_log("Erreur audit mise à jour machine: " . $e->getMessage());
         }

@@ -65,6 +65,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                             <th class="d-none d-md-table-cell">Référence</th>
                                             <th>Marque</th>
                                             <th class="d-none d-md-table-cell">Type</th>
+                                            <th class="d-none d-md-table-cell">Catégorie</th>
                                             <th>Désignation</th>
                                             <th class="d-none d-md-table-cell">Numéro Facture</th>
                                             <th class="d-none d-md-table-cell">Date Facture</th>
@@ -84,6 +85,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                     <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['reference'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($machine['brand'] ?? '') ?></td>
                                                     <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['type'] ?? '') ?></td>
+                                                    <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['category'] ?? '') ?></td>
                                                     <td><?= htmlspecialchars($machine['designation'] ?? '') ?></td>
                                                     <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['billing_num'] ?? '') ?></td>
                                                     <td class="d-none d-md-table-cell"><?= htmlspecialchars($machine['bill_date'] ?? '') ?></td>

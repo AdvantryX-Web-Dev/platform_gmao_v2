@@ -31,11 +31,13 @@ class MachineController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             // Validation et nettoyage des données
             $machine_id = !empty($_POST['machine_id']) ? substr($_POST['machine_id'], 0, 16) : null;
             $designation = !empty($_POST['designation']) ? $_POST['designation'] : null;
             $reference = !empty($_POST['reference']) ? $_POST['reference'] : null;
             $type = !empty($_POST['type']) ? $_POST['type'] : null;
+            $category = !empty($_POST['category']) ? $_POST['category'] : null;
             $brand = !empty($_POST['brand']) ? $_POST['brand'] : null;
             $billing_num = !empty($_POST['billing_num']) ? $_POST['billing_num'] : null;
             $bill_date = !empty($_POST['bill_date']) ? $_POST['bill_date'] : null;
@@ -55,6 +57,7 @@ class MachineController
                 $designation,
                 $reference,
                 $type,
+                $category,
                 $brand,
                 $billing_num,
                 $bill_date,
@@ -72,6 +75,7 @@ class MachineController
                         'designation' => $designation,
                         'reference' => $reference,
                         'type' => $type,
+                        'category' => $category,
                         'brand' => $brand,
                         'billing_num' => $billing_num,
                         'bill_date' => $bill_date,
@@ -117,6 +121,7 @@ class MachineController
             $designation = !empty($_POST['designation']) ? $_POST['designation'] : null;
             $reference = !empty($_POST['reference']) ? $_POST['reference'] : null;
             $type = !empty($_POST['type']) ? $_POST['type'] : null;
+            $category = !empty($_POST['category']) ? $_POST['category'] : null;
             $brand = !empty($_POST['brand']) ? $_POST['brand'] : null;
             $billing_num = !empty($_POST['billing_num']) ? $_POST['billing_num'] : null;
             $bill_date = !empty($_POST['bill_date']) ? $_POST['bill_date'] : null;
@@ -136,6 +141,7 @@ class MachineController
                 $designation,
                 $reference,
                 $type,
+                $category,
                 $brand,
                 $billing_num,
                 $bill_date,
@@ -153,6 +159,7 @@ class MachineController
                         'designation' => $designation,
                         'reference' => $reference,
                         'type' => $type,
+                        'category' => $category,
                         'brand' => $brand,
                         'billing_num' => $billing_num,
                         'bill_date' => $bill_date,

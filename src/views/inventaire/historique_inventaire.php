@@ -183,7 +183,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <th class="d-none d-md-table-cell">Référence</th>
                                             <th class="d-none d-md-table-cell">Type</th>
                                             <th>Emplacement </th>
-                                            <th>Statut </th>
+                                            <!-- <th>Statut </th> -->
                                             <?php if ($isAdmin): ?>
                                                 <th>Maintenancier Inventaire</th>
                                                 <th>Maintenancier </th>
@@ -213,7 +213,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
                                                 <!-- statut machine -->
 
-                                                <td>
+                                                <!-- <td>
                                                     <?php
                                                     $machineStatus = $comp['current_status_name'] ?? null;
 
@@ -237,7 +237,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     <?php else: ?>
                                                         <span class="text-muted">Non défini </span>
                                                     <?php endif; ?>
-                                                </td>
+                                                </td> -->
 
 
                                                 <?php if ($isAdmin): ?>

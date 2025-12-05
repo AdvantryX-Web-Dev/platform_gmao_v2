@@ -7,6 +7,7 @@ use App\Models\Maintainer_model;
 use App\Models\AuditTrail_model;
 use App\Controllers\HistoriqueInventaireController;
 use App\Models\HistoriqueInventaire_model;
+use PDO;
 
 class InventaireController
 {
@@ -32,7 +33,7 @@ class InventaireController
             $connectedMatricule = $_SESSION['user']['matricule'];
         }
         // Options location
-        $stmt = $conn->query("SELECT id, location_name FROM gmao__location  ORDER BY location_name ASC");
+        $stmt = $conn->query("SELECT id, location_name, location_category FROM gmao__location  ORDER BY location_name ASC");
         $locationOptions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         // Options status (restricted to active, inactive, en panne, ferraille in this order)
@@ -159,25 +160,25 @@ class InventaireController
 
         try {
             $sql = "INSERT INTO gmao__evaluation_inventaire 
-                (inventory_maintainer, machine_id, reference, type, current_location, current_status, evaluation, difference, created_at) 
-                VALUES (:maintainer_id, :machine_id, :reference, :type, :location_id, :status_id, :evaluation, :difference, CURRENT_TIMESTAMP)";
+                (inventory_maintainer, machine_id, reference, type,  evaluation, difference, created_at) 
+                VALUES (:maintainer_id, :machine_id, :reference, :type,:evaluation, :difference, CURRENT_TIMESTAMP)";
             $stmt = $conn->prepare($sql);
 
             $current_data = HistoriqueInventaire_model::maintMachine($maintainer_id);
-         
+
             $inventory_data = HistoriqueInventaire_model::inventory_data($maintainer_id);
             $comparaison = $this->comparaison($maintainer_id, $current_data, $inventory_data);
-      
+
             foreach ($comparaison as $row) {
                 $maintainerId = $row['inventory_maintainer'] ?? $maintainer_id;
                 $machineId = $row['machine_id'] ?? null;
 
                 $reference = $row['reference'] ?? 'non défini';
                 $type = $row['type'] ?? 'non défini';
-                $locationId = $row['current_location_id'] ?? null;
-                $locationName = $row['current_location_name'] ?? 'Non défini';
-                $statusId = $row['current_status_id'] ?? null;
-                $statusName = $row['current_status_name'] ?? 'Non défini';
+                // $locationId = $row['current_location_id'] ?? null;
+                // $locationName = $row['current_location_name'] ?? 'Non défini';
+                // $statusId = $row['current_status_id'] ?? null;
+                // $statusName = $row['current_status_name'] ?? 'Non défini';
                 $evaluation = $row['evaluation'] ?? 'conforme';
                 $difference = $row['difference'] ?? '';
 
@@ -186,8 +187,8 @@ class InventaireController
                     ':type' => $type,
                     ':maintainer_id' => $maintainerId,
                     ':machine_id'    => $machineId,
-                    ':location_id'   => $locationName,
-                    ':status_id'     => $statusName,
+                    // ':location_id'   => $locationName,
+                    // ':status_id'     => $statusName,
                     ':evaluation'    => $evaluation,
                     ':difference'    => $difference
                 ]);
@@ -198,15 +199,19 @@ class InventaireController
                     'machine_id' => $machineId,
                     'reference' => $reference,
                     'type' => $type,
-                    'current_location_id' => $locationId,
-                    'current_location_name' => $locationName,
-                    'current_status_id' => $statusId,
-                    'current_status_name' => $statusName,
+                    // 'current_location_id' => $locationId,
+                    // 'current_location_name' => $locationName,
+                    // 'current_status_id' => $statusId,
+                    // 'current_status_name' => $statusName,
                     'evaluation' => $evaluation,
                     'difference' => $difference,
                 ]);
             }
         } catch (\Throwable $e) {
+            error_log("Erreur insertion evaluation inventaire: " . $e->getMessage());
+            $_SESSION['flash_error'] = 'Erreur lors de l\'insertion de l\'évaluation inventaire: ';
+            header('Location: index.php?route=ajouterInventaire');
+            exit;
         }
     }
     private function comparaison(int $maintainerId, array $currentData, array $inventoryData): array
@@ -249,15 +254,15 @@ class InventaireController
                 'machine_id' => $machineId, //machine_id pas id_machine
                 'reference' => $currentMachine['reference'] ?? null,
                 'type' => $currentMachine['type'] ??  null,
-                'current_location_id' => $currentMachine['machines_location_id'] ?? null,
-                'current_location_name' => $currentMachine['location_name'] ?? 'Non défini',
-                'current_status_id' => $current_status_id,
-                'current_status_name' => $current_status_name,
+                // 'current_location_id' => $currentMachine['machines_location_id'] ?? null,
+                // 'current_location_name' => $currentMachine['location_name'] ?? 'Non défini',
+                // 'current_status_id' => $current_status_id,
+                // 'current_status_name' => $current_status_name,
                 'evaluation' => $evaluation,
                 'difference' => implode('<br>', $differences),
             ];
         }
-    
+
         return $rows;
     }
 
@@ -307,19 +312,19 @@ class InventaireController
             $issues[] = '*Localisation modifiée : ' . $currentLocationName . ' → ' . $inventoryLocationName;
         }
 
-        $currentStatusName = $this->normalizeStatusDisplay(
-            $currentMachine['production_status'] ?? null,
-            $currentMachine['status_name'] ?? null,
-            $currentMachine['machines_status_id'] ?? null
-        );
-        $inventoryStatusName = $this->normalizeStatusDisplay(
-            $inventoryRow['status_name'] ?? null,
-            null,
-            $inventoryRow['status_id'] ?? null
-        );
-        if ($this->stringChanged($currentStatusName, $inventoryStatusName)) {
-            $issues[] = '*Statut modifié : ' . $currentStatusName . ' → ' . $inventoryStatusName;
-        }
+        // $currentStatusName = $this->normalizeStatusDisplay(
+        //     $currentMachine['production_status'] ?? null,
+        //     $currentMachine['status_name'] ?? null,
+        //     $currentMachine['machines_status_id'] ?? null
+        // );
+        // $inventoryStatusName = $this->normalizeStatusDisplay(
+        //     $inventoryRow['status_name'] ?? null,
+        //     null,
+        //     $inventoryRow['status_id'] ?? null
+        // );
+        // if ($this->stringChanged($currentStatusName, $inventoryStatusName)) {
+        //     $issues[] = '*Statut modifié : ' . $currentStatusName . ' → ' . $inventoryStatusName;
+        // }
 
         $currentMaintId = $currentMachine['maintener_id'] ?? null;
         $inventoryMaintId = $inventoryRow['maintener_id'] ?? null;
@@ -332,47 +337,47 @@ class InventaireController
         return $issues;
     }
 
-    private function normalizeStatusDisplay($primary = null, $secondary = null, $id = null): string
-    {
-        foreach ([$primary, $secondary] as $candidate) {
-            $resolved = $this->mapStatusToken($candidate);
-            if ($resolved !== null) {
-                return $resolved;
-            }
-        }
+    // private function normalizeStatusDisplay($primary = null, $secondary = null, $id = null): string
+    // {
+    //     foreach ([$primary, $secondary] as $candidate) {
+    //         $resolved = $this->mapStatusToken($candidate);
+    //         if ($resolved !== null) {
+    //             return $resolved;
+    //         }
+    //     }
 
-        $fallback = $this->mapStatusToken($id);
-        return $fallback ?? 'Non défini';
-    }
+    //     $fallback = $this->mapStatusToken($id);
+    //     return $fallback ?? 'Non défini';
+    // }
 
-    private function mapStatusToken($value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
+    // private function mapStatusToken($value): ?string
+    // {
+    //     if ($value === null) {
+    //         return null;
+    //     }
 
-        $raw = trim((string)$value);
-        if ($raw === '') {
-            return null;
-        }
+    //     $raw = trim((string)$value);
+    //     if ($raw === '') {
+    //         return null;
+    //     }
 
-        $normalized = strtolower($raw);
-        if ($normalized === '1') {
-            return 'active';
-        }
-        if ($normalized === '0') {
-            return 'inactive';
-        }
-        if ($normalized === 'active' || $normalized === 'inactive') {
-            return $normalized;
-        }
+    //     $normalized = strtolower($raw);
+    //     if ($normalized === '1') {
+    //         return 'active';
+    //     }
+    //     if ($normalized === '0') {
+    //         return 'inactive';
+    //     }
+    //     if ($normalized === 'active' || $normalized === 'inactive') {
+    //         return $normalized;
+    //     }
 
-        if (is_numeric($raw)) {
-            return 'ID ' . $raw;
-        }
+    //     if (is_numeric($raw)) {
+    //         return 'ID ' . $raw;
+    //     }
 
-        return $raw;
-    }
+    //     return $raw;
+    // }
 
     private function stringChanged(?string $current, ?string $target): bool
     {
@@ -419,18 +424,60 @@ class InventaireController
         $stmt = $conn->prepare($sql);
         $ok = 0;
         foreach ($inventoryRows as $row) {
+            if ($row['status_id'] == null) {
+                $statusId = $this->presence_machine($row['machine_id']);
+            }
             $stmt->execute([
                 ':maintainer_id' => $row['maintainer_id'] ?? null,
                 ':machine_id' => $row['machine_id'] ?? null,
                 ':location_id' => $row['location_id'] ?? null,
-                ':status_id' => $row['status_id'] ?? null,
+                ':status_id' => $statusId ?? $row['status_id'],
             ]);
             $ok += (int)$stmt->rowCount();
 
             // Audit trail pour chaque insertion dans historique inventaire
-            $this->logAudithistoriqueInventaire($row);
+            $this->logAudithistoriqueInventaire($row, $statusId ?? $row['status_id']);
         }
         return $ok;
+    }
+
+
+    private function presence_machine($machineId)
+    {
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+
+        // 🔹 Récupérer la dernière ligne pour la machine
+        $stmt = $conn->prepare("
+            SELECT prod__presence.p_state, prod__presence.cur_date
+            FROM prod__presence
+            LEFT JOIN init__machine m ON m.machine_id = prod__presence.machine_id
+            WHERE m.id = :machine_id
+            ORDER BY prod__presence.id DESC
+            LIMIT 1
+        ");
+
+        $stmt->execute([':machine_id' => $machineId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // 🔹 Vérifier si le dernier état est actif et date = aujourd'hui
+        $isActive = $row && $row['p_state'] == 1 && $row['cur_date'] == date('Y-m-d');
+
+        $statusName = $isActive ? 'active' : 'inactive';
+
+        // 🔹 Récupérer l'id du status
+        $stmt2 = $conn->prepare("
+            SELECT id
+            FROM gmao__status
+            WHERE status_name = :status_name
+              AND status_category = 'machine'
+            LIMIT 1
+        ");
+
+        $stmt2->execute([':status_name' => $statusName]);
+        $statusId = $stmt2->fetchColumn();
+
+        return $statusId ? intval($statusId) : null;
     }
 
 
@@ -472,7 +519,7 @@ class InventaireController
             error_log("Erreur audit non-admin: " . $e->getMessage());
         }
     }
-    private function logAudithistoriqueInventaire(array $row)
+    private function logAudithistoriqueInventaire(array $row, int $statusId)
     {
         try {
             $userMatricule = $_SESSION['user']['matricule'] ?? null;
@@ -481,7 +528,7 @@ class InventaireController
                 'maintainer_id' => $row['maintainer_id'] ?? null,
                 'machine_id' => $row['machine_id'] ?? null,
                 'location_id' => $row['location_id'] ?? null,
-                'status_id' => $row['status_id'] ?? null,
+                'status_id' => $statusId ?? $row['status_id'],
                 'created_at' => date('Y-m-d H:i:s')
             ];
             AuditTrail_model::logAudit($userMatricule, 'add', 'gmao__historique_inventaire', null, $newValue);

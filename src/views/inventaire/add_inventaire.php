@@ -142,17 +142,19 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                                                 <select class="form-control" id="location_id" name="location_id" required>
                                                     <option value="">-- Sélectionner --</option>
                                                     <?php if (!empty($locationOptions)): foreach ($locationOptions as $opt): ?>
-                                                            <option value="<?= (int)$opt['id'] ?>"><?= htmlspecialchars($opt['location_name']) ?></option>
+                                                            <option value="<?= (int)$opt['id'] ?>" data-category="<?= htmlspecialchars($opt['location_category'] ?? '')  ?>">
+                                                                <?= htmlspecialchars($opt['location_name']) ?>
+                                                            </option>
                                                     <?php endforeach;
                                                     endif; ?>
                                                 </select>
                                             </div>
-                                            <div class="form-group mb-0">
+                                            <div class="form-group mb-0" id="statusFieldBlock" style="display:none;">
                                                 <label for="status_id" class="mb-1">Statut</label>
                                                 <select class="form-control" id="status_id" name="status_id">
                                                     <option value="">-- Sélectionner --</option>
                                                     <?php if (!empty($statusOptions)): foreach ($statusOptions as $opt): ?>
-                                                            <?php if ($opt['status_name'] !== 'non disponible' && $opt['status_name'] !== 'disponible'): ?>
+                                                            <?php if ($opt['status_name'] !== 'non disponible' && $opt['status_name'] !== 'disponible' && $opt['status_name'] !== 'inactive'): ?>
                                                                 <option value="<?= (int)$opt['id'] ?>"><?= htmlspecialchars($opt['status_name']) ?></option>
                                                             <?php endif; ?>
                                                     <?php endforeach;
@@ -204,7 +206,7 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
 
                     </div>
                     <div class="card shadow mb-4">
-                       
+
                         <div class="card-body">
                             <form method="post" action="/platform_gmao/public/index.php?route=ajouterEvaluationInventaire">
                                 <div class="row justify-content-center">
@@ -425,6 +427,17 @@ $isAdmin = isset($_SESSION['qualification']) && $_SESSION['qualification'] === '
                 setTimeout(function() {
                     $(".auto-dismiss").fadeOut("slow");
                 }, 4000);
+
+                $('#location_id').on('change', function() {
+                    var el = $(this).find('option:selected');
+                    var locCat = el.data('category') ? el.data('category').toString().toLowerCase() : '';
+                    if (locCat === 'parc') {
+                        $('#statusFieldBlock').show();
+                    } else {
+                        $('#statusFieldBlock').hide();
+                    }
+                });
+                $('#location_id').trigger('change'); // Init on page load
             });
         </script>
     </div>

@@ -15,6 +15,8 @@ class MachineStatusExport
     public static function generateExcelFile($machinesData, $isAdmin)
     {
         try {
+            // Nettoyage buffer pour éviter toute sortie avant header
+            if (ob_get_length()) ob_end_clean();
             // Vérifier si PhpSpreadsheet est disponible
             if (!class_exists('PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
                 throw new \Exception('PhpSpreadsheet n\'est pas disponible');
@@ -32,9 +34,10 @@ class MachineStatusExport
                 'A1' => 'Machine ID',
                 'B1' => 'Mainteneur',
                 'C1' => 'Désignation',
-                'D1' => 'Emplacement',
+                'D1' => 'Catégorie',
+                'E1' => 'Emplacement',
                 'E1' => 'État',
-                'F1' => 'Date dernière action'
+                'G1' => 'Date dernière action'
             ];
 
             // Écrire les en-têtes
@@ -58,7 +61,7 @@ class MachineStatusExport
                 ]
             ];
 
-            $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
+            $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
 
             // Données des machines
             $row = 2;
@@ -71,10 +74,11 @@ class MachineStatusExport
                         ($machine['maintener_matricule'] . ' - ' . $machine['maintener_name']) :
                         'Non défini');
                     $sheet->setCellValue('C' . $row, $machine['designation'] ?? 'Non défini');
-                    $sheet->setCellValue('D' . $row, $machine['location'] ?? 'Non défini');
-                    $sheet->setCellValue('E' . $row, $status ?? 'Non défini');
-                    $sheet->setCellValue('F' . $row, $status == 'inactive' ?
-                        ($machine['cur_date_time'] ?? $machine['updated_at'] ?? 'Non défini') : ($machine['updated_at'] ?? 'Non défini'));
+                    $sheet->setCellValue('D' . $row, $machine['category'] ?? 'Non défini');
+                    $sheet->setCellValue('E' . $row, $machine['location'] ?? 'Non défini');
+                    $sheet->setCellValue('F' . $row, $status ?? 'Non défini');
+                    $sheet->setCellValue('G' . $row, $status == 'inactive' ?
+                        ($machine['cur_date_time'] ?? 'Non défini') : 'Non défini');
 
                     $row++;
                 }
@@ -83,10 +87,11 @@ class MachineStatusExport
             // Ajuster la largeur des colonnes
             $sheet->getColumnDimension('A')->setWidth(15);
             $sheet->getColumnDimension('B')->setWidth(25);
-            $sheet->getColumnDimension('C')->setWidth(30);
+            $sheet->getColumnDimension('C')->setWidth(25);
             $sheet->getColumnDimension('D')->setWidth(20);
-            $sheet->getColumnDimension('E')->setWidth(15);
-            $sheet->getColumnDimension('F')->setWidth(25);
+            $sheet->getColumnDimension('E')->setWidth(20);
+            $sheet->getColumnDimension('F')->setWidth(20);
+            $sheet->getColumnDimension('G')->setWidth(25);
 
             // Style des bordures pour toutes les cellules
             $borderStyle = [
@@ -104,7 +109,7 @@ class MachineStatusExport
             }
 
             // Nom du fichier avec timestamp
-            $filename = 'machines_etat_' . date('Y-m-d_H-i-s') . '.xlsx';
+            $filename = 'machines_etat_' . date('Ymd') . '.xlsx';
 
             // Headers pour le téléchargement
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -133,8 +138,10 @@ class MachineStatusExport
      */
     public static function generateCSVFile($machinesData, $isAdmin)
     {
+        // Nettoyage buffer pour éviter toute sortie avant header
+        if (ob_get_length()) ob_end_clean();
         // Nom du fichier avec timestamp
-        $filename = 'machines_etat_' . date('Y-m-d_H-i-s') . '.csv';
+        $filename = 'machines_etat_' . date('Ymd') . '.csv';
 
         // Headers pour le téléchargement
         header('Content-Type: text/csv; charset=utf-8');
@@ -173,8 +180,7 @@ class MachineStatusExport
                     $machine['designation'] ?? 'Non défini',
                     $machine['location'] ?? 'Non défini',
                     $status ?? 'Non défini',
-                    $status == 'inactive' ?
-                        ($machine['cur_date_time'] ?? $machine['updated_at'] ?? 'Non défini') : ($machine['updated_at'] ?? 'Non défini')
+                    $status == 'inactive' ?  ($machine['cur_date_time'] ?? 'Non défini') : 'Non défini'
                 ];
 
                 fputcsv($output, $row, ';');

@@ -12,6 +12,7 @@ class Machine_model
     private $designation;
     private $reference;
     private $type;
+    private $category;
     private $brand;
     private $billing_num;
     private $machines_location_id;
@@ -19,12 +20,13 @@ class Machine_model
     private $bill_date;
 
 
-    public function __construct($machine_id, $designation, $reference, $type, $brand, $billing_num, $bill_date, $machines_location_id, $machines_status_id)
+    public function __construct($machine_id, $designation, $reference, $type, $category, $brand, $billing_num, $bill_date, $machines_location_id, $machines_status_id)
     {
         $this->machine_id = $machine_id;
         $this->designation = $designation;
         $this->reference = $reference;
         $this->type = $type;
+        $this->category = $category;
         $this->brand = $brand;
         $this->billing_num = $billing_num;
         $this->bill_date = $bill_date;
@@ -51,8 +53,14 @@ class Machine_model
         $conn = $db->getConnection();
         $machines = array();
         try {
-            $req = $conn->query("SELECT * FROM init__machine m  
-            order by m.created_at desc");
+            $req = $conn->query("
+            SELECT *
+            FROM init__machine m
+             ORDER BY 
+                CASE WHEN m.machine_id REGEXP '^[0-9]+$' THEN 0 ELSE 1 END,
+                CAST(m.machine_id AS UNSIGNED),
+                m.machine_id ASC
+            ");
             $machines = $req->fetchAll();
         } catch (PDOException $e) {
 
@@ -107,17 +115,18 @@ class Machine_model
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("UPDATE init__machine SET reference = ?, designation = ?, brand = ?, type = ?, billing_num = ?, bill_date = ?, price = ?, cur_date = NOW(), machines_location_id = ?, machines_status_id = ? WHERE machine_id = ?");
+            $stmt = $conn->prepare("UPDATE init__machine SET reference = ?, designation = ?, brand = ?, type = ?,category = ?,  billing_num = ?, bill_date = ?, price = ?, cur_date = NOW(), machines_location_id = ?, machines_status_id = ? WHERE machine_id = ?");
             $stmt->bindParam(1, $machine->reference);
             $stmt->bindParam(2, $machine->designation);
             $stmt->bindParam(3, $machine->brand);
             $stmt->bindParam(4, $machine->type);
-            $stmt->bindParam(5, $machine->billing_num);
-            $stmt->bindParam(6, $machine->bill_date);
-            $stmt->bindParam(7, $price);
-            $stmt->bindParam(8, $machine->machines_location_id);
-            $stmt->bindParam(9, $machine->machines_status_id);
-            $stmt->bindParam(10, $machine->machine_id);
+            $stmt->bindParam(5, $machine->category);
+            $stmt->bindParam(6, $machine->billing_num);
+            $stmt->bindParam(7, $machine->bill_date);
+            $stmt->bindParam(8, $price);
+            $stmt->bindParam(9, $machine->machines_location_id);
+            $stmt->bindParam(10, $machine->machines_status_id);
+            $stmt->bindParam(11, $machine->machine_id);
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
@@ -128,20 +137,22 @@ class Machine_model
 
     public static function AjouterMachine($machine, $price = null)
     {
+
         $db = Database::getInstance('db_digitex');
         $conn = $db->getConnection();
         try {
-            $stmt = $conn->prepare("INSERT INTO init__machine (`machine_id`, `reference`, `brand`, `type`, `designation`, `billing_num`, `bill_date`, `price`, `cur_date`, `machines_location_id`, `machines_status_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO init__machine (`machine_id`, `reference`, `brand`, `type`, `category`, `designation`, `billing_num`, `bill_date`, `price`, `cur_date`, `machines_location_id`, `machines_status_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)");
             $stmt->bindParam(1, $machine->machine_id);
             $stmt->bindParam(2, $machine->reference);
             $stmt->bindParam(3, $machine->brand);
             $stmt->bindParam(4, $machine->type);
-            $stmt->bindParam(5, $machine->designation);
-            $stmt->bindParam(6, $machine->billing_num);
-            $stmt->bindParam(7, $machine->bill_date);
-            $stmt->bindParam(8, $price);
-            $stmt->bindParam(9, $machine->machines_location_id);
-            $stmt->bindParam(10, $machine->machines_status_id);
+            $stmt->bindParam(5, $machine->category);
+            $stmt->bindParam(6, $machine->designation);
+            $stmt->bindParam(7, $machine->billing_num);
+            $stmt->bindParam(8, $machine->bill_date);
+            $stmt->bindParam(9, $price);
+            $stmt->bindParam(10, $machine->machines_location_id);
+            $stmt->bindParam(11, $machine->machines_status_id);
 
             $stmt->execute();
             return true;
@@ -276,7 +287,7 @@ class Machine_model
             $filterMachineId = $filters['machine_id'] ?? null;
             $filterLocation = $filters['location'] ?? null;
             $filterStatus = $filters['status'] ?? null;
-            $filterDesignation = $filters['designation'] ?? null;
+            $filterType = $filters['type'] ?? null;
 
             $query = "
                 SELECT 
@@ -292,6 +303,7 @@ class Machine_model
                     m.bill_date,
                     m.created_at,
                     m.updated_at,
+                    m.category,
                     ms.status_name AS etat_machine,
                     ms.id AS status_id,
                     ml.location_name AS location,
@@ -311,11 +323,30 @@ class Machine_model
                     ) AS cur_date_time,
     
                     -- Statut final (active/inactive)
-                    CASE 
-                        WHEN ms.status_name = 'active' AND COALESCE(pp_today.p_state, 0) = 0 THEN 'inactive'
+                    CASE
+                        WHEN ml.location_category = 'prodline'
+                            THEN
+                            CASE
+                                -- 1) Si la machine est dans ECH / CH FOR / ch14 → non_defini
+                                WHEN UPPER(TRIM(ml.location_name)) IN ('ECH', 'CH FOR', 'CH14')
+                                    THEN 'non_defini'
+
+                                -- 2) Si status = active ou inactive + hors ECH/CH FOR/ch14 → active si p_state = 1
+                                WHEN ms.status_name IN ('active', 'inactive')
+                                    AND UPPER(TRIM(ml.location_name)) NOT IN ('ECH', 'CH FOR', 'CH14')
+                                    AND m.category = 'Machine à coudre'
+                                    AND COALESCE(pp_today.p_state, 0) = 1
+                                    THEN 'active'
+
+                                -- 3) Sinon → inactive
+                                ELSE 'inactive'
+                            END
+
+                        -- Machines hors prodline → status original
                         ELSE ms.status_name
                     END AS status_name_final
-    
+
+   
                 FROM init__machine m
                 LEFT JOIN gmao__status ms ON ms.id = m.machines_status_id
                 LEFT JOIN gmao__location ml ON ml.id = m.machines_location_id
@@ -382,7 +413,7 @@ class Machine_model
             // Filtre par machine_id
             if ($filterMachineId) {
                 $whereConditions[] = "m.machine_id LIKE :filterMachineId";
-                $params[':filterMachineId'] = '%' . $filterMachineId . '%';
+                $params[':filterMachineId'] =  $filterMachineId ;
             }
 
             // Filtre par emplacement
@@ -391,23 +422,45 @@ class Machine_model
                 $params[':filterLocation'] = $filterLocation;
             }
 
-            // Filtre par état
-            if ($filterStatus) {
-                if ($filterStatus === 'active') {
-                    $whereConditions[] = "COALESCE(pp_today.p_state, 0) = 1";
-                } elseif ($filterStatus === 'inactive') {
-                    $whereConditions[] = "COALESCE(pp_today.p_state, 0) = 0";
-                } else {
-                    // Utiliser l'ID du statut pour le filtrage
-                    $whereConditions[] = "ms.id = :filterStatus";
-                    $params[':filterStatus'] = $filterStatus;
-                }
-            }
+            //v0 Filtre par état
+            // if ($filterStatus) {
+            //     if ($filterStatus === 'active') {
+            //         $whereConditions[] = "COALESCE(pp_today.p_state, 0) = 1";
+            //     } elseif ($filterStatus === 'inactive') {
+            //         $whereConditions[] = "COALESCE(pp_today.p_state, 0) = 0";
+            //     } else {
+            //         // Utiliser l'ID du statut pour le filtrage
+            //         $whereConditions[] = "ms.id = :filterStatus";
+            //         $params[':filterStatus'] = $filterStatus;
+            //     }
+            // }
 
-            // Filtre par désignation (recherche partielle)
-            if ($filterDesignation) {
-                $whereConditions[] = "m.designation LIKE :filterDesignation";
-                $params[':filterDesignation'] = '%' . $filterDesignation . '%';
+            //  $havingConditions = [];
+
+            // if ($filterStatus) {
+            
+            //     // 3 = active
+            //     if ($filterStatus === '3') {
+            //         $havingConditions[] = "status_name_final = 'active' or etat_machine = 'active'";
+            //     }
+            
+            //     // 4 = inactive
+            //     elseif ($filterStatus === '4') {
+            //         $havingConditions[] = "status_name_final = 'inactive' or etat_machine = 'inactive'";
+            //     }
+            
+            //     // Sinon : filtre sur ID status
+            //     else {
+            //         $whereConditions[] = "ms.id = :filterStatus";
+            //         $params[':filterStatus'] = $filterStatus;
+            //     }
+            // }
+            
+            
+            // Filtre par type de machine
+            if ($filterType) {
+                $whereConditions[] = "m.type = :filterType";
+                $params[':filterType'] = $filterType;
             }
 
             // Ajouter les conditions WHERE si elles existent
@@ -415,7 +468,13 @@ class Machine_model
                 $query .= " WHERE " . implode(" AND ", $whereConditions);
             }
 
-            $query .= " ORDER BY m.updated_at DESC";
+            if (!empty($havingConditions)) {
+                $query .= " HAVING " . implode(" AND ", $havingConditions);
+            }
+
+            $query .= " ORDER BY  CASE WHEN m.machine_id REGEXP '^[0-9]+$' THEN 0 ELSE 1 END,
+                        CAST(m.machine_id AS UNSIGNED),
+                        m.machine_id ASC";
 
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':today', $today);
@@ -443,6 +502,19 @@ class Machine_model
         $conn = $db->getConnection();
         try {
             $stmt = $conn->prepare("SELECT DISTINCT designation FROM init__machine order by designation ASC");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+
+            return [];
+        }
+    }
+    public static function getTypeMachine()
+    {
+        $db = Database::getInstance('db_digitex');
+        $conn = $db->getConnection();
+        try {
+            $stmt = $conn->prepare("SELECT DISTINCT type FROM init__machine WHERE type IS NOT NULL AND type != '' order by type ASC");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
